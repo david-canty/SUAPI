@@ -1,10 +1,7 @@
 import Vapor
 
 public func routes(_ router: Router) throws {
-    
-    router.get("hello") { req in
-        return "Hello, world!"
-    }
 
-    
+    let itemController = SUItemController()
+    try router.register(collection: itemController)
 }
