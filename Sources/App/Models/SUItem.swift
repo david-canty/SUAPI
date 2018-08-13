@@ -41,7 +41,7 @@ extension SUItem: Migration {
         return Database.create(self, on: connection) { builder in
             
             try addProperties(to: builder)
-            builder.reference(from: \.categoryID, to: \SUCategory.id)
+            builder.reference(from: \.categoryID, to: \SUCategory.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }
 }

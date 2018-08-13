@@ -26,7 +26,7 @@ extension SUYear: Migration {
             
             try addProperties(to: builder)
             builder.unique(on: \.yearName)
-            builder.reference(from: \.schoolID, to: \SUSchool.id)
+            builder.reference(from: \.schoolID, to: \SUSchool.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }
 }

@@ -33,8 +33,8 @@ extension SUItemYear: Migration {
             
             try addProperties(to: builder)
             
-            builder.reference(from: \.itemID, to: \SUItem.id, onDelete: .cascade)
-            builder.reference(from: \.yearID, to: \SUYear.id, onDelete: .cascade)
+            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.yearID, to: \SUYear.id, onUpdate: .cascade, onDelete: .cascade)
         }
     }
 }

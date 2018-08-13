@@ -34,8 +34,8 @@ extension SUItemSize: Migration {
             
             try addProperties(to: builder)
             
-            builder.reference(from: \.itemID, to: \SUItem.id, onDelete: .cascade)
-            builder.reference(from: \.sizeID, to: \SUSize.id, onDelete: .cascade)
+            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .cascade)
         }
     }
 }
