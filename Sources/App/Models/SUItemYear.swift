@@ -19,9 +19,9 @@ final class SUItemYear: MySQLUUIDPivot, ModifiablePivot {
         self.yearID = yearID
     }
     
-    init(_ left: SUItem, _ right: SUYear) throws {
-        self.itemID = try left.requireID()
-        self.yearID = try right.requireID()
+    init(_ item: SUItem, _ year: SUYear) throws {
+        self.itemID = try item.requireID()
+        self.yearID = try year.requireID()
     }
 }
 

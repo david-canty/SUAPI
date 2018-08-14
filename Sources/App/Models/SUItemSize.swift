@@ -20,9 +20,9 @@ final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
         self.sizeID = sizeID
     }
     
-    init(_ left: SUItem, _ right: SUSize) throws {
-        self.itemID = try left.requireID()
-        self.sizeID = try right.requireID()
+    init(_ item: SUItem, _ size: SUSize) throws {
+        self.itemID = try item.requireID()
+        self.sizeID = try size.requireID()
     }
 }
 

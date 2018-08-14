@@ -10,8 +10,8 @@ struct SUSizeController: RouteCollection {
         sizesRoute.post(SUSize.self, use: createHandler)
         sizesRoute.get(use: getAllHandler)
         sizesRoute.get(SUSize.parameter, use: getHandler)
-        categoriesRoute.put(SUCategory.parameter, use: updateHandler)
-        categoriesRoute.delete(SUCategory.parameter, use: deleteHandler)
+        sizesRoute.put(SUSize.parameter, use: updateHandler)
+        sizesRoute.delete(SUSize.parameter, use: deleteHandler)
         
         // Items
         sizesRoute.get(SUSize.parameter, "items", use: getItemsHandler)
@@ -32,6 +32,21 @@ struct SUSizeController: RouteCollection {
     func getHandler(_ req: Request) throws -> Future<SUSize> {
         
         return try req.parameters.next(SUSize.self)
+    }
+    
+    func updateHandler(_ req: Request) throws -> Future<SUSize> {
+        
+        return try flatMap(to: SUSize.self, req.parameters.next(SUSize.self), req.content.decode(SUSize.self)) { size, updatedSize in
+            
+            size.sizeName = updatedSize.sizeName
+            
+            return size.save(on: req)
+        }
+    }
+    
+    func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try req.parameters.next(SUSize.self).delete(on: req).transform(to: HTTPStatus.noContent)
     }
     
     // Items

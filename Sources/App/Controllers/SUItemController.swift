@@ -22,6 +22,9 @@ struct SUItemController: RouteCollection {
         itemsRoute.get(SUItem.parameter, "sizes", use: getSizesHandler)
         itemsRoute.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
+        // Stock
+        itemsRoute.put(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
+        
         // Years
         itemsRoute.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
         itemsRoute.get(SUItem.parameter, "years", use: getYearsHandler)
@@ -81,9 +84,10 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUItem.self),
                            req.parameters.next(SUSize.self)) { item, size in
                             
-                            let pivot = try SUItemSize(item.requireID(), size.requireID())
+//                            let pivot = try SUItemSize(item.requireID(), size.requireID())
+//                            return pivot.save(on: req).transform(to: .created)
                             
-                            return pivot.save(on: req).transform(to: .created)
+                            return item.sizes.attach(size, on: req).transform(to: .created)
         }
     }
     
@@ -102,6 +106,19 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUSize.self)) { item, size in
                             
                             return item.sizes.detach(size, on: req).transform(to: HTTPStatus.noContent)
+        }
+    }
+    
+    // Stock
+    func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    
+        return try flatMap(to: HTTPStatus.self,
+                           req.parameters.next(SUItem.self),
+                           req.parameters.next(SUSize.self)) { item, size in
+                            
+                            let stock = try req.parameters.next(Int.self)
+                            
+                            //return item.sizes.detach(size, on: req).transform(to: HTTPStatus.ok)
         }
     }
     
