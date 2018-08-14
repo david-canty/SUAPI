@@ -112,13 +112,20 @@ struct SUItemController: RouteCollection {
     // Stock
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
     
-        return try flatMap(to: HTTPStatus.self,
-                           req.parameters.next(SUItem.self),
-                           req.parameters.next(SUSize.self)) { item, size in
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUSize.self)) { item, size in
                             
-                            let stock = try req.parameters.next(Int.self)
-                            
-                            //return item.sizes.detach(size, on: req).transform(to: HTTPStatus.ok)
+            let stock = try req.parameters.next(Int.self)
+            
+            let pivot = try SUItemSize.query(on: req)
+                .filter(\.itemID == item.requireID())
+                .filter(\.sizeID == size.requireID())
+                .first()
+            
+            return pivot.flatMap(to: HTTPStatus.self) { itemSize in
+                
+                itemSize?.itemSizeStock = stock
+                return (itemSize?.save(on: req).transform(to: HTTPStatus.ok))!
+            }
         }
     }
     
