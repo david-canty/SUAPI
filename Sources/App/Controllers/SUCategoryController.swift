@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 struct SUCategoryController: RouteCollection {
     

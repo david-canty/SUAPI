@@ -10,4 +10,10 @@ public func routes(_ router: Router) throws {
     
     let sizeController = SUSizeController()
     try router.register(collection: sizeController)
+    
+    let yearController = SUYearController()
+    try router.register(collection: yearController)
+    
+    let schoolController = SUSchoolController()
+    try router.register(collection: schoolController)
 }

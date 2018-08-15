@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 struct SUSizeController: RouteCollection {
     
@@ -58,4 +59,3 @@ struct SUSizeController: RouteCollection {
         }
     }
 }
-

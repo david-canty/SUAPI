@@ -10,7 +10,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(router, as: Router.self)
 
     var middlewares = MiddlewareConfig()
-    middlewares.use(FileMiddleware.self)
+    //middlewares.use(FileMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
     services.register(middlewares)
 
