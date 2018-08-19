@@ -6,7 +6,7 @@ final class SUJWTHelper {
     static let sharedInstance = SUJWTHelper()
     
     var app: Application!
-    var publicKeys: [[String: String]] = []
+    var publicKeys: [String: String] = [:]
     var cacheControlMaxAge: Int = 0
     
     private init() {}
@@ -56,8 +56,9 @@ final class SUJWTHelper {
                             let keyCert = keyPairs[1]
                             var keyCertStripped = keyCert.replacingOccurrences(of: "\"", with: "")
                             keyCertStripped = keyCertStripped.replacingOccurrences(of: " ", with: "")
+                            // also } and check anything else
                             
-                            self.publicKeys.append([keyIdStripped: keyCertStripped])
+                            self.publicKeys[keyIdStripped] = keyCertStripped
                         }
                     }
                 }

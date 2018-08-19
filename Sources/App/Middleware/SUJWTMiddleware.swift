@@ -18,29 +18,12 @@ final class SUJWTMiddleware: Middleware {
                 throw Abort(HTTPResponseStatus.unauthorized)
             }
             
-            // To Do
             // - validate claims
             
             let headerKid = jwt.header[.kid] as! String
+            let publicKey = SUJWTHelper.sharedInstance.publicKeys[headerKid]
             
-            let _ = HTTPClient.connect(scheme: .https, hostname: "www.googleapis.com", on: req).flatMap(to: HTTPResponse.self) { client in
-                
-                let httpReq = HTTPRequest(method: .GET, url: "/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
-                
-                return client.send(httpReq).map(to: HTTPResponse.self) { clientResponse in
-                    
-                    let cache = clientResponse.headers.firstValue(name: HTTPHeaderName.cacheControl)
-                    
-                    let responseBody = clientResponse.body
-                    
-                    // To Do
-                    // - parse response body for headerKid
-                    // - extract corresponding certificate
-                    //let verified = try JWT.verify(token, using: .rs256(Data(certificate.utf8), RSAKeyType.certificate) - throw abort if not verified
-                    
-                    return clientResponse
-                }
-            }
+            //let verified = try JWT.verify(token, using: .rs256(Data(certificate.utf8), RSAKeyType.certificate) - throw abort if not verified
             
             return res
         }
