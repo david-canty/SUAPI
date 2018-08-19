@@ -21,6 +21,8 @@ struct SUCategoryController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, category: SUCategory) throws -> Future<SUCategory> {
         
+        category.timestamp = String(describing: Date())
+        
         return category.save(on: req)
     }
     
@@ -39,6 +41,7 @@ struct SUCategoryController: RouteCollection {
         return try flatMap(to: SUCategory.self, req.parameters.next(SUCategory.self), req.content.decode(SUCategory.self)) { category, updatedCategory in
             
             category.categoryName = updatedCategory.categoryName
+            category.timestamp = String(describing: Date())
             
             return category.save(on: req)
         }

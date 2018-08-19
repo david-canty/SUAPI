@@ -24,6 +24,8 @@ struct SUYearController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, year: SUYear) throws -> Future<SUYear> {
         
+        year.timestamp = String(describing: Date())
+        
         return year.save(on: req)
     }
     
@@ -44,6 +46,7 @@ struct SUYearController: RouteCollection {
             
             year.yearName = updatedYear.yearName
             year.schoolID = updatedYear.schoolID
+            year.timestamp = String(describing: Date())
             
             return year.save(on: req)
         }

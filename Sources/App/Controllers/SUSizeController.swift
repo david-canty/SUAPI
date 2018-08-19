@@ -21,6 +21,8 @@ struct SUSizeController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, size: SUSize) throws -> Future<SUSize> {
         
+        size.timestamp = String(describing: Date())
+        
         return size.save(on: req)
     }
     
@@ -40,6 +42,7 @@ struct SUSizeController: RouteCollection {
         return try flatMap(to: SUSize.self, req.parameters.next(SUSize.self), req.content.decode(SUSize.self)) { size, updatedSize in
             
             size.sizeName = updatedSize.sizeName
+            size.timestamp = String(describing: Date())
             
             return size.save(on: req)
         }

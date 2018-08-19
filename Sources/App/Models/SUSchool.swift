@@ -6,9 +6,11 @@ final class SUSchool: Codable {
     
     var id: UUID?
     var schoolName: String
+    var timestamp: String?
     
     init(name: String) {
         self.schoolName = name
+        self.timestamp = String(describing: Date())
     }
 }
 

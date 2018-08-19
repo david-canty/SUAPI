@@ -6,9 +6,11 @@ final class SUSize: Codable {
     
     var id: UUID?
     var sizeName: String
+    var timestamp: String?
     
     init(name: String) {
         self.sizeName = name
+        self.timestamp = String(describing: Date())
     }
 }
 

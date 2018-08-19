@@ -21,6 +21,8 @@ struct SUSchoolController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, school: SUSchool) throws -> Future<SUSchool> {
         
+        school.timestamp = String(describing: Date())
+        
         return school.save(on: req)
     }
     
@@ -39,6 +41,7 @@ struct SUSchoolController: RouteCollection {
         return try flatMap(to: SUSchool.self, req.parameters.next(SUSchool.self), req.content.decode(SUSchool.self)) { school, updatedSchool in
             
             school.schoolName = updatedSchool.schoolName
+            school.timestamp = String(describing: Date())
             
             return school.save(on: req)
         }

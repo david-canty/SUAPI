@@ -6,9 +6,11 @@ final class SUCategory: Codable {
     
     var id: UUID?
     var categoryName: String
+    var timestamp: String?
     
     init(name: String) {
         self.categoryName = name
+        self.timestamp = String(describing: Date())
     }
 }
 

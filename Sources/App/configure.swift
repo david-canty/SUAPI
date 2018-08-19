@@ -8,10 +8,16 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
+    
+    services.register(SULogMiddleware.self)
+    services.register(SUJWTMiddleware.self)
 
     var middlewares = MiddlewareConfig()
     //middlewares.use(FileMiddleware.self)
+    middlewares.use(SULogMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
+    middlewares.use(SUJWTMiddleware.self)
+    
     services.register(middlewares)
 
     var databases = DatabasesConfig()

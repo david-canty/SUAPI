@@ -34,6 +34,8 @@ struct SUItemController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, item: SUItem) throws -> Future<SUItem> {
         
+        item.timestamp = String(describing: Date())
+        
         return item.save(on: req)
     }
     
@@ -58,6 +60,7 @@ struct SUItemController: RouteCollection {
             item.itemPrice = updatedItem.itemPrice
             item.itemImage = updatedItem.itemImage
             item.categoryID = updatedItem.categoryID
+            item.timestamp = String(describing: Date())
             
             return item.save(on: req)
         }
@@ -84,10 +87,11 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUItem.self),
                            req.parameters.next(SUSize.self)) { item, size in
                             
-//                            let pivot = try SUItemSize(item.requireID(), size.requireID())
-//                            return pivot.save(on: req).transform(to: .created)
+                            let pivot = try SUItemSize(item.requireID(), size.requireID())
+                            pivot.timestamp = String(describing: Date())
+                            return pivot.save(on: req).transform(to: .created)
                             
-                            return item.sizes.attach(size, on: req).transform(to: .created)
+                            //return item.sizes.attach(size, on: req).transform(to: .created)
         }
     }
     
@@ -124,6 +128,8 @@ struct SUItemController: RouteCollection {
             return pivot.flatMap(to: HTTPStatus.self) { itemSize in
                 
                 itemSize?.itemSizeStock = stock
+                itemSize?.timestamp = String(describing: Date())
+                
                 return (itemSize?.save(on: req).transform(to: HTTPStatus.ok))!
             }
         }
@@ -137,6 +143,7 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUYear.self)) { item, year in
                             
                             let pivot = try SUItemYear(item.requireID(), year.requireID())
+                            pivot.timestamp = String(describing: Date())
                             
                             return pivot.save(on: req).transform(to: .created)
         }

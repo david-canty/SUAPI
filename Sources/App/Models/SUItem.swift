@@ -11,6 +11,7 @@ final class SUItem: Codable {
     var itemPrice: Double
     var itemImage: Data?
     var categoryID: SUCategory.ID
+    var timestamp: String?
     
     init(name: String,
          description: String? = nil,
@@ -27,6 +28,7 @@ final class SUItem: Codable {
         self.itemPrice = price
         self.itemImage = image
         self.categoryID = categoryID
+        self.timestamp = String(describing: Date())
     }
 }
 
