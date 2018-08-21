@@ -14,7 +14,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     var middlewares = MiddlewareConfig()
     //middlewares.use(FileMiddleware.self)
-    middlewares.use(SULogMiddleware.self)
+    //middlewares.use(SULogMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
     middlewares.use(SUJWTMiddleware.self)
     

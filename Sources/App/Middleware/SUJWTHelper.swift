@@ -7,7 +7,6 @@ final class SUJWTHelper {
     
     var app: Application!
     var publicKeys: [String: String] = [:]
-    var cacheControlMaxAge: Int = 0
     
     private init() {}
     
@@ -15,24 +14,21 @@ final class SUJWTHelper {
         
         do {
             
+            // Create client request
             let client = try app.client()
             let httpReq = HTTPRequest(method: .GET, url: "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
             let req = Request(http: httpReq, using: app)
-            let res = client.send(req)
-            
-//            let keys = client.send(req)
-//                .flatMap { try $0.content.decode([String: String].self) }
-//            _ = keys.map() { key in
-//                let dictKeys = key.keys
-//                print(dictKeys)
-//            }
-            
-            // Parse response
-            res.do { response in
+
+            // Get response
+            _ = client.send(req).flatMap { response in
                 
-                do {
+                // Decode public keys
+                try response.content.decode([String: String].self).map() { keys in
                     
-                    // Parse cache control max-age
+                    self.publicKeys = keys
+                    
+                    // Get cache control max-age
+                    var cacheControlMaxAge = 86400 // default to a day
                     if let cacheControlString = response.http.headers.firstValue(name: .cacheControl) {
                         
                         if let maxAgeRange = cacheControlString.range(of: "max-age=") {
@@ -40,104 +36,20 @@ final class SUJWTHelper {
                             let cacheSubstringFromMaxAge = cacheControlString[maxAgeRange.upperBound..<cacheControlString.endIndex]
                             let substringComponents = cacheSubstringFromMaxAge.split(separator: ",")
                             let maxAgeSubstring = substringComponents[0]
-                            self.cacheControlMaxAge = Int(maxAgeSubstring)!
+                            cacheControlMaxAge = Int(maxAgeSubstring)!
                         }
                     }
                     
-                    // Parse public keys
-                    _ = try response.content.decode([String: String].self).map() { keys in
-                        
-                         self.publicKeys = keys
-                        print(self.publicKeys)
+                    // Schedule next keys refresh
+                    _ = self.app.eventLoop.scheduleTask(in: TimeAmount.seconds(cacheControlMaxAge)) { () -> Void in
+                            self.fetchPublicKeys()
                     }
-                    
-                    // Schedule next key refresh
-                    _ = self.app.eventLoop.scheduleTask(in: TimeAmount.seconds(self.cacheControlMaxAge)) { () -> Void in
-                        self.fetchPublicKeys()
-                    }
-                    
-                } catch {
-                    
-                    fatalError("Could not decode content: \(error)")
                 }
-
-            }.catch { error in
-                    
-                fatalError("Could not get HTTP response: \(error)")
             }
             
         } catch {
             
-            fatalError("Could not create HTTP client: \(error)")
+            fatalError("Error with request: \(error)")
         }
     }
-    
-//    func fetchPublicKeys() {
-//
-//        do {
-//
-//            // Request public keys
-//            let client = try app.client()
-//            let httpReq = HTTPRequest(method: .GET, url: "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
-//            let req = Request(http: httpReq, using: app)
-//            let res = client.send(req)
-//
-//            // Parse response
-//            res.do { response in
-//
-//                // Parse cache control max-age
-//                if let cacheControlString = response.http.headers.firstValue(name: .cacheControl) {
-//
-//                    if let maxAgeRange = cacheControlString.range(of: "max-age=") {
-//
-//                        let cacheSubstringFromMaxAge = cacheControlString[maxAgeRange.upperBound..<cacheControlString.endIndex]
-//                        let substringComponents = cacheSubstringFromMaxAge.split(separator: ",")
-//                        let maxAgeSubstring = substringComponents[0]
-//                        self.cacheControlMaxAge = Int(maxAgeSubstring)!
-//                    }
-//                }
-//
-//                // Parse public keys
-//                if let bodyData = response.http.body.data {
-//
-//
-//                    let bodyString = String(data: bodyData, encoding: .utf8)
-//
-//                    if let keyComponentPairs = bodyString?.split(separator: ",") {
-//
-//                        for keyComponents in keyComponentPairs {
-//
-//                            let keyPairs = keyComponents.split(separator: ":")
-//
-//                            let keyId = keyPairs[0]
-//                            var keyIdStripped = keyId.replacingOccurrences(of: "\"", with: "")
-//                            keyIdStripped = keyIdStripped.replacingOccurrences(of: "{", with: "")
-//                            keyIdStripped = keyIdStripped.replacingOccurrences(of: "\n", with: "")
-//                            keyIdStripped = keyIdStripped.replacingOccurrences(of: " ", with: "")
-//
-//                            let keyCert = keyPairs[1]
-//                            var keyCertStripped = keyCert.replacingOccurrences(of: "\"", with: "")
-//                            keyCertStripped = keyCertStripped.replacingOccurrences(of: "}", with: "")
-//                            keyCertStripped = keyCertStripped.replacingOccurrences(of: " ", with: "")
-//
-//                            self.publicKeys[keyIdStripped] = keyCertStripped
-//                        }
-//                    }
-//                }
-//
-//                // Schedule next key refresh
-//                _ = self.app.eventLoop.scheduleTask(in: TimeAmount.seconds(self.cacheControlMaxAge)) { () -> Void in
-//                    self.fetchPublicKeys()
-//                }
-//
-//            }.catch { error in
-//
-//                fatalError("Could not send HTTP request: \(error)")
-//            }
-//
-//        } catch {
-//
-//            fatalError("Could not create HTTP client: \(error)")
-//        }
-//    }
 }
