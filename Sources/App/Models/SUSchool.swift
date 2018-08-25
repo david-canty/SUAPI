@@ -6,11 +6,23 @@ final class SUSchool: Codable {
     
     var id: UUID?
     var schoolName: String
+    var sortOrder: Int?
     var timestamp: String?
     
-    init(name: String) {
+    init(name: String, sortOrder: Int = 0) {
         self.schoolName = name
+        self.sortOrder = sortOrder
         self.timestamp = String(describing: Date())
+    }
+}
+
+extension SUSchool: Validatable {
+    
+    static func validations() throws -> Validations<SUSchool> {
+        
+        var validations = Validations(SUSchool.self)
+        try validations.add(\.schoolName, .count(1...))
+        return validations
     }
 }
 

@@ -41,6 +41,7 @@ struct SUCategoryController: RouteCollection {
         return try flatMap(to: SUCategory.self, req.parameters.next(SUCategory.self), req.content.decode(SUCategory.self)) { category, updatedCategory in
             
             category.categoryName = updatedCategory.categoryName
+            category.sortOrder = updatedCategory.sortOrder
             category.timestamp = String(describing: Date())
             
             return category.save(on: req)

@@ -1,0 +1,128 @@
+body {
+    background-color: #F8F8F8;
+}
+
+.container {
+    background-color: #FFFFFF;
+}
+
+.col,
+[class*="col-"] {
+    padding: 0;
+}
+
+p {
+    font-size: 0.75em;
+}
+
+h1 {
+    color: #D52422;
+    font-size: 1.75em;
+    font-weight: normal;
+}
+
+h2 {
+    color: #5054A1;
+    padding: 25px 0 15px 0;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+h3 {
+    color: #333333;
+    font-size: 1.25em;
+    padding: 15px 0;
+}
+
+h4 {
+    color: #333333;
+    font-size: 1em;
+    padding: 0;
+}
+
+table th,
+table td {
+    font-size: 1em;
+}
+
+label {
+    color: #333333;
+    padding: 20px 0;
+    font-size: 1em;
+}
+
+.bg-dark {
+    background-color: #5054A1 !important;
+}
+
+.navbar a {
+    color: rgba(255, 255, 255, 1.0) !important;
+}
+
+.navbar a:hover {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.navbar li.active a {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.btn-primary {
+    background-color: #5054A1;
+    color: rgba(255, 255, 255, 1.0);
+    font-size: 0.75em;
+}
+
+.btn-secondary,
+.btn-danger {
+    font-size: 0.75em;
+}
+
+.btn-primary:hover {
+    background-color: #5054A1 !important;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-control {
+    font-size: 0.75em;
+}
+
+label, legend {
+    padding: 10px 10px 0 0;
+    font-size: 0.75em;
+}
+
+.form-control[type="text"] {
+    margin-right: 20px;
+}
+
+input[type="file"] {
+    font-size: 0.75em;
+}
+
+.form-check-inline {
+    padding: 0 0 0 20px;
+}
+
+.form-check-inline label {
+    padding: 0;
+}
+
+.validation-error p,
+.invalid-feedback {
+    font-size: 1em;
+    color: red;
+}
+
+.dropdown-item {
+    font-size: 0.75em;
+}
+
+a.dropdown-item:hover {
+    background-color: #5054A1;
+    color: #FFF;
+}
+
+.modal-body p {
+    margin: 0;
+}

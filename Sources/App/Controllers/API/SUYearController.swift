@@ -46,6 +46,7 @@ struct SUYearController: RouteCollection {
             
             year.yearName = updatedYear.yearName
             year.schoolID = updatedYear.schoolID
+            year.sortOrder = updatedYear.sortOrder
             year.timestamp = String(describing: Date())
             
             return year.save(on: req)

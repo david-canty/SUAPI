@@ -7,11 +7,13 @@ final class SUYear: Codable {
     var id: UUID?
     var yearName: String
     var schoolID: SUSchool.ID
+    var sortOrder: Int?
     var timestamp: String?
     
-    init(name: String, schoolID: SUSchool.ID) {
+    init(name: String, schoolID: SUSchool.ID, sortOrder: Int = 0) {
         self.yearName = name
         self.schoolID = schoolID
+        self.sortOrder = sortOrder
         self.timestamp = String(describing: Date())
     }
 }

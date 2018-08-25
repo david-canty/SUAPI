@@ -1,19 +1,21 @@
 import FluentMySQL
 import Vapor
+import Leaf
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
     try services.register(FluentMySQLProvider())
+    try services.register(LeafProvider())
 
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
     
-    services.register(SULogMiddleware.self)
+    //services.register(SULogMiddleware.self)
     services.register(SUJWTMiddleware.self)
 
     var middlewares = MiddlewareConfig()
-    //middlewares.use(FileMiddleware.self)
+    middlewares.use(FileMiddleware.self)
     //middlewares.use(SULogMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
     middlewares.use(SUJWTMiddleware.self)
@@ -58,4 +60,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SUYear.self, database: .mysql)
     migrations.add(model: SUItemYear.self, database: .mysql)
     services.register(migrations)
+    
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
 }

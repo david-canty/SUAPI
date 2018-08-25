@@ -23,7 +23,34 @@ struct SUSchoolController: RouteCollection {
         
         school.timestamp = String(describing: Date())
         
-        return school.save(on: req)
+        do {
+            
+            try school.validate()
+            
+        } catch {
+            
+            if let validationError = error as? ValidationError {
+                
+                if validationError.reason.contains("not larger than 1") {
+                
+                    throw Abort(.conflict, reason: "School name cannot be blank.")
+                }
+            }
+        }
+        
+        return school.save(on: req).catchMap { error in
+            
+            let errorDescription = error.localizedDescription.lowercased()
+            
+            switch errorDescription {
+                
+            case let str where str.contains("duplicate"):
+                throw Abort(.conflict, reason: "A school with this name exists.")
+                
+            default:
+                throw Abort(.internalServerError, reason: error.localizedDescription)
+            }
+        }
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[SUSchool]> {
@@ -41,6 +68,7 @@ struct SUSchoolController: RouteCollection {
         return try flatMap(to: SUSchool.self, req.parameters.next(SUSchool.self), req.content.decode(SUSchool.self)) { school, updatedSchool in
             
             school.schoolName = updatedSchool.schoolName
+            school.sortOrder = updatedSchool.sortOrder
             school.timestamp = String(describing: Date())
             
             return school.save(on: req)

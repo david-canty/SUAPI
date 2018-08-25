@@ -1,0 +1,36 @@
+#set("content") {
+
+    <div class="container" id="schools-container">
+        
+        <div class="row">
+            <div class="col">
+                <h1>#(title)</h1>
+            </div>
+        </div>
+    
+        <div class="row mt-1">
+            
+            <div class="col">
+                
+                <form action="" method="">
+                    
+                    <div class="validation-wrapper">
+ 
+                        <input class="form-control col-6 p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" />
+                        <div class="input-group">
+                            <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">
+                            <input class="btn btn-primary school-create-submit mt-3 mb-3" name="schoolSubmit" type="submit" value="Create">
+                        </div
+                    
+                    </div>
+                    
+                </form>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+}
+
+#embed("base")
