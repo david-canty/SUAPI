@@ -21,11 +21,10 @@ struct SUSchoolController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, school: SUSchool) throws -> Future<SUSchool> {
         
-        school.timestamp = String(describing: Date())
-        
         do {
             
             try school.validate()
+            school.timestamp = String(describing: Date())
             
         } catch {
             
@@ -33,7 +32,7 @@ struct SUSchoolController: RouteCollection {
                 
                 if validationError.reason.contains("not larger than 1") {
                 
-                    throw Abort(.conflict, reason: "School name cannot be blank.")
+                    throw Abort(.badRequest, reason: "School name cannot be blank.")
                 }
             }
         }
@@ -69,9 +68,36 @@ struct SUSchoolController: RouteCollection {
             
             school.schoolName = updatedSchool.schoolName
             school.sortOrder = updatedSchool.sortOrder
-            school.timestamp = String(describing: Date())
             
-            return school.save(on: req)
+            do {
+                
+                try school.validate()
+                school.timestamp = String(describing: Date())
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    if validationError.reason.contains("not larger than 1") {
+                        
+                        throw Abort(.badRequest, reason: "School name cannot be blank.")
+                    }
+                }
+            }
+            
+            return school.save(on: req).catchMap { error in
+                
+                let errorDescription = error.localizedDescription.lowercased()
+                
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "A school with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
         }
     }
     

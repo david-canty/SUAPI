@@ -12,14 +12,15 @@
             
             <div class="col">
                 
-                <form action="" method="">
+                <form action="" method="" #if(editing) {data-id="#(school.id)"}>
                     
                     <div class="validation-wrapper">
  
-                        <input class="form-control col-6 p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" />
+                        <input class="form-control col-6 p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
+                        
                         <div class="input-group">
                             <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">
-                            <input class="btn btn-primary school-create-submit mt-3 mb-3" name="schoolSubmit" type="submit" value="Create">
+                            <input class="btn btn-primary #if(editing) {school-update-submit } else {school-create-submit } mt-3 mb-3" name="schoolSubmit" type="submit" value="#if(editing) {Update} else {Create}">
                         </div
                     
                     </div>
