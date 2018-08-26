@@ -1,6 +1,7 @@
 import Foundation
 import Vapor
 import FluentMySQL
+import Authentication
 
 final class SUUser: Codable {
     
@@ -48,6 +49,8 @@ extension SUUser: MySQLUUIDModel {}
 extension SUUser: Content {}
 extension SUUser: Parameter {}
 extension SUUser.Public: Content {}
+extension SUUser: PasswordAuthenticatable {}
+extension SUUser: SessionAuthenticatable {}
 
 extension SUUser: Migration {
     
@@ -78,4 +81,10 @@ extension Future where T: SUUser {
             return user.convertToPublic()
         }
     }
+}
+
+extension SUUser: BasicAuthenticatable {
+    
+    static let usernameKey: UsernameKey = \SUUser.username
+    static let passwordKey: PasswordKey = \SUUser.password
 }

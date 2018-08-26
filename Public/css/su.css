@@ -114,6 +114,11 @@ input[type="file"] {
     color: red;
 }
 
+.alert p {
+    font-size: 0.75em;
+    margin: 0;
+}
+
 .dropdown-item {
     font-size: 0.75em;
 }

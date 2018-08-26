@@ -1,11 +1,13 @@
 import FluentMySQL
 import Vapor
 import Leaf
+import Authentication
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
     try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
+    try services.register(AuthenticationProvider())
 
     let router = EngineRouter.default()
     try routes(router)
@@ -19,6 +21,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     //middlewares.use(SULogMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
     middlewares.use(SUJWTMiddleware.self)
+    middlewares.use(SessionsMiddleware.self)
     
     services.register(middlewares)
 
@@ -63,4 +66,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
+    config.prefer(MemoryKeyedCache.self, for: KeyedCache.self)
 }

@@ -10,13 +10,13 @@
     
         <div class="row mt-1">
             
-            <div class="col">
+            <div class="col-6">
                 
                 <form action="" method="" #if(editing) {data-id="#(school.id)"}>
                     
                     <div class="validation-wrapper">
  
-                        <input class="form-control col-6 p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
+                        <input class="form-control p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
                         
                         <div class="input-group">
                             <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">
