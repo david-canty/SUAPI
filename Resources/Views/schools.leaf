@@ -1,6 +1,6 @@
 #set("content") {
 
-    <div class="container" id="schools-container">
+    <div id="schools-container">
 
         <div class="row">
             <div class="col">
@@ -31,7 +31,9 @@
                                         Action
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="actionButton#(school.id)">
-                                        <a class="dropdown-item" href="/schools/#(school.id)/edit">View / Edit School</a>
+                                        <a class="dropdown-item" href="/schools/#(school.id)/edit">Edit School</a>
+                                        <a class="dropdown-item" href="/schools/#(school.id)/years">School Years</a>
+                                        <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="" data-toggle="modal" data-target="#school-delete-modal" data-id="#(school.id)">Delete School</a>
                                     </div>
                                 </div>

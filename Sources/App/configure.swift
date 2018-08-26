@@ -59,6 +59,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SUSchool.self, database: .mysql)
     migrations.add(model: SUYear.self, database: .mysql)
     migrations.add(model: SUItemYear.self, database: .mysql)
+    migrations.add(model: SUUser.self, database: .mysql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
