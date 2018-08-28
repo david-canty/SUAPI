@@ -21,7 +21,8 @@ struct SUAdminController: RouteCollection {
     // Handlers
     func indexHandler(_ req: Request) throws -> Future<View> {
         
-        let context = IndexContext(title: "Home")
+        let showCookieMessage = req.http.cookies["cookies-accepted"] == nil
+        let context = IndexContext(title: "Home", showCookieMessage: showCookieMessage)
         return try req.view().render("index", context)
     }
     
@@ -70,6 +71,7 @@ struct SUAdminController: RouteCollection {
     struct IndexContext: Encodable {
         
         let title: String
+        let showCookieMessage: Bool
     }
     
     struct SignInContext: Encodable {
