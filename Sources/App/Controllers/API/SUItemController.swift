@@ -1,34 +1,45 @@
 import Vapor
 import Fluent
+import Authentication
 
 struct SUItemController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let itemsRoute = router.grouped("api", "items")
-        
         // CRUD
-        itemsRoute.post(SUItem.self, use: createHandler)
-        itemsRoute.get(use: getAllHandler)
-        itemsRoute.get(SUItem.parameter, use: getHandler)
-        itemsRoute.put(SUItem.parameter, use: updateHandler)
-        itemsRoute.delete(SUItem.parameter, use: deleteHandler)
+        let itemRoutes = router.grouped("api", "items")
+        itemRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+            
+            jwtProtectedGroup.get(use: getAllHandler)
+            jwtProtectedGroup.get(SUItem.parameter, use: getHandler)
+            
+            // Category
+            jwtProtectedGroup.get(SUItem.parameter, "category", use: getCategoryHandler)
+            
+            // Sizes
+            jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
+            
+            // Years
+            jwtProtectedGroup.get(SUItem.parameter, "years", use: getYearsHandler)
+        }
         
-        // Category
-        itemsRoute.get(SUItem.parameter, "category", use: getCategoryHandler)
+        let authSessionRoutes = itemRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        
+        redirectProtectedGroup.post(SUItem.self, use: createHandler)
+        redirectProtectedGroup.put(SUItem.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUItem.parameter, use: deleteHandler)
         
         // Sizes
-        itemsRoute.post(SUItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
-        itemsRoute.get(SUItem.parameter, "sizes", use: getSizesHandler)
-        itemsRoute.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
+        redirectProtectedGroup.post(SUItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
+        redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
         // Stock
-        itemsRoute.put(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
+        redirectProtectedGroup.put(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
         
         // Years
-        itemsRoute.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
-        itemsRoute.get(SUItem.parameter, "years", use: getYearsHandler)
-        itemsRoute.delete(SUItem.parameter, "years", SUYear.parameter, use: deleteYearHandler)
+        redirectProtectedGroup.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
+        redirectProtectedGroup.delete(SUItem.parameter, "years", SUYear.parameter, use: deleteYearHandler)
     }
     
     // CRUD

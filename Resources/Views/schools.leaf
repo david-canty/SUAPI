@@ -1,76 +1,83 @@
 #set("content") {
 
-    <div id="schools-container">
+    #embed("navigation")
 
-        <div class="row">
-            <div class="col">
-                <h1>#(title)</h1>
-                <a class="btn btn-primary mt-3 mb-3" href="schools/create" role="button">&#43;</a>
-            </div>
-        </div>
+    <div class="container mt-3">
         
-        <div class="row">
-            <div class="col">
-                
-                #if(count(schools) > 0) {
+        <div id="schools-container">
 
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        #for(school in schools) {
-                        <tr>
-                            <td>#(school.schoolName)</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(school.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Action
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="actionButton#(school.id)">
-                                        <a class="dropdown-item" href="/schools/#(school.id)/edit">Edit School</a>
-                                        <a class="dropdown-item" href="/schools/#(school.id)/years">School Years</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#school-delete-modal" data-id="#(school.id)">Delete School</a>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-
-                } else {
-
-                <h2>No schools</h2>
-
-                }
+            <div class="row">
+                <div class="col">
+                    <h1>#(title)</h1>
+                    <a class="btn btn-primary mt-3 mb-3" href="schools/create" role="button">&#43;</a>
+                </div>
             </div>
-        </div>
+            
+            <div class="row">
+                <div class="col">
+                    
+                    #if(count(schools) > 0) {
 
-        <div class="modal fade" id="school-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="deleteModalLabel">Delete?</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you wish to delete this school?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger school-delete-submit">Delete</button>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            #for(school in schools) {
+                            <tr>
+                                <td>#(school.schoolName)</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(school.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Action
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="actionButton#(school.id)">
+                                            <a class="dropdown-item" href="/schools/#(school.id)/edit">Edit School</a>
+                                            <a class="dropdown-item" href="/schools/#(school.id)/years">School Years</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="" data-toggle="modal" data-target="#school-delete-modal" data-id="#(school.id)">Delete School</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    } else {
+
+                    <h2>No schools</h2>
+
+                    }
+                </div>
+            </div>
+
+            <div class="modal fade" id="school-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="deleteModalLabel">Delete?</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you wish to delete this school?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger school-delete-submit">Delete</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        
     </div>
+
 }
 
 #embed("base")

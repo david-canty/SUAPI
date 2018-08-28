@@ -1,21 +1,28 @@
 import Vapor
 import Fluent
+import Authentication
 
 struct SUCategoryController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let categoriesRoute = router.grouped("api", "categories")
-        
         // CRUD
-        categoriesRoute.post(SUCategory.self, use: createHandler)
-        categoriesRoute.get(use: getAllHandler)
-        categoriesRoute.get(SUCategory.parameter, use: getHandler)
-        categoriesRoute.put(SUCategory.parameter, use: updateHandler)
-        categoriesRoute.delete(SUCategory.parameter, use: deleteHandler)
+        let categoryRoutes = router.grouped("api", "categories")
+        categoryRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+            
+            jwtProtectedGroup.get(use: getAllHandler)
+            jwtProtectedGroup.get(SUCategory.parameter, use: getHandler)
+            
+            // Items
+            jwtProtectedGroup.get(SUCategory.parameter, "items", use: getItemsHandler)
+        }
         
-        // Items
-        categoriesRoute.get(SUCategory.parameter, "items", use: getItemsHandler)
+        let authSessionRoutes = categoryRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        
+        redirectProtectedGroup.post(SUCategory.self, use: createHandler)
+        redirectProtectedGroup.put(SUCategory.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUCategory.parameter, use: deleteHandler)
     }
     
     // CRUD

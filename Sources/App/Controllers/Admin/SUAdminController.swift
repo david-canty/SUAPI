@@ -7,9 +7,15 @@ struct SUAdminController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        router.get(use: indexHandler)
-        router.get("signin", use: signInHandler)
-        router.post(SignInPostData.self, at: "signin", use: signInPostHandler)
+        let authSessionRoutes = router.grouped(SUUser.authSessionsMiddleware())
+        
+        authSessionRoutes.get("signin", use: signInHandler)
+        authSessionRoutes.post(SignInPostData.self, at: "signin", use: signInPostHandler)
+        
+        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        
+        redirectProtectedRoutes.get(use: indexHandler)
+        redirectProtectedRoutes.post("signout", use: signOutHandler)
     }
     
     // Handlers
@@ -52,6 +58,12 @@ struct SUAdminController: RouteCollection {
     struct SignInPostData: Content {
         let username: String
         let password: String
+    }
+    
+    func signOutHandler(_ req: Request) throws -> Response {
+        
+        try req.unauthenticateSession(SUUser.self)
+        return req.redirect(to: "/")
     }
     
     // Contexts

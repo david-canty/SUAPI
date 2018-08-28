@@ -1,21 +1,28 @@
 import Vapor
 import Fluent
+import Authentication
 
 struct SUSizeController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let sizesRoute = router.grouped("api", "sizes")
-        
         // CRUD
-        sizesRoute.post(SUSize.self, use: createHandler)
-        sizesRoute.get(use: getAllHandler)
-        sizesRoute.get(SUSize.parameter, use: getHandler)
-        sizesRoute.put(SUSize.parameter, use: updateHandler)
-        sizesRoute.delete(SUSize.parameter, use: deleteHandler)
+        let sizeRoutes = router.grouped("api", "sizes")
+        sizeRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+            
+            jwtProtectedGroup.get(use: getAllHandler)
+            jwtProtectedGroup.get(SUSize.parameter, use: getHandler)
+            
+            // Items
+            jwtProtectedGroup.get(SUSize.parameter, "items", use: getItemsHandler)
+        }
         
-        // Items
-        sizesRoute.get(SUSize.parameter, "items", use: getItemsHandler)
+        let authSessionRoutes = sizeRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        
+        redirectProtectedGroup.post(SUSize.self, use: createHandler)
+        redirectProtectedGroup.put(SUSize.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUSize.parameter, use: deleteHandler)
     }
     
     // CRUD

@@ -1,37 +1,44 @@
 #set("content") {
 
-    <div id="schools-container">
+    #embed("navigation")
+
+    <div class="container mt-3">
         
-        <div class="row">
-            <div class="col">
-                <h1>#(title)</h1>
-            </div>
-        </div>
-    
-        <div class="row mt-1">
+        <div id="schools-container">
             
-            <div class="col-6">
+            <div class="row">
+                <div class="col">
+                    <h1>#(title)</h1>
+                </div>
+            </div>
+        
+            <div class="row mt-1">
                 
-                <form action="" method="" #if(editing) {data-id="#(school.id)"}>
+                <div class="col-6">
                     
-                    <div class="validation-wrapper">
- 
-                        <input class="form-control p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
+                    <form action="" method="" #if(editing) {data-id="#(school.id)"}>
                         
-                        <div class="input-group">
-                            <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">
-                            <input class="btn btn-primary #if(editing) {school-update-submit } else {school-create-submit } mt-3 mb-3" name="schoolSubmit" type="submit" value="#if(editing) {Update} else {Create}">
-                        </div
+                        <div class="validation-wrapper">
+     
+                            <input class="form-control p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
+                            
+                            <div class="input-group">
+                                <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">
+                                <input class="btn btn-primary #if(editing) {school-update-submit } else {school-create-submit } mt-3 mb-3" name="schoolSubmit" type="submit" value="#if(editing) {Update} else {Create}">
+                            </div
+                        
+                        </div>
+                        
+                    </form>
                     
-                    </div>
-                    
-                </form>
+                </div>
                 
             </div>
             
         </div>
         
     </div>
+
 }
 
 #embed("base")

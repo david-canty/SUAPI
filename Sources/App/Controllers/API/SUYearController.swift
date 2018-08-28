@@ -1,24 +1,31 @@
 import Vapor
 import Fluent
+import Authentication
 
 struct SUYearController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let yearsRoute = router.grouped("api", "years")
-        
         // CRUD
-        yearsRoute.post(SUYear.self, use: createHandler)
-        yearsRoute.get(use: getAllHandler)
-        yearsRoute.get(SUYear.parameter, use: getHandler)
-        yearsRoute.put(SUYear.parameter, use: updateHandler)
-        yearsRoute.delete(SUYear.parameter, use: deleteHandler)
+        let yearRoutes = router.grouped("api", "years")
+        yearRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+            
+            jwtProtectedGroup.get(use: getAllHandler)
+            jwtProtectedGroup.get(SUYear.parameter, use: getHandler)
+            
+            // School
+            jwtProtectedGroup.get(SUItem.parameter, "school", use: getSchoolHandler)
+            
+            // Items
+            jwtProtectedGroup.get(SUYear.parameter, "items", use: getItemsHandler)
+        }
         
-        // School
-        yearsRoute.get(SUItem.parameter, "school", use: getSchoolHandler)
+        let authSessionRoutes = yearRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
         
-        // Items
-        yearsRoute.get(SUYear.parameter, "items", use: getItemsHandler)
+        redirectProtectedGroup.post(SUYear.self, use: createHandler)
+        redirectProtectedGroup.put(SUYear.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUYear.parameter, use: deleteHandler)
     }
     
     // CRUD

@@ -17,10 +17,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(SUJWTMiddleware.self)
 
     var middlewares = MiddlewareConfig()
-    middlewares.use(FileMiddleware.self)
     //middlewares.use(SULogMiddleware.self)
+    middlewares.use(FileMiddleware.self)
     middlewares.use(ErrorMiddleware.self)
-    middlewares.use(SUJWTMiddleware.self)
     middlewares.use(SessionsMiddleware.self)
     
     services.register(middlewares)
@@ -63,6 +62,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SUYear.self, database: .mysql)
     migrations.add(model: SUItemYear.self, database: .mysql)
     migrations.add(model: SUUser.self, database: .mysql)
+    migrations.add(migration: AdminUser.self, database: .mysql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

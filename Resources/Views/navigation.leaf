@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            
+            <button class="navbar-toggler" type="button"
+                data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse"
+                id="navbarSupportedContent">
+                
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item #if(title == "Home"){active}">
+                        <a href="/" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item #if(title == "Schools"){active}">
+                        <a href="/schools" class="nav-link">Schools</a>
+                    </li>
+                    <li class="nav-item #if(title == "Years"){active}">
+                        <a href="/years" class="nav-link">Years</a>
+                    </li>
+                    <li class="nav-item #if(title == "Categories"){active}">
+                        <a href="/categories" class="nav-link">Categories</a>
+                    </li>
+                    <li class="nav-item #if(title == "Sizes"){active}">
+                        <a href="/sizes" class="nav-link">Sizes</a>
+                    </li>
+                    <li class="nav-item #if(title == "Items"){active}">
+                        <a href="/items" class="nav-link">Items</a>
+                    </li>
+                </ul>
+                
+                <form class="form-inline" action="/signout" method="POST">
+                    <input class="nav-link btn btn-link" type="submit" value="Sign Out">
+                        </form>
+            </div>
+        </nav>
+    </div>
+</div>

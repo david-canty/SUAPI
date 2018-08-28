@@ -88,3 +88,25 @@ extension SUUser: BasicAuthenticatable {
     static let usernameKey: UsernameKey = \SUUser.username
     static let passwordKey: PasswordKey = \SUUser.password
 }
+
+struct AdminUser: Migration {
+    
+    typealias Database = MySQLDatabase
+    
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
+        
+        let password = try? BCrypt.hash("password")
+        
+        guard let hashedPassword = password else {
+            fatalError("Failed to create admin user")
+        }
+    
+        let user = SUUser(name: "Admin", username: "admin", password: hashedPassword)
+        
+        return user.save(on: connection).transform(to: ())
+    }
+    
+    static func revert(on connection: MySQLConnection) -> Future<Void> {
+            return .done(on: connection)
+    }
+}

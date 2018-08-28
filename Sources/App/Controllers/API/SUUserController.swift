@@ -1,19 +1,22 @@
 import Vapor
 import Fluent
 import Crypto
+import Authentication
 
 struct SUUserController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let usersRoute = router.grouped("api", "users")
-        
         // CRUD
-        usersRoute.post(SUUser.self, use: createHandler)
-        usersRoute.get(use: getAllHandler)
-        usersRoute.get(SUUser.parameter, use: getHandler)
-        usersRoute.put(SUUser.parameter, use: updateHandler)
-        usersRoute.delete(SUUser.parameter, use: deleteHandler)
+        let userRoutes = router.grouped("api", "users")
+        let authSessionRoutes = userRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        
+        redirectProtectedGroup.post(SUUser.self, use: createHandler)
+        redirectProtectedGroup.get(use: getAllHandler)
+        redirectProtectedGroup.get(SUUser.parameter, use: getHandler)
+        redirectProtectedGroup.put(SUUser.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUUser.parameter, use: deleteHandler)
     }
 
     // CRUD

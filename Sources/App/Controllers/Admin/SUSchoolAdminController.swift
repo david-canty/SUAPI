@@ -1,16 +1,18 @@
 import Vapor
 import Leaf
 import Fluent
+import Authentication
 
 struct SUSchoolAdminController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let schoolsRoute = router.grouped("schools")
+        let authSessionRoutes = router.grouped("schools").grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
         
-        schoolsRoute.get("create", use: createSchoolHandler)
-        schoolsRoute.get(use: schoolsHandler)
-        schoolsRoute.get(SUSchool.parameter, "edit", use: editSchoolHandler)
+        redirectProtectedRoutes.get("create", use: createSchoolHandler)
+        redirectProtectedRoutes.get(use: schoolsHandler)
+        redirectProtectedRoutes.get(SUSchool.parameter, "edit", use: editSchoolHandler)
     }
     
     // CRUD handlers
