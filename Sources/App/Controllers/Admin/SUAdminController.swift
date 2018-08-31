@@ -21,8 +21,11 @@ struct SUAdminController: RouteCollection {
     // Handlers
     func indexHandler(_ req: Request) throws -> Future<View> {
         
+        let user = try req.requireAuthenticated(SUUser.self)
+        let isAdmin = user.username == "admin"
+        
         let showCookieMessage = req.http.cookies["cookies-accepted"] == nil
-        let context = IndexContext(title: "Home", showCookieMessage: showCookieMessage)
+        let context = IndexContext(isAdmin: isAdmin, showCookieMessage: showCookieMessage)
         return try req.view().render("index", context)
     }
     
@@ -42,17 +45,21 @@ struct SUAdminController: RouteCollection {
         return try req.view().render("signIn", context)
     }
     
-    func signInPostHandler(_ req: Request, userData: SignInPostData) throws -> Future<Response> {
+    func signInPostHandler(_ req: Request, userData: SignInPostData) throws -> Future<HTTPResponseStatus> {
         
-        return SUUser.authenticate(username: userData.username, password: userData.password, using: BCryptDigest(), on: req).map(to: Response.self) { user in
+        return SUUser.authenticate(username: userData.username, password: userData.password, using: BCryptDigest(), on: req).map(to: HTTPResponseStatus.self) { user in
                 
             guard let user = user else {
-                return req.redirect(to: "/signin?error")
+                throw Abort(.unauthorized, reason: "Invalid username or password.")
+            }
+            
+            if !user.isEnabled {
+                throw Abort(.forbidden, reason: "This user account is disabled.")
             }
             
             try req.authenticateSession(user)
             
-            return req.redirect(to: "/")
+            return HTTPResponseStatus.ok
         }
     }
     
@@ -70,7 +77,8 @@ struct SUAdminController: RouteCollection {
     // Contexts
     struct IndexContext: Encodable {
         
-        let title: String
+        let title = "Home"
+        let isAdmin: Bool
         let showCookieMessage: Bool
     }
     

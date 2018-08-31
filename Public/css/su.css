@@ -67,6 +67,11 @@ label {
     color: rgba(255, 255, 255, 0.5) !important;
 }
 
+.nav-link.dropdown-toggle:active,
+.nav-link.dropdown-toggle:focus {
+    outline: 0;
+}
+
 .btn-primary {
     background-color: #5054A1;
     color: rgba(255, 255, 255, 1.0);
@@ -106,12 +111,6 @@ input[type="file"] {
 
 .form-check-inline label {
     padding: 0;
-}
-
-.validation-error p,
-.invalid-feedback {
-    font-size: 1em;
-    color: red;
 }
 
 .alert p {

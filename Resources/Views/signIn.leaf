@@ -14,19 +14,23 @@
                 
                 <div class="col-4">
                     
-                    <form method="post">
+                    <form action="" method="">
                         
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" name="username" class="form-control" id="username"/>
+                        <div class="validation-wrapper">
+                            
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" name="username" class="form-control" id="username"/>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" name="password" class="form-control" id="password"/>
+                            </div>
+                            
+                            <button type="submit" id='sign-in' class="btn btn-primary mt-2 mb-4">Sign In</button>
+                        
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" name="password" class="form-control" id="password"/>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary mt-2 mb-4">Sign In</button>
                         
                     </form>
                     

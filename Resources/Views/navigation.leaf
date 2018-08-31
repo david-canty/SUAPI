@@ -31,11 +31,21 @@
                     <li class="nav-item #if(title == "Items"){active}">
                         <a href="/items" class="nav-link">Items</a>
                     </li>
+                    #if(isAdmin) {
+                    <li class="nav-item #if(title == "Users"){active}">
+                        <a href="/users" class="nav-link">Users</a>
+                    </li>
+                    }
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Change Password</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" id="sign-out" href="">Sign Out</a>
+                        </div>
+                    </li>
                 </ul>
                 
-                <form class="form-inline" action="/signout" method="POST">
-                    <input class="nav-link btn btn-link" type="submit" value="Sign Out">
-                        </form>
             </div>
         </nav>
     </div>

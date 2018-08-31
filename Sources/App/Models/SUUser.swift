@@ -9,13 +9,13 @@ final class SUUser: Codable {
     var name: String
     var username: String
     var password: String
-    var timestamp: String?
+    var isEnabled = true
+    var timestamp = String(describing: Date())
     
     init(name: String, username: String, password: String) {
         self.name = name
         self.username = username
         self.password = password
-        self.timestamp = String(describing: Date())
     }
     
     final class Public: Codable {
@@ -23,13 +23,15 @@ final class SUUser: Codable {
         var id: UUID?
         var name: String
         var username: String
-        var timestamp: String?
+        var isEnabled: Bool
+        var timestamp: String
         
-        init(id: UUID?, name: String, username: String) {
+        init(id: UUID?, name: String, username: String, isEnabled: Bool, timestamp: String) {
             self.id = id
             self.name = name
             self.username = username
-            self.timestamp = String(describing: Date())
+            self.isEnabled = isEnabled
+            self.timestamp = timestamp
         }
     }
 }
@@ -68,7 +70,7 @@ extension SUUser {
     
     func convertToPublic() -> SUUser.Public {
         
-        return SUUser.Public(id: id, name: name, username: username)
+        return SUUser.Public(id: id, name: name, username: username, isEnabled: isEnabled, timestamp: timestamp)
     }
 }
 
