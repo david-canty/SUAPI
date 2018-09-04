@@ -113,9 +113,14 @@ input[type="file"] {
     padding: 0;
 }
 
-.alert p {
+.alert p,
+.invalid-feedback p {
     font-size: 0.75em;
     margin: 0;
+}
+
+.invalid-feedback p {
+    font-size: 1em;
 }
 
 .dropdown-item {

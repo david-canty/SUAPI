@@ -41,7 +41,7 @@ extension SUUser: Validatable {
     static func validations() throws -> Validations<SUUser> {
         
         var validations = Validations(SUUser.self)
-        try validations.add(\.name, .count(1...))
+        try validations.add(\.name, .count(1...) && .characterSet(.alphanumerics + .whitespaces))
         try validations.add(\.username, .count(1...) && .alphanumeric)
         return validations
     }
@@ -100,7 +100,7 @@ struct AdminUser: Migration {
         let password = try? BCrypt.hash("password")
         
         guard let hashedPassword = password else {
-            fatalError("Failed to create admin user")
+            fatalError("Failed to create admin user.")
         }
     
         let user = SUUser(name: "Admin", username: "admin", password: hashedPassword)

@@ -39,7 +39,7 @@ struct SUSchoolController: RouteCollection {
                 
                 if validationError.reason.contains("not larger than 1") {
                 
-                    throw Abort(.badRequest, reason: "School name cannot be blank.")
+                    throw Abort(.badRequest, reason: "School name must not be blank.")
                 }
             }
         }
@@ -87,7 +87,7 @@ struct SUSchoolController: RouteCollection {
                     
                     if validationError.reason.contains("not larger than 1") {
                         
-                        throw Abort(.badRequest, reason: "School name cannot be blank.")
+                        throw Abort(.badRequest, reason: "School name must not be blank.")
                     }
                 }
             }

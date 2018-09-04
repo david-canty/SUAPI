@@ -84,9 +84,17 @@ $(document).ready(function() {
     // User create submit
     $('#user-create-submit').click(function(e) {
         
-        e.preventDefault();
         $('.alert').remove();
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
         var form = $(this).closest('form');
+        form.addClass('was-validated');
+        
+        if (form[0].checkValidity() === false) {
+            return false
+        }
 
         $.ajax({
         url: baseUrl + '/users',
@@ -111,10 +119,18 @@ $(document).ready(function() {
     // User update submit
     $('#user-update-submit').click(function(e) {
         
-        e.preventDefault();
         $('.alert').remove();
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
         var form = $(this).closest('form');
         var userId = form.data('id');
+        form.addClass('was-validated');
+        
+        if (form[0].checkValidity() === false) {
+            return false
+        }
         
         $.ajax({
         url: baseUrl + '/users/' + userId,
@@ -132,15 +148,18 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
+            
         });
     });
     
     // User delete submit
     $('#users-container').on('click', '.user-delete-submit', function(e) {
         
-        e.preventDefault();
-        var userId = $(this).data('id');
         $('#user-delete-modal').modal('hide');
+        
+        e.preventDefault();
+        
+        var userId = $(this).data('id');
         
         $.ajax({
         url: baseUrl + '/users/' + userId,
@@ -208,8 +227,10 @@ $(document).ready(function() {
     // Sign in
     $('#sign-in').click(function(e) {
         
-        e.preventDefault();
         $('.alert').remove();
+        
+        e.preventDefault();
+        
         var form = $(this).closest('form');
         
         $.ajax({

@@ -37,16 +37,19 @@ struct SUUserController: RouteCollection {
             
             if let validationError = error as? ValidationError {
                 
-                switch validationError.reason {
-                    
-                case let str where str.contains("not larger than 1"):
-                    throw Abort(.badRequest, reason: "Username cannot be blank.")
-                    
-                case let str where str.contains("invalid character"):
-                    throw Abort(.badRequest, reason: "Username must be alphanumeric with no spaces.")
-                    
-                default:
-                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                let errorString = "Error creating user:\n\n"
+                var validationErrorReason = errorString
+                
+                if validationError.reason.contains("'name'") {
+                    validationErrorReason += "Name must be alphanumeric only and not blank.\n\n"
+                }
+                
+                if validationError.reason.contains("'username'") {
+                    validationErrorReason += "Username must be alphanumeric only and not blank."
+                }
+                
+                if validationErrorReason != errorString {
+                    throw Abort(.internalServerError, reason: validationErrorReason)
                 }
             }
         }
@@ -58,7 +61,7 @@ struct SUUserController: RouteCollection {
             switch errorDescription {
                 
             case let str where str.contains("duplicate"):
-                throw Abort(.conflict, reason: "A user with this username exists.")
+                throw Abort(.conflict, reason: "Error creating user:\n\nA user with this username exists.")
                 
             default:
                 throw Abort(.internalServerError, reason: error.localizedDescription)
@@ -89,19 +92,22 @@ struct SUUserController: RouteCollection {
                 user.timestamp = String(describing: Date())
                 
             } catch {
-                
+
                 if let validationError = error as? ValidationError {
                     
-                    switch validationError.reason {
-                        
-                    case let str where str.contains("not larger than 1"):
-                        throw Abort(.badRequest, reason: "Username cannot be blank.")
-                        
-                    case let str where str.contains("invalid character"):
-                        throw Abort(.badRequest, reason: "Username must be alphanumeric with no spaces.")
-                        
-                    default:
-                        throw Abort(.internalServerError, reason: error.localizedDescription)
+                    let errorString = "Error updating user:\n\n"
+                    var validationErrorReason = errorString
+                    
+                    if validationError.reason.contains("'name'") {
+                        validationErrorReason += "Name must be alphanumeric only and not blank.\n\n"
+                    }
+                    
+                    if validationError.reason.contains("'username'") {
+                        validationErrorReason += "Username must be alphanumeric only and not blank."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.internalServerError, reason: validationErrorReason)
                     }
                 }
             }
@@ -113,7 +119,7 @@ struct SUUserController: RouteCollection {
                 switch errorDescription {
                     
                 case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "A user with this username exists.")
+                    throw Abort(.conflict, reason: "Error creating user:\n\nA user with this username exists.")
                     
                 default:
                     throw Abort(.internalServerError, reason: error.localizedDescription)
