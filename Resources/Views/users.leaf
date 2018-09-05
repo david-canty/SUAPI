@@ -41,7 +41,7 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="actionButton#(user.id)">
                                         <a class="dropdown-item" href="/users/#(user.id)/edit">Edit User</a>
-                                        <a class="dropdown-item" href="#">Change Password</a>
+                                        <a class="dropdown-item" href="/users/#(user.id)/change-password">Change Password</a>
                                         <a class="dropdown-item disable-user" href="" data-id="#(user.id)" data-enabled="#(user.isEnabled)">#if(user.isEnabled == true) {Disable} else {Enable}&nbsp;User</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="" data-toggle="modal" data-target="#user-delete-modal" data-id="#(user.id)">Delete User</a>

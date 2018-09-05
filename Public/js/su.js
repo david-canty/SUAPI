@@ -84,8 +84,6 @@ $(document).ready(function() {
     // User create submit
     $('#user-create-submit').click(function(e) {
         
-        $('.alert').remove();
-        
         e.preventDefault();
         e.stopPropagation();
         
@@ -112,14 +110,11 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
 
             alert(validationErrorString);
-            
         });
     });
     
     // User update submit
     $('#user-update-submit').click(function(e) {
-        
-        $('.alert').remove();
         
         e.preventDefault();
         e.stopPropagation();
@@ -148,7 +143,6 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
-            
         });
     });
     
@@ -224,6 +218,45 @@ $(document).ready(function() {
         $(this).find('.user-delete-submit').attr('data-id', recipient);
     });
     
+    // Change Password
+    $('#password-cancel-submit').click(function(e) {
+        
+        e.preventDefault();
+        window.history.back();
+    });
+                        
+    $('#password-change-submit').click(function(e) {
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var form = $(this).closest('form');
+        var userId = form.data('id');
+        form.addClass('was-validated');
+        
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/users/' + userId + '/change-password',
+        type: 'PATCH',
+        data: form.serialize(),
+        success: function(response) {
+            
+            window.history.back();
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
     // Sign in
     $('#sign-in').click(function(e) {
         
@@ -234,7 +267,7 @@ $(document).ready(function() {
         var form = $(this).closest('form');
         
         $.ajax({
-        url: '/signin',
+        url: '/sign-in',
         type: 'POST',
         data: form.serialize(),
         success: function(response) {
@@ -254,8 +287,7 @@ $(document).ready(function() {
     });
     
     // Sign out
-    $('#sign-out').click(function() {
-        
-        $.ajax({ url: '/signout', type: 'POST' });
+    $('.container').on('click', '#sign-out', function(e) {
+        $.ajax({ url: '/sign-out', type: 'POST'});
     });
 })

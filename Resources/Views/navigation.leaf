@@ -31,15 +31,15 @@
                     <li class="nav-item #if(title == "Items"){active}">
                         <a href="/items" class="nav-link">Items</a>
                     </li>
-                    #if(isAdmin) {
+                    #if(authenticatedUser.username == "admin") {
                     <li class="nav-item #if(title == "Users"){active}">
                         <a href="/users" class="nav-link">Users</a>
                     </li>
                     }
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                        <a class="nav-link dropdown-toggle" href="" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Change Password</a>
+                            <a class="dropdown-item" href="/#(authenticatedUser.id)/change-password">Change Password</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" id="sign-out" href="">Sign Out</a>
                         </div>

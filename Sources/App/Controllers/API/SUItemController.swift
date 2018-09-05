@@ -24,7 +24,7 @@ struct SUItemController: RouteCollection {
         }
         
         let authSessionRoutes = itemRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUItem.self, use: createHandler)
         redirectProtectedGroup.put(SUItem.parameter, use: updateHandler)

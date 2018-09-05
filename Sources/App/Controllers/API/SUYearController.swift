@@ -21,7 +21,7 @@ struct SUYearController: RouteCollection {
         }
         
         let authSessionRoutes = yearRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUYear.self, use: createHandler)
         redirectProtectedGroup.put(SUYear.parameter, use: updateHandler)

@@ -8,7 +8,7 @@ struct SUSchoolAdminController: RouteCollection {
     func boot(router: Router) throws {
         
         let authSessionRoutes = router.grouped("schools").grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedRoutes.get("create", use: createSchoolHandler)
         redirectProtectedRoutes.get(use: schoolsHandler)
@@ -19,20 +19,18 @@ struct SUSchoolAdminController: RouteCollection {
     func createSchoolHandler(_ req: Request) throws -> Future<View> {
         
         let user = try req.requireAuthenticated(SUUser.self)
-        let isAdmin = user.username == "admin"
+        let context = CreateSchoolContext(authenticatedUser: user)
         
-        let context = CreateSchoolContext(isAdmin: isAdmin)
         return try req.view().render("school", context)
     }
     
     func schoolsHandler(_ req: Request) throws -> Future<View> {
         
-        let user = try req.requireAuthenticated(SUUser.self)
-        let isAdmin = user.username == "admin"
-        
         return SUSchool.query(on: req).all().flatMap(to: View.self) { schools in
             
-            let context = SchoolsContext(isAdmin: isAdmin, schools: schools)
+            let user = try req.requireAuthenticated(SUUser.self)
+            let context = SchoolsContext(authenticatedUser: user, schools: schools)
+            
             return try req.view().render("schools", context)
         }
     }
@@ -42,9 +40,8 @@ struct SUSchoolAdminController: RouteCollection {
         return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
             
             let user = try req.requireAuthenticated(SUUser.self)
-            let isAdmin = user.username == "admin"
+            let context = EditSchoolContext(authenticatedUser: user, school: school)
             
-            let context = EditSchoolContext(isAdmin: isAdmin, school: school)
             return try req.view().render("school", context)
         }
     }
@@ -52,18 +49,18 @@ struct SUSchoolAdminController: RouteCollection {
     // Contexts
     struct CreateSchoolContext: Encodable {
         let title = "Create School"
-        let isAdmin: Bool
+        let authenticatedUser: SUUser
     }
     
     struct SchoolsContext: Encodable {
         let title = "Schools"
-        let isAdmin: Bool
+        let authenticatedUser: SUUser
         let schools: [SUSchool]
     }
     
     struct EditSchoolContext: Encodable {
         let title = "Edit School"
-        let isAdmin: Bool
+        let authenticatedUser: SUUser
         let school: SUSchool
         let editing = true
     }

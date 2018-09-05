@@ -18,7 +18,7 @@ struct SUSchoolController: RouteCollection {
         }
         
         let authSessionRoutes = schoolRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUSchool.self, use: createHandler)
         redirectProtectedGroup.put(SUSchool.parameter, use: updateHandler)

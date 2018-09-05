@@ -10,12 +10,13 @@ struct SUUserController: RouteCollection {
         // CRUD
         let userRoutes = router.grouped("api", "users")
         let authSessionRoutes = userRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUUserData.self, use: createHandler)
         redirectProtectedGroup.get(use: getAllHandler)
         redirectProtectedGroup.get(SUUser.parameter, use: getHandler)
         redirectProtectedGroup.put(SUUser.parameter, use: updateHandler)
+        redirectProtectedGroup.patch(SUUser.parameter, "change-password", use: changePasswordHandler)
         redirectProtectedGroup.patch(SUUser.parameter, "status", use: isEnabledHandler)
         redirectProtectedGroup.delete(SUUser.parameter, use: deleteHandler)
     }
@@ -119,12 +120,39 @@ struct SUUserController: RouteCollection {
                 switch errorDescription {
                     
                 case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "Error creating user:\n\nA user with this username exists.")
+                    throw Abort(.conflict, reason: "Error updating user:\n\nA user with this username exists.")
                     
                 default:
                     throw Abort(.internalServerError, reason: error.localizedDescription)
                 }
             }
+        }
+    }
+    
+    func changePasswordHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUUser.self), req.content.decode(SUUserPasswordData.self)) { user, passwordData in
+            
+            do {
+                
+                try passwordData.validate()
+                
+                let hashedPassword = try BCrypt.hash(passwordData.password)
+                user.password = hashedPassword
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    let errorString = "Error updating user:\n\n"
+                    var validationErrorReason = errorString
+                    validationErrorReason += validationError.reason
+                    
+                    throw Abort(.internalServerError, reason: validationErrorReason)
+                }
+            }
+            
+            return user.save(on: req).transform(to: HTTPStatus.ok)
         }
     }
     
@@ -162,5 +190,27 @@ struct SUUserController: RouteCollection {
     struct SUUserUpdateData: Content {
         let name: String
         let username: String
+    }
+    
+    struct SUUserPasswordData: Content, Validatable, Reflectable {
+        
+        let password: String
+        let confirmPassword: String
+        
+        static func validations() throws -> Validations<SUUserPasswordData> {
+            
+            var validations = Validations(SUUserPasswordData.self)
+            
+            try validations.add(\.password, .count(8...))
+            
+            validations.add("passwords match") { passwordData in
+            
+                guard passwordData.password == passwordData.confirmPassword else {
+                    throw BasicValidationError("passwords don’t match")
+                }
+            }
+            
+            return validations
+        }
     }
 }

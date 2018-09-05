@@ -9,23 +9,23 @@ struct SUAdminController: RouteCollection {
         
         let authSessionRoutes = router.grouped(SUUser.authSessionsMiddleware())
         
-        authSessionRoutes.get("signin", use: signInHandler)
-        authSessionRoutes.post(SignInPostData.self, at: "signin", use: signInPostHandler)
+        authSessionRoutes.get("sign-in", use: signInHandler)
+        authSessionRoutes.post(SignInData.self, at: "sign-in", use: signInPostHandler)
         
-        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedRoutes.get(use: indexHandler)
-        redirectProtectedRoutes.post("signout", use: signOutHandler)
+        redirectProtectedRoutes.get(SUUser.parameter, "change-password", use: changePasswordHandler)
+        redirectProtectedRoutes.post("sign-out", use: signOutHandler)
     }
     
     // Handlers
     func indexHandler(_ req: Request) throws -> Future<View> {
         
         let user = try req.requireAuthenticated(SUUser.self)
-        let isAdmin = user.username == "admin"
-        
         let showCookieMessage = req.http.cookies["cookies-accepted"] == nil
-        let context = IndexContext(isAdmin: isAdmin, showCookieMessage: showCookieMessage)
+        let context = IndexContext(authenticatedUser: user, showCookieMessage: showCookieMessage)
+        
         return try req.view().render("index", context)
     }
     
@@ -45,7 +45,7 @@ struct SUAdminController: RouteCollection {
         return try req.view().render("signIn", context)
     }
     
-    func signInPostHandler(_ req: Request, userData: SignInPostData) throws -> Future<HTTPResponseStatus> {
+    func signInPostHandler(_ req: Request, userData: SignInData) throws -> Future<HTTPResponseStatus> {
         
         return SUUser.authenticate(username: userData.username, password: userData.password, using: BCryptDigest(), on: req).map(to: HTTPResponseStatus.self) { user in
                 
@@ -63,9 +63,15 @@ struct SUAdminController: RouteCollection {
         }
     }
     
-    struct SignInPostData: Content {
-        let username: String
-        let password: String
+    func changePasswordHandler(_ req: Request) throws -> Future<View> {
+     
+        return try req.parameters.next(SUUser.self).flatMap(to: View.self) { user in
+            
+            let authenticatedUser = try req.requireAuthenticated(SUUser.self)
+            let context = ChangePasswordContext(authenticatedUser: authenticatedUser, editingUser: user)
+            
+            return try req.view().render("password", context)
+        }
     }
     
     func signOutHandler(_ req: Request) throws -> Response {
@@ -74,11 +80,22 @@ struct SUAdminController: RouteCollection {
         return req.redirect(to: "/")
     }
     
+    // Structs
+    struct SignInData: Content {
+        let username: String
+        let password: String
+    }
+    
+    struct ChangePasswordData: Content {
+        let password: String
+        let confirmPassword: String
+    }
+    
     // Contexts
     struct IndexContext: Encodable {
-        
+
         let title = "Home"
-        let isAdmin: Bool
+        let authenticatedUser: SUUser
         let showCookieMessage: Bool
     }
     
@@ -90,5 +107,12 @@ struct SUAdminController: RouteCollection {
         init(signInError: Bool = false) {
             self.signInError = signInError
         }
+    }
+    
+    struct ChangePasswordContext: Encodable {
+        
+        let title = "Change Password"
+        let authenticatedUser: SUUser
+        let editingUser: SUUser
     }
 }

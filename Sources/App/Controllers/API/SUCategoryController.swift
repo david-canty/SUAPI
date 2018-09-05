@@ -18,7 +18,7 @@ struct SUCategoryController: RouteCollection {
         }
         
         let authSessionRoutes = categoryRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUCategory.self, use: createHandler)
         redirectProtectedGroup.put(SUCategory.parameter, use: updateHandler)

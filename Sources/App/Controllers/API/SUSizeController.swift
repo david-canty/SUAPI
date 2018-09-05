@@ -18,7 +18,7 @@ struct SUSizeController: RouteCollection {
         }
         
         let authSessionRoutes = sizeRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/signin"))
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedGroup.post(SUSize.self, use: createHandler)
         redirectProtectedGroup.put(SUSize.parameter, use: updateHandler)
