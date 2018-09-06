@@ -16,11 +16,17 @@
                 
                 <div class="col-6">
                     
-                    <form action="" method="" #if(editing) {data-id="#(school.id)"}>
+                    <form action="" method="" #if(editing) {data-id="#(school.id)"} novalidate>
                         
                         <div class="validation-wrapper">
      
-                            <input class="form-control p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"}/>
+                            <div class="form-group">
+                                <label for="schoolName">School Name</label>
+                                <input class="form-control p-2" type="text" name="schoolName" id="schoolName" placeholder="School Name" #if(editing) {value="#(school.schoolName)"} required />
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                    <p>School name is required</p>
+                                </div>
+                            </div>
                             
                             <div class="input-group">
                                 <input class="btn btn-primary school-cancel-submit mt-3 mb-3 mr-2" name="schoolCancel" type="submit" value="Cancel" formaction="/schools">

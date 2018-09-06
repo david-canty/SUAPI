@@ -6,8 +6,13 @@ $(document).ready(function() {
     $('#schools-container').on('click', '.school-create-submit', function(e) {
         
         e.preventDefault();
-        $('.alert').remove();
+        
         var form = $(this).closest('form');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
         
         $.ajax({
         url: baseUrl + '/schools',
@@ -24,10 +29,7 @@ $(document).ready(function() {
             var responseJSON = JSON.parse(xhr.responseText);
             var validationErrorString = responseJSON.reason;
             
-            var schoolNameInput = form.find('input[name=schoolName]');
-            schoolNameInput.focus()
-            schoolNameInput.closest('.validation-wrapper').append('<div class="alert alert-danger mb-4" role="alert"><p>' + validationErrorString + '</p></div>');
-            $('.alert').hide().fadeIn(500);
+            alert(validationErrorString);
         });
     });
 
@@ -35,9 +37,14 @@ $(document).ready(function() {
     $('#schools-container').on('click', '.school-update-submit', function(e) {
         
         e.preventDefault();
-        $('.alert').remove();
+        
         var form = $(this).closest('form');
         var schoolId = form.data('id');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
 
         $.ajax({
         url: baseUrl + '/schools/' + schoolId,
@@ -54,10 +61,7 @@ $(document).ready(function() {
             var responseJSON = JSON.parse(xhr.responseText);
             var validationErrorString = responseJSON.reason;
             
-            var schoolNameInput = form.find('input[name=schoolName]');
-            schoolNameInput.focus();
-            schoolNameInput.closest('.validation-wrapper').append('<div class="alert alert-danger mb-4" role="alert"><p>' + validationErrorString + '</p></div>');
-            $('.alert').hide().fadeIn(500);
+            alert(validationErrorString);
         });
     });
     
@@ -65,6 +69,7 @@ $(document).ready(function() {
     $('#schools-container').on('click', '.school-delete-submit', function(e) {
        
         e.preventDefault();
+        
         var schoolId = $(this).data('id');
         $('#school-delete-modal').modal('hide');
         
@@ -77,7 +82,12 @@ $(document).ready(function() {
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
-            alert('Error: ' + xhr.status + ' ' + xhr.statusText);
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
         });
     });
     
@@ -85,11 +95,10 @@ $(document).ready(function() {
     $('#user-create-submit').click(function(e) {
         
         e.preventDefault();
-        e.stopPropagation();
         
         var form = $(this).closest('form');
-        form.addClass('was-validated');
         
+        form.addClass('was-validated');
         if (form[0].checkValidity() === false) {
             return false
         }
@@ -117,12 +126,11 @@ $(document).ready(function() {
     $('#user-update-submit').click(function(e) {
         
         e.preventDefault();
-        e.stopPropagation();
         
         var form = $(this).closest('form');
         var userId = form.data('id');
-        form.addClass('was-validated');
         
+        form.addClass('was-validated');
         if (form[0].checkValidity() === false) {
             return false
         }
@@ -228,12 +236,11 @@ $(document).ready(function() {
     $('#password-change-submit').click(function(e) {
         
         e.preventDefault();
-        e.stopPropagation();
         
         var form = $(this).closest('form');
         var userId = form.data('id');
-        form.addClass('was-validated');
         
+        form.addClass('was-validated');
         if (form[0].checkValidity() === false) {
             return false
         }

@@ -42,7 +42,7 @@
             <div class="row justify-content-center">
                 <div class="col-4 mb-4">
                     <div class="alert alert-danger m-0" role="alert">
-                        <p class="text-center">Invalid username or password.</p>
+                        <p>Invalid username or password.</p>
                     </div>
                 </div>
             </div>

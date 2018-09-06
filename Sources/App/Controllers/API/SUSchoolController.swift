@@ -37,7 +37,7 @@ struct SUSchoolController: RouteCollection {
             
             if let validationError = error as? ValidationError {
                 
-                if validationError.reason.contains("not larger than 1") {
+                if validationError.reason.contains("not larger") {
                 
                     throw Abort(.badRequest, reason: "School name must not be blank.")
                 }
@@ -85,7 +85,7 @@ struct SUSchoolController: RouteCollection {
                 
                 if let validationError = error as? ValidationError {
                     
-                    if validationError.reason.contains("not larger than 1") {
+                    if validationError.reason.contains("not larger") {
                         
                         throw Abort(.badRequest, reason: "School name must not be blank.")
                     }
