@@ -41,7 +41,10 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="/#(authenticatedUser.id)/change-password">Change Password</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" id="sign-out" href="">Sign Out</a>
+                            <form class="form-inline" action="/sign-out" method="POST">
+                                <input class="dropdown-item" type="submit" value="Sign Out">
+                            </form>
+                            <!--<a class="dropdown-item" id="sign-out" href="">Sign Out</a>-->
                         </div>
                     </li>
                 </ul>

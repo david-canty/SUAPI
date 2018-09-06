@@ -286,8 +286,8 @@ $(document).ready(function() {
         });
     });
     
-    // Sign out
-    $('.container').on('click', '#sign-out', function(e) {
-        $.ajax({ url: '/sign-out', type: 'POST'});
-    });
+//    // Sign out
+//    $('.container').on('click', '#sign-out', function(e) {
+//        $.ajax({ url: '/sign-out', type: 'POST'});
+//    });
 })

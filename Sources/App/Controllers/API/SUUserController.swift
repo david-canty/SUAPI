@@ -144,11 +144,20 @@ struct SUUserController: RouteCollection {
                 
                 if let validationError = error as? ValidationError {
                     
-                    let errorString = "Error updating user:\n\n"
+                    let errorString = "Error changing password:\n\n"
                     var validationErrorReason = errorString
-                    validationErrorReason += validationError.reason
                     
-                    throw Abort(.internalServerError, reason: validationErrorReason)
+                    if validationError.reason.contains("not larger") {
+                        validationErrorReason += "Password must be 8 or more characters.\n\n"
+                    }
+                    
+                    if validationError.reason.contains("match") {
+                        validationErrorReason += "Password and confirmed password must match."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.internalServerError, reason: validationErrorReason)
+                    }
                 }
             }
             
@@ -206,7 +215,7 @@ struct SUUserController: RouteCollection {
             validations.add("passwords match") { passwordData in
             
                 guard passwordData.password == passwordData.confirmPassword else {
-                    throw BasicValidationError("passwords don’t match")
+                    throw BasicValidationError("Password and confirmed password must match.")
                 }
             }
             

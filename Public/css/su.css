@@ -127,9 +127,12 @@ input[type="file"] {
     font-size: 0.75em;
 }
 
-a.dropdown-item:hover {
+a.dropdown-item:hover,
+.nav-item input[type="submit"]:hover
+{
     background-color: #5054A1;
     color: #FFF;
+    cursor: pointer;
 }
 
 .modal-body p {
