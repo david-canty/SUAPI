@@ -15,7 +15,8 @@ struct SUSchoolAdminController: RouteCollection {
         redirectProtectedRoutes.get(SUSchool.parameter, "edit", use: editSchoolHandler)
         
         redirectProtectedRoutes.get(SUSchool.parameter, "years", "create", use: createYearHandler)
-        redirectProtectedRoutes.get(SUSchool.parameter, "years", use: schoolYearsHandler)
+        redirectProtectedRoutes.get(SUSchool.parameter, "years", use: yearsHandler)
+        redirectProtectedRoutes.get(SUSchool.parameter, "years", SUYear.parameter, "edit", use: editYearHandler)
     }
     
     // CRUD handlers
@@ -49,7 +50,7 @@ struct SUSchoolAdminController: RouteCollection {
         }
     }
 
-    // Years
+    // Years CRUD handlers
     func createYearHandler(_ req: Request) throws -> Future<View> {
         
         return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
@@ -61,7 +62,7 @@ struct SUSchoolAdminController: RouteCollection {
         }
     }
     
-    func schoolYearsHandler(_ req: Request) throws -> Future<View> {
+    func yearsHandler(_ req: Request) throws -> Future<View> {
         
         return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
             
@@ -70,6 +71,19 @@ struct SUSchoolAdminController: RouteCollection {
             let context = YearsContext(authenticatedUser: user, years: years)
             
             return try req.view().render("years", context)
+        }
+    }
+    
+    func editYearHandler(_ req: Request) throws -> Future<View> {
+        
+        return try flatMap(to: View.self,
+                           req.parameters.next(SUSchool.self),
+                           req.parameters.next(SUYear.self)) { school, year in
+
+            let user = try req.requireAuthenticated(SUUser.self)
+            let context = EditYearContext(authenticatedUser: user, year: year, school: school)
+            
+            return try req.view().render("year", context)
         }
     }
     
@@ -108,6 +122,7 @@ struct SUSchoolAdminController: RouteCollection {
         let title = "Edit Year"
         let authenticatedUser: SUUser
         let year: SUYear
+        let school: SUSchool
         let editing = true
     }
 }

@@ -78,7 +78,7 @@ $(document).ready(function() {
         type: 'DELETE',
         success: function(response) {
                 
-            window.location.reload(true);
+            $(location).attr('href','/schools');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -111,6 +111,65 @@ $(document).ready(function() {
         success: function(response) {
             
             $(location).attr('href','/schools/' + schoolID + '/years');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Year update submit
+    $('#years-container').on('click', '.year-update-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var yearID = form.data('id');
+        var schoolID = form.find('input[name="schoolID"]').val();
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/years/' + yearID,
+        type: 'PUT',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href', '/schools/' + schoolID + '/years');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Year delete submit
+    $('#years-container').on('click', '.year-delete-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var yearId = $(this).data('id');
+        $('#year-delete-modal').modal('hide');
+        
+        $.ajax({
+        url: baseUrl + '/years/' + yearId,
+        type: 'DELETE',
+        success: function(response) {
+            
+            location.reload(true);
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -200,7 +259,7 @@ $(document).ready(function() {
         type: 'DELETE',
         success: function(response) {
             
-            window.location.reload(true);
+            $(location).attr('href', '/users');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -249,6 +308,13 @@ $(document).ready(function() {
         var button = $(e.relatedTarget);
         var recipient = button.data('id');
         $(this).find('.school-delete-submit').attr('data-id', recipient);
+    });
+    
+    $('#year-delete-modal').on('show.bs.modal', function (e) {
+        
+        var button = $(e.relatedTarget);
+        var recipient = button.data('id');
+        $(this).find('.year-delete-submit').attr('data-id', recipient);
     });
     
     $('#user-delete-modal').on('show.bs.modal', function (e) {

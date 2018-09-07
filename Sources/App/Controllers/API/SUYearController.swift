@@ -86,9 +86,42 @@ struct SUYearController: RouteCollection {
             year.yearName = updatedYear.yearName
             year.schoolID = updatedYear.schoolID
             year.sortOrder = updatedYear.sortOrder
-            year.timestamp = String(describing: Date())
             
-            return year.save(on: req)
+            do {
+                
+                try year.validate()
+                year.timestamp = String(describing: Date())
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    let errorString = "Error creating year:\n\n"
+                    var validationErrorReason = errorString
+                    
+                    if validationError.reason.contains("not larger") {
+                        validationErrorReason += "Year name must not be blank."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
+                    }
+                }
+            }
+            
+            return year.save(on: req).catchMap { error in
+                
+                let errorDescription = error.localizedDescription.lowercased()
+                
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating year:\n\nA year with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
         }
     }
     
