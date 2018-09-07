@@ -37,9 +37,15 @@ struct SUSchoolController: RouteCollection {
             
             if let validationError = error as? ValidationError {
                 
-                if validationError.reason.contains("not larger") {
+                let errorString = "Error creating school:\n\n"
+                var validationErrorReason = errorString
                 
-                    throw Abort(.badRequest, reason: "School name must not be blank.")
+                if validationError.reason.contains("not larger") {
+                    validationErrorReason += "School name must not be blank."
+                }
+                
+                if validationErrorReason != errorString {
+                    throw Abort(.badRequest, reason: validationErrorReason)
                 }
             }
         }
@@ -51,7 +57,7 @@ struct SUSchoolController: RouteCollection {
             switch errorDescription {
                 
             case let str where str.contains("duplicate"):
-                throw Abort(.conflict, reason: "A school with this name exists.")
+                throw Abort(.conflict, reason: "Error creating school:\n\nA school with this name exists.")
                 
             default:
                 throw Abort(.internalServerError, reason: error.localizedDescription)
@@ -85,9 +91,15 @@ struct SUSchoolController: RouteCollection {
                 
                 if let validationError = error as? ValidationError {
                     
+                    let errorString = "Error creating school:\n\n"
+                    var validationErrorReason = errorString
+                    
                     if validationError.reason.contains("not larger") {
-                        
-                        throw Abort(.badRequest, reason: "School name must not be blank.")
+                        validationErrorReason += "School name must not be blank."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
                     }
                 }
             }
@@ -99,7 +111,7 @@ struct SUSchoolController: RouteCollection {
                 switch errorDescription {
                     
                 case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "A school with this name exists.")
+                    throw Abort(.conflict, reason: "Error creating school:\n\nA school with this name exists.")
                     
                 default:
                     throw Abort(.internalServerError, reason: error.localizedDescription)

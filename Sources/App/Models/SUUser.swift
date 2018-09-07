@@ -36,17 +36,6 @@ final class SUUser: Codable {
     }
 }
 
-extension SUUser: Validatable {
-    
-    static func validations() throws -> Validations<SUUser> {
-        
-        var validations = Validations(SUUser.self)
-        try validations.add(\.name, .count(1...) && .characterSet(.alphanumerics + .whitespaces))
-        try validations.add(\.username, .count(1...) && .alphanumeric)
-        return validations
-    }
-}
-
 extension SUUser: MySQLUUIDModel {}
 extension SUUser: Content {}
 extension SUUser: Parameter {}
@@ -63,6 +52,17 @@ extension SUUser: Migration {
             try addProperties(to: builder)
             builder.unique(on: \.username)
         }
+    }
+}
+
+extension SUUser: Validatable {
+    
+    static func validations() throws -> Validations<SUUser> {
+        
+        var validations = Validations(SUUser.self)
+        try validations.add(\.name, .count(1...) && .characterSet(.alphanumerics + .whitespaces))
+        try validations.add(\.username, .count(1...) && .alphanumeric)
+        return validations
     }
 }
 

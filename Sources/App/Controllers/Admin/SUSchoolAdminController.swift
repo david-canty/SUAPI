@@ -13,6 +13,9 @@ struct SUSchoolAdminController: RouteCollection {
         redirectProtectedRoutes.get("create", use: createSchoolHandler)
         redirectProtectedRoutes.get(use: schoolsHandler)
         redirectProtectedRoutes.get(SUSchool.parameter, "edit", use: editSchoolHandler)
+        
+        redirectProtectedRoutes.get(SUSchool.parameter, "years", "create", use: createYearHandler)
+        redirectProtectedRoutes.get(SUSchool.parameter, "years", use: schoolYearsHandler)
     }
     
     // CRUD handlers
@@ -46,6 +49,30 @@ struct SUSchoolAdminController: RouteCollection {
         }
     }
 
+    // Years
+    func createYearHandler(_ req: Request) throws -> Future<View> {
+        
+        return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
+            
+            let user = try req.requireAuthenticated(SUUser.self)
+            let context = CreateYearContext(authenticatedUser: user, school: school)
+            
+            return try req.view().render("year", context)
+        }
+    }
+    
+    func schoolYearsHandler(_ req: Request) throws -> Future<View> {
+        
+        return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
+            
+            let user = try req.requireAuthenticated(SUUser.self)
+            let years = try school.years.query(on: req).all()
+            let context = YearsContext(authenticatedUser: user, years: years)
+            
+            return try req.view().render("years", context)
+        }
+    }
+    
     // Contexts
     struct CreateSchoolContext: Encodable {
         let title = "Create School"
@@ -62,6 +89,25 @@ struct SUSchoolAdminController: RouteCollection {
         let title = "Edit School"
         let authenticatedUser: SUUser
         let school: SUSchool
+        let editing = true
+    }
+    
+    struct CreateYearContext: Encodable {
+        let title = "Create Year"
+        let authenticatedUser: SUUser
+        let school: SUSchool
+    }
+    
+    struct YearsContext: Encodable {
+        let title = "Years"
+        let authenticatedUser: SUUser
+        let years: EventLoopFuture<[SUYear]>
+    }
+    
+    struct EditYearContext: Encodable {
+        let title = "Edit Year"
+        let authenticatedUser: SUUser
+        let year: SUYear
         let editing = true
     }
 }

@@ -91,6 +91,38 @@ $(document).ready(function() {
         });
     });
     
+    // Year create submit
+    $('#years-container').on('click', '.year-create-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var schoolID = form.find('input[name="schoolID"]').val();
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/years',
+        type: 'POST',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href','/schools/' + schoolID + '/years');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
     // User create submit
     $('#user-create-submit').click(function(e) {
         

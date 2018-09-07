@@ -16,16 +16,6 @@ final class SUSchool: Codable {
     }
 }
 
-extension SUSchool: Validatable {
-    
-    static func validations() throws -> Validations<SUSchool> {
-        
-        var validations = Validations(SUSchool.self)
-        try validations.add(\.schoolName, .count(1...))
-        return validations
-    }
-}
-
 extension SUSchool: MySQLUUIDModel {}
 extension SUSchool: Content {}
 extension SUSchool: Parameter {}
@@ -39,6 +29,16 @@ extension SUSchool: Migration {
             try addProperties(to: builder)
             builder.unique(on: \.schoolName)
         }
+    }
+}
+
+extension SUSchool: Validatable {
+    
+    static func validations() throws -> Validations<SUSchool> {
+        
+        var validations = Validations(SUSchool.self)
+        try validations.add(\.schoolName, .count(1...))
+        return validations
     }
 }
 

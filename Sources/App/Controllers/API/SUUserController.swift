@@ -50,7 +50,7 @@ struct SUUserController: RouteCollection {
                 }
                 
                 if validationErrorReason != errorString {
-                    throw Abort(.internalServerError, reason: validationErrorReason)
+                    throw Abort(.badRequest, reason: validationErrorReason)
                 }
             }
         }
@@ -108,7 +108,7 @@ struct SUUserController: RouteCollection {
                     }
                     
                     if validationErrorReason != errorString {
-                        throw Abort(.internalServerError, reason: validationErrorReason)
+                        throw Abort(.badRequest, reason: validationErrorReason)
                     }
                 }
             }
@@ -156,7 +156,7 @@ struct SUUserController: RouteCollection {
                     }
                     
                     if validationErrorReason != errorString {
-                        throw Abort(.internalServerError, reason: validationErrorReason)
+                        throw Abort(.badRequest, reason: validationErrorReason)
                     }
                 }
             }

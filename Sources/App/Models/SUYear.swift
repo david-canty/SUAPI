@@ -35,6 +35,16 @@ extension SUYear: Migration {
     }
 }
 
+extension SUYear: Validatable {
+    
+    static func validations() throws -> Validations<SUYear> {
+        
+        var validations = Validations(SUYear.self)
+        try validations.add(\.yearName, .count(1...))
+        return validations
+    }
+}
+
 extension SUYear {
     
     var school: Parent<SUYear, SUSchool> {
