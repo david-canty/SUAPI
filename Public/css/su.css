@@ -135,6 +135,20 @@ a.dropdown-item:hover,
     cursor: pointer;
 }
 
+nav.breadcrumb {
+    background-color: #FFF;
+    margin: 0;
+    padding: 0;
+}
+
+ol.breadcrumb {
+    background-color: #FFF;
+}
+
+.breadcrumb-item a {
+    color: #5054A1;
+}
+
 .modal-body p {
     margin: 0;
 }

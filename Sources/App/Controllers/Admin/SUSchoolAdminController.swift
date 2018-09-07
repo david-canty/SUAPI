@@ -68,7 +68,7 @@ struct SUSchoolAdminController: RouteCollection {
             
             let user = try req.requireAuthenticated(SUUser.self)
             let years = try school.years.query(on: req).all()
-            let context = YearsContext(authenticatedUser: user, years: years)
+            let context = YearsContext(authenticatedUser: user, school: school, years: years)
             
             return try req.view().render("years", context)
         }
@@ -115,6 +115,7 @@ struct SUSchoolAdminController: RouteCollection {
     struct YearsContext: Encodable {
         let title = "Years"
         let authenticatedUser: SUUser
+        let school: SUSchool
         let years: EventLoopFuture<[SUYear]>
     }
     

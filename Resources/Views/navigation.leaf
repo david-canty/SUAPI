@@ -16,7 +16,7 @@
                     <li class="nav-item #if(title == "Home"){active}">
                         <a href="/" class="nav-link">Home</a>
                     </li>
-                    <li class="nav-item #if(title == "Schools"){active}">
+                    <li class="nav-item #if(title == "Schools"){active} else if(title == "Years"){active} else if(title == "Create Year"){active} else if(title == "Edit Year"){active}">
                         <a href="/schools" class="nav-link">Schools</a>
                     </li>
                     <li class="nav-item #if(title == "Categories"){active}">
