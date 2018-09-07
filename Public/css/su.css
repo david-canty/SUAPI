@@ -149,6 +149,10 @@ ol.breadcrumb {
     color: #5054A1;
 }
 
+.breadcrumb-item.active {
+    color: #D52422;
+}
+
 .modal-body p {
     margin: 0;
 }
