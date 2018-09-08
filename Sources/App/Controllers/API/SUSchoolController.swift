@@ -91,7 +91,7 @@ struct SUSchoolController: RouteCollection {
                 
                 if let validationError = error as? ValidationError {
                     
-                    let errorString = "Error creating school:\n\n"
+                    let errorString = "Error updating school:\n\n"
                     var validationErrorReason = errorString
                     
                     if validationError.reason.contains("not larger") {
@@ -111,7 +111,7 @@ struct SUSchoolController: RouteCollection {
                 switch errorDescription {
                     
                 case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "Error creating school:\n\nA school with this name exists.")
+                    throw Abort(.conflict, reason: "Error updating school:\n\nA school with this name exists.")
                     
                 default:
                     throw Abort(.internalServerError, reason: error.localizedDescription)

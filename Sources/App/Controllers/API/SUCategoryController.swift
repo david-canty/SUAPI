@@ -28,9 +28,41 @@ struct SUCategoryController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, category: SUCategory) throws -> Future<SUCategory> {
         
-        category.timestamp = String(describing: Date())
+        do {
+            
+            try category.validate()
+            category.timestamp = String(describing: Date())
+            
+        } catch {
+            
+            if let validationError = error as? ValidationError {
+                
+                let errorString = "Error creating category:\n\n"
+                var validationErrorReason = errorString
+                
+                if validationError.reason.contains("not larger") {
+                    validationErrorReason += "Category name must not be blank."
+                }
+                
+                if validationErrorReason != errorString {
+                    throw Abort(.badRequest, reason: validationErrorReason)
+                }
+            }
+        }
         
-        return category.save(on: req)
+        return category.save(on: req).catchMap { error in
+            
+            let errorDescription = error.localizedDescription.lowercased()
+            
+            switch errorDescription {
+                
+            case let str where str.contains("duplicate"):
+                throw Abort(.conflict, reason: "Error creating category:\n\nA category with this name exists.")
+                
+            default:
+                throw Abort(.internalServerError, reason: error.localizedDescription)
+            }
+        }
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[SUCategory]> {
@@ -49,9 +81,42 @@ struct SUCategoryController: RouteCollection {
             
             category.categoryName = updatedCategory.categoryName
             category.sortOrder = updatedCategory.sortOrder
-            category.timestamp = String(describing: Date())
             
-            return category.save(on: req)
+            do {
+                
+                try category.validate()
+                category.timestamp = String(describing: Date())
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    let errorString = "Error updating category:\n\n"
+                    var validationErrorReason = errorString
+                    
+                    if validationError.reason.contains("not larger") {
+                        validationErrorReason += "Category name must not be blank."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
+                    }
+                }
+            }
+            
+            return category.save(on: req).catchMap { error in
+                
+                let errorDescription = error.localizedDescription.lowercased()
+                
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error updating category:\n\nA category with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
         }
     }
     

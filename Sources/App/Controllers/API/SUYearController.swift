@@ -96,7 +96,7 @@ struct SUYearController: RouteCollection {
                 
                 if let validationError = error as? ValidationError {
                     
-                    let errorString = "Error creating year:\n\n"
+                    let errorString = "Error updating year:\n\n"
                     var validationErrorReason = errorString
                     
                     if validationError.reason.contains("not larger") {
@@ -116,7 +116,7 @@ struct SUYearController: RouteCollection {
                 switch errorDescription {
                     
                 case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "Error creating year:\n\nA year with this name exists.")
+                    throw Abort(.conflict, reason: "Error updating year:\n\nA year with this name exists.")
                     
                 default:
                     throw Abort(.internalServerError, reason: error.localizedDescription)

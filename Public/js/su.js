@@ -182,6 +182,95 @@ $(document).ready(function() {
         });
     });
     
+    // Category create submit
+    $('#categories-container').on('click', '.category-create-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/categories',
+        type: 'POST',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href','/categories');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Category update submit
+    $('#categories-container').on('click', '.category-update-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var categoryId = form.data('id');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/categories/' + categoryId,
+        type: 'PUT',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href', '/categories');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Category delete submit
+    $('#categories-container').on('click', '.category-delete-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var categoryId = $(this).data('id');
+        $('#category-delete-modal').modal('hide');
+        
+        $.ajax({
+        url: baseUrl + '/categories/' + categoryId,
+        type: 'DELETE',
+        success: function(response) {
+            
+            $(location).attr('href','/categories');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
     // User create submit
     $('#user-create-submit').click(function(e) {
         
@@ -304,21 +393,24 @@ $(document).ready(function() {
     
     // Delete modal handlers
     $('#school-delete-modal').on('show.bs.modal', function (e) {
-        
         var button = $(e.relatedTarget);
         var recipient = button.data('id');
         $(this).find('.school-delete-submit').attr('data-id', recipient);
     });
     
     $('#year-delete-modal').on('show.bs.modal', function (e) {
-        
         var button = $(e.relatedTarget);
         var recipient = button.data('id');
         $(this).find('.year-delete-submit').attr('data-id', recipient);
     });
     
+    $('#category-delete-modal').on('show.bs.modal', function (e) {
+        var button = $(e.relatedTarget);
+        var recipient = button.data('id');
+        $(this).find('.category-delete-submit').attr('data-id', recipient);
+    });
+    
     $('#user-delete-modal').on('show.bs.modal', function (e) {
-        
         var button = $(e.relatedTarget);
         var recipient = button.data('id');
         $(this).find('.user-delete-submit').attr('data-id', recipient);
@@ -326,7 +418,6 @@ $(document).ready(function() {
     
     // Change Password
     $('#password-cancel-submit').click(function(e) {
-        
         e.preventDefault();
         window.history.back();
     });

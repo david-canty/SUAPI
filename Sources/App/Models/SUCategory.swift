@@ -32,6 +32,16 @@ extension SUCategory: Migration {
     }
 }
 
+extension SUCategory: Validatable {
+    
+    static func validations() throws -> Validations<SUCategory> {
+        
+        var validations = Validations(SUCategory.self)
+        try validations.add(\.categoryName, .count(1...))
+        return validations
+    }
+}
+
 extension SUCategory {
     
     var items: Children<SUCategory, SUItem> {
