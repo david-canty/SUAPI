@@ -22,13 +22,15 @@
                         <thead class="thead-light">
                             <tr>
                                 <th>Name</th>
+                                <th>Sort Order</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             #for(category in categories) {
-                            <tr>
+                            <tr id="#(category.id)">
                                 <td>#(category.categoryName)</td>
+                                <td>#(category.sortOrder)</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(category.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

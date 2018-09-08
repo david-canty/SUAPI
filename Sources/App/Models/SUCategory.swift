@@ -9,9 +9,9 @@ final class SUCategory: Codable {
     var sortOrder: Int?
     var timestamp: String?
     
-    init(name: String, sortOrder: Int = 0) {
+    init(name: String) {
         self.categoryName = name
-        self.sortOrder = sortOrder
+        self.sortOrder = 0
         self.timestamp = String(describing: Date())
     }
 }

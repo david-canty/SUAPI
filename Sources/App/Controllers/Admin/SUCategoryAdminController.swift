@@ -26,7 +26,7 @@ struct SUCategoryAdminController: RouteCollection {
     
     func categoriesHandler(_ req: Request) throws -> Future<View> {
         
-        return SUCategory.query(on: req).all().flatMap(to: View.self) { categories in
+        return SUCategory.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { categories in
             
             let user = try req.requireAuthenticated(SUUser.self)
             let context = CategoriesContext(authenticatedUser: user, categories: categories)

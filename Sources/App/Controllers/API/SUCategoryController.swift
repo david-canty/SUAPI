@@ -22,6 +22,7 @@ struct SUCategoryController: RouteCollection {
         
         redirectProtectedGroup.post(SUCategory.self, use: createHandler)
         redirectProtectedGroup.put(SUCategory.parameter, use: updateHandler)
+        redirectProtectedGroup.patch(SUCategory.parameter, "sort-order", use: updateSortOrderHandler)
         redirectProtectedGroup.delete(SUCategory.parameter, use: deleteHandler)
     }
     
@@ -50,17 +51,22 @@ struct SUCategoryController: RouteCollection {
             }
         }
         
-        return category.save(on: req).catchMap { error in
+        return SUCategory.query(on: req).count().flatMap(to: SUCategory.self) { categoryCount in
             
-            let errorDescription = error.localizedDescription.lowercased()
+            category.sortOrder = categoryCount
             
-            switch errorDescription {
+            return category.save(on: req).catchMap { error in
                 
-            case let str where str.contains("duplicate"):
-                throw Abort(.conflict, reason: "Error creating category:\n\nA category with this name exists.")
+                let errorDescription = error.localizedDescription.lowercased()
                 
-            default:
-                throw Abort(.internalServerError, reason: error.localizedDescription)
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating category:\n\nA category with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
             }
         }
     }
@@ -80,7 +86,6 @@ struct SUCategoryController: RouteCollection {
         return try flatMap(to: SUCategory.self, req.parameters.next(SUCategory.self), req.content.decode(SUCategory.self)) { category, updatedCategory in
             
             category.categoryName = updatedCategory.categoryName
-            category.sortOrder = updatedCategory.sortOrder
             
             do {
                 
@@ -120,6 +125,15 @@ struct SUCategoryController: RouteCollection {
         }
     }
     
+    func updateSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUCategory.self), req.content.decode(SUCategorySortOrderData.self)) { category, sortOrderData in
+         
+            category.sortOrder = sortOrderData.sortOrder
+            return category.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.parameters.next(SUCategory.self).delete(on: req).transform(to: HTTPStatus.noContent)
@@ -132,5 +146,10 @@ struct SUCategoryController: RouteCollection {
             
             try category.items.query(on: req).all()
         }
+    }
+    
+    // Data structs
+    struct SUCategorySortOrderData: Content {
+        let sortOrder: Int
     }
 }

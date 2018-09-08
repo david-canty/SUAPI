@@ -161,7 +161,7 @@ struct SUUserController: RouteCollection {
                 }
             }
             
-            return user.save(on: req).transform(to: HTTPStatus.ok)
+            return user.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
     
@@ -190,6 +190,7 @@ struct SUUserController: RouteCollection {
         }
     }
     
+    // Data structs
     struct SUUserData: Content {
         let name: String
         let username: String

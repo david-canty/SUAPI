@@ -245,6 +245,48 @@ $(document).ready(function() {
         });
     });
     
+    // Category drag and drop
+    $('#categories-container tbody').sortable({ update: function(event, ui) {
+        
+        updateCategorySortOrders();
+        
+    }}).disableSelection();
+    
+    updateCategorySortOrders();
+    
+    function updateCategorySortOrders() {
+        
+        // Update category table sort orders
+        $('#categories-container table tr').each(function() {
+            $(this).children('td:nth-child(2)').html($(this).index())
+        });
+        
+        // Get array of sorted category ids
+        var sortedCategoryIds = $('#categories-container tbody').sortable('toArray');
+        
+        // Patch each category with new sort order
+        $.each(sortedCategoryIds, function(index, categoryId) {
+            
+            var json = {"sortOrder": index};
+            
+            $.ajax({
+            url: baseUrl + '/categories/' + categoryId + '/sort-order',
+            type: 'PATCH',
+            data: JSON.stringify(json),
+            processData: false,
+            contentType: "application/json",
+            success: function(response) { }}).fail(function(xhr, ajaxOptions, thrownError) {
+                
+                var statusCode = xhr.status;
+                var statusText = xhr.statusText;
+                var responseJSON = JSON.parse(xhr.responseText);
+                var validationErrorString = responseJSON.reason;
+                
+                alert(validationErrorString);
+            });
+        });
+    }
+    
     // Category delete submit
     $('#categories-container').on('click', '.category-delete-submit', function(e) {
         
@@ -486,4 +528,5 @@ $(document).ready(function() {
 //    $('.container').on('click', '#sign-out', function(e) {
 //        $.ajax({ url: '/sign-out', type: 'POST'});
 //    });
-})
+    
+});
