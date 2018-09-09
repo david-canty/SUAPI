@@ -397,6 +397,137 @@ $(document).ready(function() {
         });
     });
     
+    // Size create submit
+    $('#sizes-container').on('click', '.size-create-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/sizes',
+        type: 'POST',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href','/sizes');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Size update submit
+    $('#sizes-container').on('click', '.size-update-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var sizeId = form.data('id');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        $.ajax({
+        url: baseUrl + '/sizes/' + sizeId,
+        type: 'PUT',
+        data: form.serialize(),
+        success: function(response) {
+            
+            $(location).attr('href', '/sizes');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
+    // Size sort order
+    $('#sizes-container tbody').sortable({ update: function(event, ui) {
+        
+        updateSizeSortOrders();
+        
+    }}).disableSelection();
+    
+    updateSizeSortOrders();
+    
+    function updateSizeSortOrders() {
+        
+        // Update size table sort orders
+        $('#sizes-container table tr').each(function() {
+            $(this).children('td:nth-child(2)').html($(this).index())
+        });
+        
+        // Get array of sorted size ids
+        var sortedSizeIds = $('#sizes-container tbody').sortable('toArray');
+        
+        // Patch each size with new sort order
+        $.each(sortedSizeIds, function(index, sizeId) {
+            
+            var json = {"sortOrder": index};
+            
+            $.ajax({
+            url: baseUrl + '/sizes/' + sizeId + '/sort-order',
+            type: 'PATCH',
+            data: JSON.stringify(json),
+            processData: false,
+            contentType: "application/json",
+                success: function(response) { }}).fail(function(xhr, ajaxOptions, thrownError) {
+                    
+                    var statusCode = xhr.status;
+                    var statusText = xhr.statusText;
+                    var responseJSON = JSON.parse(xhr.responseText);
+                    var validationErrorString = responseJSON.reason;
+                    
+                    alert(validationErrorString);
+                });
+        });
+    }
+    
+    // Size delete submit
+    $('#sizes-container').on('click', '.size-delete-submit', function(e) {
+        
+        e.preventDefault();
+        
+        var sizeId = $(this).data('id');
+        $('#size-delete-modal').modal('hide');
+        
+        $.ajax({
+        url: baseUrl + '/sizes/' + sizeId,
+        type: 'DELETE',
+        success: function(response) {
+            
+            $(location).attr('href','/sizes');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
     // User create submit
     $('#user-create-submit').click(function(e) {
         

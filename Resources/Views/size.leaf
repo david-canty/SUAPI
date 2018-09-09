@@ -1,0 +1,61 @@
+#set("content") {
+
+    #embed("navigation")
+
+    <div class="container mt-3">
+        
+        <div id="sizes-container">
+            
+            <div class="row">
+                <div class="col">
+                    <nav class="breadcrumb" aria-label="breadcrumb">
+                        <ol class="breadcrumb m-0 mt-1 mb-3 p-0">
+                            <li class="breadcrumb-item"><a href="/sizes">Sizes</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">#if(editing) {#(size.sizeName)} else {Create}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <h1>#(title)</h1>
+                </div>
+            </div>
+            
+            <div class="row mt-1">
+                
+                <div class="col-6">
+                    
+                    <form action="" method="" #if(editing) {data-id="#(size.id)"} novalidate>
+                        
+                        <div class="validation-wrapper">
+                            
+                            <div class="form-group">
+                                <label for="sizeName">Size Name</label>
+                                <input class="form-control p-2" type="text" name="sizeName" id="sizeName" placeholder="Size Name" #if(editing) {value="#(size.sizeName)"} required />
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                    <p>Size name is required</p>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <input class="btn btn-primary size-cancel-submit mt-3 mb-3 mr-2" name="sizeCancel" type="submit" value="Cancel" formaction="/sizes">
+                                <input class="btn btn-primary #if(editing) {size-update-submit } else {size-create-submit } mt-3 mb-3" name="sizeSubmit" type="submit" value="#if(editing) {Update} else {Create}">
+                            </div
+                                        
+                        </div>
+                        
+                    </form>
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+
+}
+
+#embed("base")

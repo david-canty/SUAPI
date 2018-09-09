@@ -27,7 +27,7 @@ struct SUUserAdminController: RouteCollection {
     
     func usersHandler(_ req: Request) throws -> Future<View> {
         
-        return SUUser.query(on: req).all().flatMap(to: View.self) { users in
+        return SUUser.query(on: req).sort(\.username, .ascending).all().flatMap(to: View.self) { users in
             
             let user = try req.requireAuthenticated(SUUser.self)
             let context = UsersContext(authenticatedUser: user, users: users)

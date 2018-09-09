@@ -6,6 +6,7 @@ final class SUSize: Codable {
     
     var id: UUID?
     var sizeName: String
+    var sortOrder: Int?
     var timestamp: String?
     
     init(name: String) {
@@ -27,6 +28,16 @@ extension SUSize: Migration {
             try addProperties(to: builder)
             builder.unique(on: \.sizeName)
         }
+    }
+}
+
+extension SUSize: Validatable {
+    
+    static func validations() throws -> Validations<SUSize> {
+        
+        var validations = Validations(SUSize.self)
+        try validations.add(\.sizeName, .count(1...))
+        return validations
     }
 }
 

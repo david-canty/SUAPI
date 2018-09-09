@@ -29,6 +29,9 @@ public func routes(_ router: Router) throws {
     let categoryAdminController = SUCategoryAdminController()
     try router.register(collection: categoryAdminController)
     
+    let sizeAdminController = SUSizeAdminController()
+    try router.register(collection: sizeAdminController)
+    
     let userAdminController = SUUserAdminController()
     try router.register(collection: userAdminController)
 }
