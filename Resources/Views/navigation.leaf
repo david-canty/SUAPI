@@ -16,10 +16,10 @@
                     <li class="nav-item #if(title == "Home"){active}">
                         <a href="/" class="nav-link">Home</a>
                     </li>
-                    <li class="nav-item #if(title == "Schools"){active} else if(title == "Years"){active} else if(title == "Create Year"){active} else if(title == "Edit Year"){active}">
+                    <li class="nav-item #if(title == "Schools"){active} else if(title == "Create School"){active} else if(title == "Edit School"){active} else if(title == "Years"){active} else if(title == "Create Year"){active} else if(title == "Edit Year"){active}">
                         <a href="/schools" class="nav-link">Schools</a>
                     </li>
-                    <li class="nav-item #if(title == "Categories"){active}">
+                    <li class="nav-item #if(title == "Categories"){active} else if(title == "Create Category"){active} else if(title == "Edit Category"){active}">
                         <a href="/categories" class="nav-link">Categories</a>
                     </li>
                     <li class="nav-item #if(title == "Sizes"){active}">
@@ -29,11 +29,11 @@
                         <a href="/items" class="nav-link">Items</a>
                     </li>
                     #if(authenticatedUser.username == "admin") {
-                    <li class="nav-item #if(title == "Users"){active}">
+                    <li class="nav-item #if(title == "Users"){active} else if(title == "Create User"){active} else if(title == "Edit User"){active}">
                         <a href="/users" class="nav-link">Users</a>
                     </li>
                     }
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown #if(title == "Change Password"){active}">
                         <a class="nav-link dropdown-toggle" href="" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="/#(authenticatedUser.id)/change-password">Change Password</a>

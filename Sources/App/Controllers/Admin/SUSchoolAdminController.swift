@@ -30,7 +30,7 @@ struct SUSchoolAdminController: RouteCollection {
     
     func schoolsHandler(_ req: Request) throws -> Future<View> {
         
-        return SUSchool.query(on: req).all().flatMap(to: View.self) { schools in
+        return SUSchool.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { schools in
             
             let user = try req.requireAuthenticated(SUUser.self)
             let context = SchoolsContext(authenticatedUser: user, schools: schools)
@@ -67,7 +67,7 @@ struct SUSchoolAdminController: RouteCollection {
         return try req.parameters.next(SUSchool.self).flatMap(to: View.self) { school in
             
             let user = try req.requireAuthenticated(SUUser.self)
-            let years = try school.years.query(on: req).all()
+            let years = try school.years.query(on: req).sort(\.sortOrder, .ascending).all()
             let context = YearsContext(authenticatedUser: user, school: school, years: years)
             
             return try req.view().render("years", context)

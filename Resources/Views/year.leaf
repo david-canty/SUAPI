@@ -12,7 +12,7 @@
                         <ol class="breadcrumb m-0 mt-1 mb-3 p-0">
                             <li class="breadcrumb-item"><a href="/schools">Schools</a></li>
                             <li class="breadcrumb-item"><a href="/schools/#(school.id)/years">#(school.schoolName)</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">#(year.yearName)</li>
+                            <li class="breadcrumb-item active" aria-current="page">#if(editing) {#(year.yearName)} else {Create}</li>
                         </ol>
                     </nav>
                 </div>

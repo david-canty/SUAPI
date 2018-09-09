@@ -73,7 +73,7 @@ struct SUItemController: RouteCollection {
             item.categoryID = updatedItem.categoryID
             item.timestamp = String(describing: Date())
             
-            return item.save(on: req)
+            return item.update(on: req)
         }
     }
     

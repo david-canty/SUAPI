@@ -113,7 +113,7 @@ struct SUUserController: RouteCollection {
                 }
             }
             
-            return user.save(on: req).convertToPublic().catchMap { error in
+            return user.update(on: req).convertToPublic().catchMap { error in
                 
                 let errorDescription = error.localizedDescription.lowercased()
                 
@@ -174,7 +174,7 @@ struct SUUserController: RouteCollection {
                 throw Abort(.badRequest, reason: "Cannot disable admin user.")
             }
             user.isEnabled = !status["isEnabled"]!
-            return user.save(on: req).transform(to: HTTPStatus.ok)
+            return user.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
     

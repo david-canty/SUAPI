@@ -22,6 +22,7 @@ struct SUSchoolController: RouteCollection {
         
         redirectProtectedGroup.post(SUSchool.self, use: createHandler)
         redirectProtectedGroup.put(SUSchool.parameter, use: updateHandler)
+        redirectProtectedGroup.patch(SUSchool.parameter, "sort-order", use: updateSortOrderHandler)
         redirectProtectedGroup.delete(SUSchool.parameter, use: deleteHandler)
     }
     
@@ -50,17 +51,22 @@ struct SUSchoolController: RouteCollection {
             }
         }
         
-        return school.save(on: req).catchMap { error in
+        return SUSchool.query(on: req).count().flatMap(to: SUSchool.self) { schoolCount in
             
-            let errorDescription = error.localizedDescription.lowercased()
+            school.sortOrder = schoolCount
             
-            switch errorDescription {
+            return school.save(on: req).catchMap { error in
                 
-            case let str where str.contains("duplicate"):
-                throw Abort(.conflict, reason: "Error creating school:\n\nA school with this name exists.")
+                let errorDescription = error.localizedDescription.lowercased()
                 
-            default:
-                throw Abort(.internalServerError, reason: error.localizedDescription)
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating school:\n\nA school with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
             }
         }
     }
@@ -80,7 +86,6 @@ struct SUSchoolController: RouteCollection {
         return try flatMap(to: SUSchool.self, req.parameters.next(SUSchool.self), req.content.decode(SUSchool.self)) { school, updatedSchool in
             
             school.schoolName = updatedSchool.schoolName
-            school.sortOrder = updatedSchool.sortOrder
             
             do {
                 
@@ -104,7 +109,7 @@ struct SUSchoolController: RouteCollection {
                 }
             }
             
-            return school.save(on: req).catchMap { error in
+            return school.update(on: req).catchMap { error in
                 
                 let errorDescription = error.localizedDescription.lowercased()
                 
@@ -120,6 +125,15 @@ struct SUSchoolController: RouteCollection {
         }
     }
     
+    func updateSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUSchool.self), req.content.decode(SUSchoolSortOrderData.self)) { school, sortOrderData in
+            
+            school.sortOrder = sortOrderData.sortOrder
+            return school.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.parameters.next(SUSchool.self).delete(on: req).transform(to: HTTPStatus.noContent)
@@ -132,5 +146,10 @@ struct SUSchoolController: RouteCollection {
             
             try school.years.query(on: req).all()
         }
+    }
+    
+    // Data structs
+    struct SUSchoolSortOrderData: Content {
+        let sortOrder: Int
     }
 }

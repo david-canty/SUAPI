@@ -25,6 +25,7 @@ struct SUYearController: RouteCollection {
         
         redirectProtectedGroup.post(SUYear.self, use: createHandler)
         redirectProtectedGroup.put(SUYear.parameter, use: updateHandler)
+        redirectProtectedGroup.patch(SUYear.parameter, "sort-order", use: updateSortOrderHandler)
         redirectProtectedGroup.delete(SUYear.parameter, use: deleteHandler)
     }
     
@@ -53,17 +54,22 @@ struct SUYearController: RouteCollection {
             }
         }
         
-        return year.save(on: req).catchMap { error in
+        return SUYear.query(on: req).count().flatMap(to: SUYear.self) { yearCount in
             
-            let errorDescription = error.localizedDescription.lowercased()
+            year.sortOrder = yearCount
             
-            switch errorDescription {
+            return year.save(on: req).catchMap { error in
                 
-            case let str where str.contains("duplicate"):
-                throw Abort(.conflict, reason: "Error creating year:\n\nA year with this name exists.")
+                let errorDescription = error.localizedDescription.lowercased()
                 
-            default:
-                throw Abort(.internalServerError, reason: error.localizedDescription)
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating year:\n\nA year with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
             }
         }
     }
@@ -85,7 +91,6 @@ struct SUYearController: RouteCollection {
             
             year.yearName = updatedYear.yearName
             year.schoolID = updatedYear.schoolID
-            year.sortOrder = updatedYear.sortOrder
             
             do {
                 
@@ -109,7 +114,7 @@ struct SUYearController: RouteCollection {
                 }
             }
             
-            return year.save(on: req).catchMap { error in
+            return year.update(on: req).catchMap { error in
                 
                 let errorDescription = error.localizedDescription.lowercased()
                 
@@ -122,6 +127,15 @@ struct SUYearController: RouteCollection {
                     throw Abort(.internalServerError, reason: error.localizedDescription)
                 }
             }
+        }
+    }
+    
+    func updateSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUYear.self), req.content.decode(SUYearSortOrderData.self)) { year, sortOrderData in
+            
+            year.sortOrder = sortOrderData.sortOrder
+            return year.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
     
@@ -146,5 +160,10 @@ struct SUYearController: RouteCollection {
             
             try year.items.query(on: req).all()
         }
+    }
+    
+    // Data structs
+    struct SUYearSortOrderData: Content {
+        let sortOrder: Int
     }
 }

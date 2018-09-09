@@ -109,7 +109,7 @@ struct SUCategoryController: RouteCollection {
                 }
             }
             
-            return category.save(on: req).catchMap { error in
+            return category.update(on: req).catchMap { error in
                 
                 let errorDescription = error.localizedDescription.lowercased()
                 

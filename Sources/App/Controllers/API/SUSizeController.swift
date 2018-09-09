@@ -51,7 +51,7 @@ struct SUSizeController: RouteCollection {
             size.sizeName = updatedSize.sizeName
             size.timestamp = String(describing: Date())
             
-            return size.save(on: req)
+            return size.update(on: req)
         }
     }
     

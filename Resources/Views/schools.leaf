@@ -22,13 +22,15 @@
                         <thead class="thead-light">
                             <tr>
                                 <th>Name</th>
+                                <th>Sort Order</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             #for(school in schools) {
-                            <tr>
+                            <tr id="#(school.id)">
                                 <td>#(school.schoolName)</td>
+                                <td>#(school.sortOrder)</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(school.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

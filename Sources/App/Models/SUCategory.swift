@@ -11,7 +11,6 @@ final class SUCategory: Codable {
     
     init(name: String) {
         self.categoryName = name
-        self.sortOrder = 0
         self.timestamp = String(describing: Date())
     }
 }

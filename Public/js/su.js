@@ -65,6 +65,48 @@ $(document).ready(function() {
         });
     });
     
+    // School sort order
+    $('#schools-container tbody').sortable({ update: function(event, ui) {
+        
+        updateSchoolSortOrders();
+        
+    }}).disableSelection();
+    
+    updateSchoolSortOrders();
+    
+    function updateSchoolSortOrders() {
+        
+        // Update school table sort orders
+        $('#schools-container table tr').each(function() {
+            $(this).children('td:nth-child(2)').html($(this).index())
+        });
+        
+        // Get array of sorted school ids
+        var sortedSchoolIds = $('#schools-container tbody').sortable('toArray');
+        
+        // Patch each school with new sort order
+        $.each(sortedSchoolIds, function(index, schoolId) {
+            
+            var json = {"sortOrder": index};
+            
+            $.ajax({
+            url: baseUrl + '/schools/' + schoolId + '/sort-order',
+            type: 'PATCH',
+            data: JSON.stringify(json),
+            processData: false,
+            contentType: "application/json",
+                success: function(response) { }}).fail(function(xhr, ajaxOptions, thrownError) {
+                    
+                    var statusCode = xhr.status;
+                    var statusText = xhr.statusText;
+                    var responseJSON = JSON.parse(xhr.responseText);
+                    var validationErrorString = responseJSON.reason;
+                    
+                    alert(validationErrorString);
+                });
+        });
+    }
+    
     // School delete submit
     $('#schools-container').on('click', '.school-delete-submit', function(e) {
        
@@ -156,6 +198,48 @@ $(document).ready(function() {
         });
     });
     
+    // Year sort order
+    $('#years-container tbody').sortable({ update: function(event, ui) {
+        
+        updateYearSortOrders();
+        
+    }}).disableSelection();
+    
+    updateYearSortOrders();
+    
+    function updateYearSortOrders() {
+        
+        // Update year table sort orders
+        $('#years-container table tr').each(function() {
+            $(this).children('td:nth-child(2)').html($(this).index())
+        });
+        
+        // Get array of sorted year ids
+        var sortedYearIds = $('#years-container tbody').sortable('toArray');
+        
+        // Patch each year with new sort order
+        $.each(sortedYearIds, function(index, yearId) {
+            
+            var json = {"sortOrder": index};
+            
+            $.ajax({
+            url: baseUrl + '/years/' + yearId + '/sort-order',
+            type: 'PATCH',
+            data: JSON.stringify(json),
+            processData: false,
+            contentType: "application/json",
+                success: function(response) { }}).fail(function(xhr, ajaxOptions, thrownError) {
+                    
+                    var statusCode = xhr.status;
+                    var statusText = xhr.statusText;
+                    var responseJSON = JSON.parse(xhr.responseText);
+                    var validationErrorString = responseJSON.reason;
+                    
+                    alert(validationErrorString);
+                });
+        });
+    }
+    
     // Year delete submit
     $('#years-container').on('click', '.year-delete-submit', function(e) {
         
@@ -245,7 +329,7 @@ $(document).ready(function() {
         });
     });
     
-    // Category drag and drop
+    // Category sort order
     $('#categories-container tbody').sortable({ update: function(event, ui) {
         
         updateCategorySortOrders();
