@@ -8,6 +8,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
+    
+    services.register(KeyedCache.self) { container in
+        try container.keyedCache(for: .mysql)
+    }
 
     let router = EngineRouter.default()
     try routes(router)
@@ -63,8 +67,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SUItemYear.self, database: .mysql)
     migrations.add(model: SUUser.self, database: .mysql)
     migrations.add(migration: AdminUser.self, database: .mysql)
+    migrations.prepareCache(for: .mysql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
-    config.prefer(MemoryKeyedCache.self, for: KeyedCache.self)
+    config.prefer(DatabaseKeyedCache<ConfiguredDatabase<MySQLDatabase>>.self, for: KeyedCache.self)
 }
