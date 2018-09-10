@@ -157,6 +157,16 @@ ol.breadcrumb {
     margin: 0;
 }
 
+.pagination a.page-link {
+    font-size: 0.75em;
+    color: #5054A1;
+}
+
+.pagination .active a.page-link {
+    background-color: #5054A1;
+    color: #FFF;
+}
+
 #cookie-footer {
     position: absolute;
     bottom: 0;

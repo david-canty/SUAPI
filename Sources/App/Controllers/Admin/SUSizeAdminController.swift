@@ -26,12 +26,28 @@ struct SUSizeAdminController: RouteCollection {
     
     func sizesHandler(_ req: Request) throws -> Future<View> {
         
-        return SUSize.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { sizes in
+        var currentPage = 1
+        let cursorLimit = 2
+        var cursorOffset = 0
+        
+        if let pageQueryParam = req.query[Int.self, at: "page"] {
             
-            let user = try req.requireAuthenticated(SUUser.self)
-            let context = SizesContext(authenticatedUser: user, sizes: sizes)
+            currentPage = pageQueryParam
+            cursorOffset = (currentPage - 1) * cursorLimit
+        }
+        
+        return SUSize.query(on: req).sort(\.sortOrder, .ascending).range(cursorOffset..<currentPage * cursorLimit).all().flatMap(to: View.self) { sizes in
             
-            return try req.view().render("sizes", context)
+            return SUSize.query(on: req).count().flatMap(to: View.self) { totalSizesCount in
+                
+                let numPages = Int(ceil(Double(totalSizesCount) / Double(cursorLimit)))
+                let pages = Array(1...numPages)
+                
+                let user = try req.requireAuthenticated(SUUser.self)
+                let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, currentPage: currentPage)
+                
+                return try req.view().render("sizes", context)
+            }
         }
     }
     
@@ -56,6 +72,8 @@ struct SUSizeAdminController: RouteCollection {
         let title = "Sizes"
         let authenticatedUser: SUUser
         let sizes: [SUSize]
+        let pages: [Int]
+        let currentPage: Int
     }
     
     struct EditSizeContext: Encodable {

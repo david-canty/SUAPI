@@ -22,15 +22,53 @@ struct SUSizeController: RouteCollection {
         
         redirectProtectedGroup.post(SUSize.self, use: createHandler)
         redirectProtectedGroup.put(SUSize.parameter, use: updateHandler)
+        redirectProtectedGroup.patch(SUSize.parameter, "sort-order", use: updateSortOrderHandler)
         redirectProtectedGroup.delete(SUSize.parameter, use: deleteHandler)
     }
     
     // CRUD
     func createHandler(_ req: Request, size: SUSize) throws -> Future<SUSize> {
         
-        size.timestamp = String(describing: Date())
+        do {
+            
+            try size.validate()
+            size.timestamp = String(describing: Date())
+            
+        } catch {
+            
+            if let validationError = error as? ValidationError {
+                
+                let errorString = "Error creating size:\n\n"
+                var validationErrorReason = errorString
+                
+                if validationError.reason.contains("not larger") {
+                    validationErrorReason += "Size name must not be blank."
+                }
+                
+                if validationErrorReason != errorString {
+                    throw Abort(.badRequest, reason: validationErrorReason)
+                }
+            }
+        }
         
-        return size.save(on: req)
+        return SUSize.query(on: req).count().flatMap(to: SUSize.self) { sizeCount in
+            
+            size.sortOrder = sizeCount
+            
+            return size.save(on: req).catchMap { error in
+                
+                let errorDescription = error.localizedDescription.lowercased()
+                
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating size:\n\nA size with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
+        }
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[SUSize]> {
@@ -49,9 +87,51 @@ struct SUSizeController: RouteCollection {
         return try flatMap(to: SUSize.self, req.parameters.next(SUSize.self), req.content.decode(SUSize.self)) { size, updatedSize in
             
             size.sizeName = updatedSize.sizeName
-            size.timestamp = String(describing: Date())
             
-            return size.update(on: req)
+            do {
+                
+                try size.validate()
+                size.timestamp = String(describing: Date())
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    let errorString = "Error updating size:\n\n"
+                    var validationErrorReason = errorString
+                    
+                    if validationError.reason.contains("not larger") {
+                        validationErrorReason += "Size name must not be blank."
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
+                    }
+                }
+            }
+            
+            return size.update(on: req).catchMap { error in
+                
+                let errorDescription = error.localizedDescription.lowercased()
+                
+                switch errorDescription {
+                    
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error updating size:\n\nA size with this name exists.")
+                    
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
+        }
+    }
+    
+    func updateSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUSize.self), req.content.decode(SUSizeSortOrderData.self)) { size, sortOrderData in
+            
+            size.sortOrder = sortOrderData.sortOrder
+            return size.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
     
@@ -67,5 +147,10 @@ struct SUSizeController: RouteCollection {
             
             try size.items.query(on: req).all()
         }
+    }
+    
+    // Data structs
+    struct SUSizeSortOrderData: Content {
+        let sortOrder: Int
     }
 }
