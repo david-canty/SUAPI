@@ -167,6 +167,11 @@ ol.breadcrumb {
     color: #FFF;
 }
 
+.btn-toolbar span {
+    color: #5054A1;
+    font-size: 0.75em;
+}
+
 #cookie-footer {
     position: absolute;
     bottom: 0;

@@ -751,7 +751,7 @@ $(document).ready(function() {
 //    });
     
     // Size pagination
-    $('.page-item a').click(function(e) {
+    $('#sizes-container').on('click', '.page-item a', function(e) {
         
         e.preventDefault();
         
@@ -815,6 +815,13 @@ $(document).ready(function() {
             sizePageChangedTo(clickedLink);
         }
     });
+    
+    // Sizes per page
+    $('#sizes-container').on('click', '.btn-toolbar .btn', function(e) {
+        var sizesPerPage = $(this).html();
+        document.cookie = "sizes-per-page=" + sizesPerPage + ";"
+        sizePageChangedTo(1);
+    });
 });
 
 function sizePageChangedTo(newPage) {
@@ -824,8 +831,10 @@ function sizePageChangedTo(newPage) {
     type: "GET",
     success: function(response) {
         
-        var $result = $(response).find('#sizes');
-        $("#sizes").replaceWith($result);
+        var $sizes = $(response).find('#sizes');
+        $("#sizes").replaceWith($sizes);
+        var $pagination = $(response).find('#pagination');
+        $("#pagination").replaceWith($pagination);
         
         $('#sizes-container tbody').sortable({ update: function(event, ui) {
             
