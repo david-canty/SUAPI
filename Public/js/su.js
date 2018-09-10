@@ -752,75 +752,16 @@ $(document).ready(function() {
     
     // Size pagination
     $('#sizes-container').on('click', '.page-item a', function(e) {
-        
         e.preventDefault();
-        
-        var linkText = $(this).text();
-        var currentLink = $('.pagination li.active').index();
-        var clickedLink = $(this).closest('li').index();
-        var numLinks = $('.pagination li').length;
-        
-        // Return if we're on the first link and we've clicked Previous
-        if (currentLink == 1 && clickedLink == 0) {
-            return;
-        }
-        
-        // Return if we're on the last link and we've clicked Next
-        if (currentLink == numLinks - 2 && clickedLink == numLinks - 1) {
-            return;
-        }
-        
-        // Previous clicked
-        if (clickedLink == 0) {
-            if (currentLink > 1) {
-                $(".pagination li").eq(currentLink).removeClass("active");
-                $(".pagination li").eq(currentLink - 1).addClass("active");
-                sizePageChangedTo(currentLink - 1);
-                if (currentLink - 1 == 1) {
-                    $(".pagination li").eq(0).addClass("disabled");
-                }
-            }
-        }
-        
-        // Next clicked
-        if (clickedLink == numLinks - 1) {
-            if (currentLink < numLinks - 2) {
-                $(".pagination li").eq(currentLink).removeClass("active");
-                $(".pagination li").eq(currentLink + 1).addClass("active");
-                sizePageChangedTo(currentLink + 1);
-                if (currentLink + 1 == numLinks - 2) {
-                    $(".pagination li").eq(numLinks - 1).addClass("disabled");
-                }
-            }
-        }
-        
-        // First link clicked, so disable Previous
-        if (clickedLink == 1) {
-            $(".pagination li").eq(0).addClass("disabled");
-        } else {
-            $(".pagination li").eq(0).removeClass("disabled");
-        }
-        
-        // Last link clicked, so disable Next
-        if (clickedLink == numLinks - 2) {
-            $(".pagination li").eq(numLinks - 1).addClass("disabled");
-        } else {
-            $(".pagination li").eq(numLinks - 1).removeClass("disabled");
-        }
-        
-        // Set active state of clicked link
-        if ((clickedLink > 0) && (clickedLink < numLinks - 1)) {
-            $(this).closest('li').addClass('active');
-            $(this).closest('li').siblings().removeClass('active');
-            sizePageChangedTo(clickedLink);
-        }
+        var clickedIndex = $(this).closest('li').index();        
+        sizePageChangedTo(clickedIndex + 1);
     });
     
     // Sizes per page
     $('#sizes-container').on('click', '.btn-toolbar .btn', function(e) {
         var sizesPerPage = $(this).html();
         document.cookie = "sizes-per-page=" + sizesPerPage + ";"
-        sizePageChangedTo(1);
+        $(location).attr('href','/sizes');
     });
 });
 

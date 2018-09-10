@@ -30,20 +30,19 @@ struct SUSizeAdminController: RouteCollection {
         
             var currentPage = 1
             var cursorOffset = 0
+            var sizesPerPage = "2"
+            var cursorLimit = 2
             
-            let cursorLimit: Int
             if let sizesPageTotal = req.http.cookies["sizes-per-page"] {
                 
-                switch sizesPageTotal.string {
+                sizesPerPage = sizesPageTotal.string
+                
+                switch sizesPerPage {
                 case let x where x == "All":
                     cursorLimit = totalSizesCount
                 default:
                     cursorLimit = Int(sizesPageTotal.string)!
                 }
-                
-            } else {
-                
-                cursorLimit = 2
             }
             
             if let pageQueryParam = req.query[Int.self, at: "page"] {
@@ -58,7 +57,7 @@ struct SUSizeAdminController: RouteCollection {
                 let pages = Array(1...numPages)
                 
                 let user = try req.requireAuthenticated(SUUser.self)
-                let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, currentPage: currentPage)
+                let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, sizesPerPage: sizesPerPage, currentPage: currentPage)
                 
                 return try req.view().render("sizes", context)
             }
@@ -87,6 +86,7 @@ struct SUSizeAdminController: RouteCollection {
         let authenticatedUser: SUUser
         let sizes: [SUSize]
         let pages: [Int]
+        let sizesPerPage: String
         let currentPage: Int
     }
     
