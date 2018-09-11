@@ -461,29 +461,28 @@ $(document).ready(function() {
     });
     
     // Size sort order
-    $('#sizes-container tbody').sortable({ update: function(event, ui) {
-        
+    $('#sizes tbody').sortable({ update: function(event, ui) {
+
         updateSizeSortOrders();
-        
+
     }}).disableSelection();
-    
-    updateSizeSortOrders();
-    
+
     function updateSizeSortOrders() {
-        
+
         // Update size table sort orders
-        $('#sizes-container table tr').each(function() {
-            $(this).children('td:nth-child(2)').html($(this).index())
+        var pageOffset = $('#sizes').data('pageoffset');
+        $('#sizes table tr').each(function() {
+            $(this).children('td:nth-child(2)').html($(this).index() + pageOffset)
         });
-        
+
         // Get array of sorted size ids
-        var sortedSizeIds = $('#sizes-container tbody').sortable('toArray');
-        
+        var sortedSizeIds = $('#sizes tbody').sortable('toArray');
+
         // Patch each size with new sort order
         $.each(sortedSizeIds, function(index, sizeId) {
-            
-            var json = {"sortOrder": index};
-            
+
+            var json = {"sortOrder": index + pageOffset};
+
             $.ajax({
             url: baseUrl + '/sizes/' + sizeId + '/sort-order',
             type: 'PATCH',
@@ -491,14 +490,59 @@ $(document).ready(function() {
             processData: false,
             contentType: "application/json",
                 success: function(response) { }}).fail(function(xhr, ajaxOptions, thrownError) {
-                    
+
                     var statusCode = xhr.status;
                     var statusText = xhr.statusText;
                     var responseJSON = JSON.parse(xhr.responseText);
                     var validationErrorString = responseJSON.reason;
-                    
+
                     alert(validationErrorString);
                 });
+        });
+    }
+    
+    // Sizes per page
+    $('#sizes-container').on('click', '.btn-toolbar .btn', function(e) {
+        e.preventDefault();
+        var sizesPerPage = $(this).html();
+        document.cookie = "sizes-per-page=" + sizesPerPage + ";"
+        sizePageChangedTo(1);
+    });
+    
+    // Size pagination
+    $('#sizes-container').on('click', '.page-item a', function(e) {
+        e.preventDefault();
+        var clickedIndex = $(this).closest('li').index();
+        sizePageChangedTo(clickedIndex + 1);
+    });
+    
+    function sizePageChangedTo(newPage) {
+        
+        $.ajax({
+        url: "/sizes?page=" + newPage,
+        type: "GET",
+        success: function(response) {
+            
+            var $sizes = $(response).find('#sizes');
+            $("#sizes").replaceWith($sizes);
+            var $pagination = $(response).find('#pagination');
+            $("#pagination").replaceWith($pagination);
+            
+            $('#sizes-container tbody').sortable({ update: function(event, ui) {
+                
+                updateSizeSortOrders();
+                
+            }}).disableSelection();
+        }
+            
+        }).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
         });
     }
     
@@ -749,48 +793,5 @@ $(document).ready(function() {
 //    $('.container').on('click', '#sign-out', function(e) {
 //        $.ajax({ url: '/sign-out', type: 'POST'});
 //    });
-    
-    // Size pagination
-    $('#sizes-container').on('click', '.page-item a', function(e) {
-        e.preventDefault();
-        var clickedIndex = $(this).closest('li').index();        
-        sizePageChangedTo(clickedIndex + 1);
-    });
-    
-    // Sizes per page
-    $('#sizes-container').on('click', '.btn-toolbar .btn', function(e) {
-        var sizesPerPage = $(this).html();
-        document.cookie = "sizes-per-page=" + sizesPerPage + ";"
-        $(location).attr('href','/sizes');
-    });
-});
 
-function sizePageChangedTo(newPage) {
-    
-    $.ajax({
-    url: "/sizes?page=" + newPage,
-    type: "GET",
-    success: function(response) {
-        
-        var $sizes = $(response).find('#sizes');
-        $("#sizes").replaceWith($sizes);
-        var $pagination = $(response).find('#pagination');
-        $("#pagination").replaceWith($pagination);
-        
-        $('#sizes-container tbody').sortable({ update: function(event, ui) {
-            
-            updateSizeSortOrders();
-            
-        }}).disableSelection();
-    }
-        
-    }).fail(function(xhr, ajaxOptions, thrownError) {
-        
-        var statusCode = xhr.status;
-        var statusText = xhr.statusText;
-        var responseJSON = JSON.parse(xhr.responseText);
-        var validationErrorString = responseJSON.reason;
-        
-        alert(validationErrorString);
-    });
-}
+});

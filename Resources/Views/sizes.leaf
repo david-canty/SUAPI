@@ -13,7 +13,7 @@
                 </div>
             </div>
             
-            <div class="row" id="sizes">
+            <div class="row" id="sizes" data-pageoffset="#(pageOffset)">
                 <div class="col">
                     
                     #if(count(sizes) > 0) {
