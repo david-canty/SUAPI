@@ -60,28 +60,26 @@
                 #if(count(pages) > 1) {
                 <div class="col">
                     <nav aria-label="Size pagination">
-                        <ul class="pagination">
+                        <ul class="pagination pagination-sm">
                             #for(page in pages) {
-                            <li class="page-item #if(page == currentPage) {active}"><a class="page-link" href="">#(page)</a></li>
+                            <li class="page-item mr-1 #if(page == currentPage) {active}"><a class="page-link" href="">#(page)</a></li>
                             }
                         </ul>
                     </nav>
                 </div>
                 }
+                #if(count(pageIncrements) > 1) {
                 <div class="col">
                     <div class="btn-toolbar justify-content-end mb-3" role="toolbar" aria-label="Sizes per page">
-                        <span class="pt-2 pr-2">Sizes per page:</span>
-                        <div class="btn-group mr-2" role="group" aria-label="2 per page">
-                            <button type="button" class="btn btn-secondary #if(sizesPerPage == "2") {active}">2</button>
+                        <span class="p-1">Sizes per page:</span>
+                        #for(increment in pageIncrements) {
+                        <div class="btn-group" role="group" aria-label="#(increment) per page">
+                            <button type="button" class="btn btn-link p-1 #if(sizesPerPage == increment){active}">#(increment)</button>
                         </div>
-                        <div class="btn-group mr-2" role="group" aria-label="4 per page">
-                            <button type="button" class="btn btn-secondary #if(sizesPerPage == "4") {active}">4</button>
-                        </div>
-                        <div class="btn-group" role="group" aria-label="All">
-                            <button type="button" class="btn btn-secondary #if(sizesPerPage == "All") {active}">All</button>
-                        </div>
+                        }
                     </div>
                 </div>
+                }
             </div>
             
             <div class="modal fade" id="size-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">

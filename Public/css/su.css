@@ -157,6 +157,10 @@ ol.breadcrumb {
     margin: 0;
 }
 
+.pagination {
+    vertical-align: middle;
+}
+
 .pagination a.page-link {
     font-size: 0.75em;
     color: #5054A1;
@@ -167,14 +171,18 @@ ol.breadcrumb {
     color: #FFF;
 }
 
-.btn-toolbar span {
+#pagination span {
     color: #5054A1;
     font-size: 0.75em;
 }
 
-.btn-toolbar .btn-secondary.active {
-    background-color: #5054A1 !important;
-    color: #FFF;
+.btn-toolbar .btn-link {
+    color: #5054A1;
+    font-size: 0.75em;
+}
+
+.btn-toolbar .btn-link.active {
+    color: #D52422;
 }
 
 #cookie-footer {

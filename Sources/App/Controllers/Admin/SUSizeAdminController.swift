@@ -28,35 +28,42 @@ struct SUSizeAdminController: RouteCollection {
         
         return SUSize.query(on: req).count().flatMap(to: View.self) { totalSizesCount in
         
+            // Set page increment step
+            let pageIncrementStep = 3
+            
+            // Default to page 1 and first increment step
+            var selectedSizesPerPage = pageIncrementStep
             var currentPage = 1
-            var cursorOffset = 0
-            var sizesPerPage = "2"
-            var cursorLimit = 2
+            var pageOffset = 0
             
+            // Get selected sizes per page from cookie
             if let sizesPageTotal = req.http.cookies["sizes-per-page"] {
-                
-                sizesPerPage = sizesPageTotal.string
-                switch sizesPerPage {
-                case let x where x == "All":
-                    cursorLimit = totalSizesCount
-                default:
-                    cursorLimit = Int(sizesPageTotal.string)!
-                }
+                selectedSizesPerPage = Int(sizesPageTotal.string)!
             }
             
+            // Get current page from request
             if let pageQueryParam = req.query[Int.self, at: "page"] {
-                
                 currentPage = pageQueryParam
-                cursorOffset = (currentPage - 1) * cursorLimit
+                pageOffset = (currentPage - 1) * selectedSizesPerPage
             }
             
-            return SUSize.query(on: req).sort(\.sortOrder, .ascending).range(cursorOffset..<currentPage * cursorLimit).all().flatMap(to: View.self) { sizes in
+            // Calculate page increment values
+            let numIncrements = Int(ceil(Double(totalSizesCount) / Double(pageIncrementStep)))
+            var pageIncrementValues = Array(repeating: 0, count: numIncrements)
+            var incrementValue = pageIncrementStep
+            pageIncrementValues = pageIncrementValues.map { _ in
+                let value = incrementValue
+                incrementValue += pageIncrementStep
+                return value
+            }
             
-                let numPages = Int(ceil(Double(totalSizesCount) / Double(cursorLimit)))
+            return SUSize.query(on: req).sort(\.sortOrder, .ascending).range(pageOffset..<currentPage * selectedSizesPerPage).all().flatMap(to: View.self) { sizes in
+            
+                let numPages = Int(ceil(Double(totalSizesCount) / Double(selectedSizesPerPage)))
                 let pages = Array(1...numPages)
-                
                 let user = try req.requireAuthenticated(SUUser.self)
-                let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, sizesPerPage: sizesPerPage, currentPage: currentPage, pageOffset: cursorOffset)
+                
+                let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, currentPage: currentPage, pageOffset: pageOffset, sizesPerPage: selectedSizesPerPage, pageIncrements: pageIncrementValues)
                 
                 return try req.view().render("sizes", context)
             }
@@ -85,9 +92,10 @@ struct SUSizeAdminController: RouteCollection {
         let authenticatedUser: SUUser
         let sizes: [SUSize]
         let pages: [Int]
-        let sizesPerPage: String
         let currentPage: Int
         let pageOffset: Int
+        let sizesPerPage: Int
+        let pageIncrements: [Int]
     }
     
     struct EditSizeContext: Encodable {
