@@ -9,7 +9,6 @@ final class SUItem: Codable {
     var itemColor: String
     var itemGender: String
     var itemPrice: Double
-    var itemImage: Data?
     var categoryID: SUCategory.ID
     var timestamp: String?
     
@@ -18,7 +17,6 @@ final class SUItem: Codable {
          color: String,
          gender: String,
          price: Double,
-         image: Data? = nil,
          categoryID: SUCategory.ID) {
         
         self.itemName = name
@@ -26,7 +24,6 @@ final class SUItem: Codable {
         self.itemColor = color
         self.itemGender = gender
         self.itemPrice = price
-        self.itemImage = image
         self.categoryID = categoryID
         self.timestamp = String(describing: Date())
     }

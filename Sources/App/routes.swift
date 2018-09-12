@@ -32,6 +32,9 @@ public func routes(_ router: Router) throws {
     let sizeAdminController = SUSizeAdminController()
     try router.register(collection: sizeAdminController)
     
+    let itemAdminController = SUItemAdminController()
+    try router.register(collection: itemAdminController)
+    
     let userAdminController = SUUserAdminController()
     try router.register(collection: userAdminController)
 }

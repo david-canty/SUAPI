@@ -69,7 +69,6 @@ struct SUItemController: RouteCollection {
             item.itemColor = updatedItem.itemColor
             item.itemGender = updatedItem.itemGender
             item.itemPrice = updatedItem.itemPrice
-            item.itemImage = updatedItem.itemImage
             item.categoryID = updatedItem.categoryID
             item.timestamp = String(describing: Date())
             

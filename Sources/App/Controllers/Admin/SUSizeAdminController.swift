@@ -60,7 +60,11 @@ struct SUSizeAdminController: RouteCollection {
             return SUSize.query(on: req).sort(\.sortOrder, .ascending).range(pageOffset..<currentPage * selectedSizesPerPage).all().flatMap(to: View.self) { sizes in
             
                 let numPages = Int(ceil(Double(totalSizesCount) / Double(selectedSizesPerPage)))
-                let pages = Array(1...numPages)
+                var pages = [Int]()
+                if numPages > 0 {
+                    pages = Array(1...numPages)
+                }
+                
                 let user = try req.requireAuthenticated(SUUser.self)
                 
                 let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, currentPage: currentPage, pageOffset: pageOffset, sizesPerPage: selectedSizesPerPage, pageIncrements: pageIncrementValues)
