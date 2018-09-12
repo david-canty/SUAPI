@@ -29,7 +29,7 @@ struct SUSizeAdminController: RouteCollection {
         return SUSize.query(on: req).count().flatMap(to: View.self) { totalSizesCount in
         
             // Set page increment step
-            let pageIncrementStep = 3
+            let pageIncrementStep = 15
             
             // Default to page 1 and first increment step
             var selectedSizesPerPage = pageIncrementStep
