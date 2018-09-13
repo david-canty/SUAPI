@@ -119,6 +119,16 @@ input[type="file"] {
     padding: 0;
 }
 
+#itemForm label,
+legend,
+#itemStockForm label {
+    font-weight: bold;
+}
+
+#itemForm label.form-check-label {
+    font-weight: normal;
+}
+
 .alert p,
 .invalid-feedback p {
     font-size: 0.75em;

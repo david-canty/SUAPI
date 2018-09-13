@@ -27,21 +27,21 @@
                 
                 <div class="col-6">
                     
-                    <form action="" method="" #if(editing) {data-id="#(item.id)"} novalidate>
+                    <form action="" method="" id="itemForm" #if(editing) {data-id="#(item.id)"} enctype="multipart/form-data" novalidate>
                         
                         <div class="validation-wrapper">
                             
                             <div class="form-group">
-                                <label for="itemName">Item Name</label>
-                                <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Item Name" #if(editing) {value="#(item.itemName)"} required />
+                                <label for="itemName">Name</label>
+                                <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Name" #if(editing) {value="#(item.itemName)"} required />
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>Item name is required</p>
                                 </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="itemDescription">Item Description</label>
-                                <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Item Description" #if(editing) {value="#(itemDescription)"} />
+                                <label for="itemDescription">Description</label>
+                                <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(itemDescription)"} />
                             </div>
                             
                             <div class="form-group">
@@ -54,6 +54,50 @@
                                     </div>
                                     }
                                 </fieldset>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="itemColor">Colour</label>
+                                <input class="form-control p-2" type="text" name="itemColor" id="itemColor" placeholder="Colour" #if(editing) {value="#(item.itemColor)"} required />
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                    <p>Colour is required</p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="itemPrice">Price</label>
+                                <input class="form-control p-2" type="number" step="any" min="0" name="itemPrice" id="itemPrice" placeholder="0.00" #if(editing) {value="#(item.itemPrice)"} required />
+                                <div class="invalid-feedback">
+                                    <p>Price is required</p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="categoryId">Category</label>
+                                <select class="custom-select form-control" id="categoryId" name="categoryId" required>
+                                    <option value="">Select</option>
+                                    #for(category in categories) {
+                                    <option value=#(category.id) #if(category.id == item.categoryID) {selected="selected"}>#(category.categoryName)</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">
+                                    <p>Category is required</p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="itemYears">Years</label>
+                                <select multiple class="custom-select form-control" id="itemYears" name="itemYears" required>
+                                    #for(school in schoolYears) {
+                                        #for(year in school) {
+                                        <option value=#(year.id) #if(contains(selectedYears, year.id)) {selected="selected"}>#(year.yearName)</option>
+                                        }
+                                    }
+                                </select>
+                                <span><small>(hold ctrl or cmd and click to select mulitple years)</small></span>
+                                <div class="invalid-feedback">
+                                    <p>At least one year is required</p>
+                                </div>
                             </div>
                             
                             
