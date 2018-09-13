@@ -25,7 +25,7 @@
                     <li class="nav-item #if(title == "Sizes"){active} else if(title == "Create Size"){active} else if(title == "Edit Size"){active}">
                         <a href="/sizes" class="nav-link">Sizes</a>
                     </li>
-                    <li class="nav-item #if(title == "Items"){active}">
+                    <li class="nav-item #if(title == "Items"){active} else if(title == "Create Item"){active} else if(title == "Edit Item"){active}">
                         <a href="/items" class="nav-link">Items</a>
                     </li>
                     #if(authenticatedUser.username == "admin") {

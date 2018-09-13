@@ -34,6 +34,12 @@ h3 {
     padding: 15px 0;
 }
 
+h3 a {
+    color: #5054A1;
+    font-size: 1em;
+    padding: 15px 0;
+}
+
 h4 {
     color: #333333;
     font-size: 1em;

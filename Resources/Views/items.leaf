@@ -9,7 +9,7 @@
             <div class="row">
                 <div class="col">
                     <h1>#(title)</h1>
-                    <a class="btn btn-primary mt-3 mb-3" href="items/create" role="button">&#43;</a>
+                    <a class="btn btn-primary mt-3 mb-3" href="/items/create" role="button">&#43;</a>
                 </div>
             </div>
             
@@ -20,9 +20,13 @@
                     
                         #for(categoryAndItems in itemsByCategory) {
                         
-                            <h3>#(category.categoryName)</h3>
+                            <h3>
+                                <a class="category-items-header" data-toggle="collapse" href="#items-#(categoryAndItems.category.id)" role="button" aria-expanded="false" aria-controls="#items-#(categoryAndItems.category.id)-items">#(categoryAndItems.category.categoryName)</a>
+                            </h3>
                             
-                            #if(count(items) > 0) {
+                            <div class="collapse" id="items-#(categoryAndItems.category.id)">
+                            
+                            #if(count(categoryAndItems.items) > 0) {
                             
                                 <table class="table table-bordered">
                                     <thead class="thead-light">
@@ -32,7 +36,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        #for(item in items) {
+                                        #for(item in categoryAndItems.items) {
                                         <tr>
                                             <td>#(item.itemName)</td>
                                             <td>
@@ -42,7 +46,7 @@
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="actionButton#(item.id)">
                                                         <a class="dropdown-item" href="/items/#(item.id)/edit">Edit Item</a>
-                                                        <a class="dropdown-item" href="/items/#(item.id/stock">Item Stock</a>
+                                                        <a class="dropdown-item" href="/items/#(item.id)/stock">Item Stock</a>
                                                         <div class="dropdown-divider"></div>
                                                         <a class="dropdown-item" href="" data-toggle="modal" data-target="#item-delete-modal" data-id="#(item.id)">Delete Item</a>
                                                     </div>
@@ -55,9 +59,11 @@
                             
                             } else {
                             
-                                <p>No Items</p>
+                                <h4>No Items</h4>
                             
                             }
+                            
+                            </div>
                             
                         }
                         
