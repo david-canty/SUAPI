@@ -26,7 +26,7 @@ struct SUItemController: RouteCollection {
         let authSessionRoutes = itemRoutes.grouped(SUUser.authSessionsMiddleware())
         let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
-        redirectProtectedGroup.post(SUItem.self, use: createHandler)
+        redirectProtectedGroup.post(SUItemData.self, use: createHandler)
         redirectProtectedGroup.put(SUItem.parameter, use: updateHandler)
         redirectProtectedGroup.delete(SUItem.parameter, use: deleteHandler)
         
@@ -43,7 +43,9 @@ struct SUItemController: RouteCollection {
     }
     
     // CRUD
-    func createHandler(_ req: Request, item: SUItem) throws -> Future<SUItem> {
+    func createHandler(_ req: Request, itemData: SUItemData) throws -> Future<SUItem> {
+        
+        let item = SUItem(name: itemData.itemName, description: itemData.itemDescription, color: itemData.itemColor, gender: itemData.itemGender, price: itemData.itemPrice, categoryID: itemData.categoryId)
         
         do {
             
@@ -213,10 +215,13 @@ struct SUItemController: RouteCollection {
     
     // Data structs
     struct SUItemData: Content {
-        let name: String
-        let description: String?
-        let color: String
-        let gender: String
-        
+        let itemName: String
+        let itemDescription: String?
+        let itemGender: String
+        let itemColor: String
+        let itemPrice: Double
+        let categoryId: UUID
+        let itemYears: [UUID]
+        let itemSizes: [UUID]
     }
 }

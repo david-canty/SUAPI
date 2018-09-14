@@ -595,7 +595,7 @@ $(document).ready(function() {
         processData: false,
         success: function(response) {
             
-            $(location).attr('href','/users');
+            $(location).attr('href','/items');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -621,10 +621,15 @@ $(document).ready(function() {
             return false
         }
         
+        var formData = new FormData(form[0]);
+        
         $.ajax({
         url: baseUrl + '/items/' + itemId,
         type: 'PUT',
-        data: form.serialize(),
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
         success: function(response) {
             
             $(location).attr('href', '/items');
