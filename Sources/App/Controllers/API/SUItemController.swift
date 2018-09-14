@@ -81,7 +81,13 @@ struct SUItemController: RouteCollection {
             }
         }
         
+        var yearSaveResults: [Future<SUItemYear>] = []
         
+        for yearId in itemData.itemYears {
+            let year = SUYear.find(yearId, on: req).unwrap(or: Abort(.badRequest, reason: "Error finding year"))
+            let pivot = try SUItemYear(item.requireID(), year.requireID())
+            pivot.timestamp = String(describing: Date())
+        }
         
         return item.save(on: req)
     }

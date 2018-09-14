@@ -21,10 +21,10 @@
                         #for(categoryAndItems in itemsByCategory) {
                         
                             <h3>
-                                <a class="category-items-header" data-toggle="collapse" href="#items-#(categoryAndItems.category.id)" role="button" aria-expanded="false" aria-controls="#items-#(categoryAndItems.category.id)-items">#(categoryAndItems.category.categoryName)</a>
+                                <a class="category-items-header" data-toggle="collapse" href="#items-#(categoryAndItems.category.id)" role="button" aria-expanded="true" aria-controls="#items-#(categoryAndItems.category.id)-items">#(categoryAndItems.category.categoryName)</a>
                             </h3>
                             
-                            <div class="collapse" id="items-#(categoryAndItems.category.id)">
+                            <div class="collapse show" id="items-#(categoryAndItems.category.id)">
                             
                             #if(count(categoryAndItems.items) > 0) {
                             
