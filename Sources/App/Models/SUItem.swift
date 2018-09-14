@@ -45,6 +45,19 @@ extension SUItem: Migration {
     }
 }
 
+extension SUItem: Validatable {
+    
+    static func validations() throws -> Validations<SUItem> {
+        
+        var validations = Validations(SUItem.self)
+        try validations.add(\.itemName, .count(1...))
+        try validations.add(\.itemColor, .count(1...))
+        try validations.add(\.itemGender, .count(1...))
+        try validations.add(\.itemPrice, .range(0...))
+        return validations
+    }
+}
+
 extension SUItem {
     
     var category: Parent<SUItem, SUCategory> {

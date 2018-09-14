@@ -192,6 +192,11 @@ ol.breadcrumb {
     font-size: 0.75em;
 }
 
+#itemForm span {
+    font-size: 0.75em;
+    font-style: italic;
+}
+
 .btn-toolbar .btn-link {
     color: #5054A1;
     font-size: 0.75em;

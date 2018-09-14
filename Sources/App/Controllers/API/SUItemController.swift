@@ -35,7 +35,7 @@ struct SUItemController: RouteCollection {
         redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
         // Stock
-        redirectProtectedGroup.put(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
+        redirectProtectedGroup.patch(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
         
         // Years
         redirectProtectedGroup.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
@@ -45,7 +45,41 @@ struct SUItemController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, item: SUItem) throws -> Future<SUItem> {
         
-        item.timestamp = String(describing: Date())
+        do {
+            
+            try item.validate()
+            item.timestamp = String(describing: Date())
+            
+        } catch {
+            
+            if let validationError = error as? ValidationError {
+                
+                let errorString = "Error creating item:\n\n"
+                var validationErrorReason = errorString
+                
+                if validationError.reason.contains("'itemName'") {
+                    validationErrorReason += "Name must not be blank.\n\n"
+                }
+                
+                if validationError.reason.contains("'itemColor'") {
+                    validationErrorReason += "Colour must not be blank.\n\n"
+                }
+                
+                if validationError.reason.contains("'itemGender'") {
+                    validationErrorReason += "Gender must not be blank.\n\n"
+                }
+                
+                if validationError.reason.contains("'itemPrice'") {
+                    validationErrorReason += "Price must not be negative.\n\n"
+                }
+                
+                if validationErrorReason != errorString {
+                    throw Abort(.badRequest, reason: validationErrorReason)
+                }
+            }
+        }
+        
+        
         
         return item.save(on: req)
     }
@@ -175,5 +209,14 @@ struct SUItemController: RouteCollection {
                             
                             return item.years.detach(year, on: req).transform(to: HTTPStatus.noContent)
         }
+    }
+    
+    // Data structs
+    struct SUItemData: Content {
+        let name: String
+        let description: String?
+        let color: String
+        let gender: String
+        
     }
 }

@@ -35,7 +35,7 @@
                                 <label for="itemName">Name</label>
                                 <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Name" #if(editing) {value="#(item.itemName)"} required />
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Item name is required</p>
+                                    <p>Name is required</p>
                                 </div>
                             </div>
                             
@@ -67,7 +67,7 @@
                             <div class="form-group">
                                 <label for="itemPrice">Price</label>
                                 <input class="form-control p-2" type="number" step="any" min="0" name="itemPrice" id="itemPrice" placeholder="0.00" #if(editing) {value="#(item.itemPrice)"} required />
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>Price is required</p>
                                 </div>
                             </div>
@@ -80,31 +80,42 @@
                                     <option value=#(category.id) #if(category.id == item.categoryID) {selected="selected"}>#(category.categoryName)</option>
                                     }
                                 </select>
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>Category is required</p>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="itemYears">Years</label>
-                                <select multiple class="custom-select form-control" id="itemYears" name="itemYears" required>
+                                <select multiple class="custom-select form-control" id="itemYears" name="itemYears" size="6" required>
                                     #for(school in schoolYears) {
                                         #for(year in school) {
                                         <option value=#(year.id) #if(contains(selectedYears, year.id)) {selected="selected"}>#(year.yearName)</option>
                                         }
                                     }
                                 </select>
-                                <span><small>(hold ctrl or cmd and click to select mulitple years)</small></span>
-                                <div class="invalid-feedback">
+                                <span>(hold ctrl or cmd and click to select mulitple years)</span>
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>At least one year is required</p>
                                 </div>
                             </div>
                             
-                            
+                            <div class="form-group">
+                                <label for="itemSizes">Sizes</label>
+                                <select multiple class="custom-select form-control" id="itemSizes" name="itemSizes" size="6" required>
+                                    #for(size in sizes) {
+                                    <option value=#(size.id) #if(contains(selectedSizes, size.id)) {selected="selected"}>#(size.sizeName)</option>
+                                    }
+                                </select>
+                                <span>(hold ctrl or cmd and click to select mulitple sizes)</span>
+                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                    <p>At least one size is required</p>
+                                </div>
+                            </div>
                             
                             <div class="input-group">
                                 <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
-                                <input class="btn btn-primary #if(editing) {item-update-submit } else {item-create-submit } mt-3 mb-3" name="itemSubmit" type="submit" value="#if(editing) {Update} else {Create}">
+                                <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit } else {item-create-submit}"type="submit" value="#if(editing) {Update} else {Create}">
                             </div
                             
                         </div>
