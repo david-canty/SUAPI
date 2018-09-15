@@ -12,7 +12,7 @@ struct SUItemAdminController: RouteCollection {
         
         redirectProtectedRoutes.get("create", use: createItemHandler)
         redirectProtectedRoutes.get(use: itemsHandler)
-        //redirectProtectedRoutes.get(SUItem.parameter, "edit", use: editItemHandler)
+        redirectProtectedRoutes.get(SUItem.parameter, "edit", use: editItemHandler)
     }
     
     // CRUD handlers
@@ -62,16 +62,40 @@ struct SUItemAdminController: RouteCollection {
         }
     }
     
-//    func editCategoryHandler(_ req: Request) throws -> Future<View> {
-//
-//        return try req.parameters.next(SUCategory.self).flatMap(to: View.self) { category in
-//
-//            let user = try req.requireAuthenticated(SUUser.self)
-//            let context = EditCategoryContext(authenticatedUser: user, category: category)
-//
-//            return try req.view().render("category", context)
-//        }
-//    }
+    func editItemHandler(_ req: Request) throws -> Future<View> {
+
+        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+
+            return SUCategory.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { categories in
+                
+                return SUSchool.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { schools in
+                    
+                    var schoolYears: [EventLoopFuture<[SUYear]>] = []
+                    for school in schools {
+                        
+                        let years = try school.years.query(on: req).sort(\.sortOrder, .ascending).all()
+                        schoolYears.append(years)
+                    }
+                    
+                    let itemYears = try item.years.query(on: req).all()
+                    
+                    return SUSize.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { sizes in
+                        
+                        let itemSizes = try item.sizes.query(on: req).all()
+                        
+                        let genders = [Gender(name: "Boys", isSelected: item.itemGender == "Boys"),
+                                       Gender(name: "Girls", isSelected: item.itemGender == "Girls"),
+                                       Gender(name: "Unisex", isSelected: item.itemGender == "Unisex")]
+                        
+                        let user = try req.requireAuthenticated(SUUser.self)
+                        let context = EditItemContext(authenticatedUser: user, item: item, categories: categories, genders: genders, schoolYears: schoolYears, selectedYears: itemYears, sizes: sizes, selectedSizes: itemSizes)
+                        
+                        return try req.view().render("item", context)
+                    }
+                }
+            }
+        }
+    }
     
     // Contexts
     struct CreateItemContext: Encodable {
@@ -107,8 +131,8 @@ struct SUItemAdminController: RouteCollection {
         let categories: [SUCategory]
         let genders: [Gender]
         let schoolYears: [EventLoopFuture<[SUYear]>]
-        let selectedYears: [UUID]
+        let selectedYears: EventLoopFuture<[SUYear]>
         let sizes: [SUSize]
-        let selectedSizes: [UUID]
+        let selectedSizes: EventLoopFuture<[SUSize]>
     }
 }

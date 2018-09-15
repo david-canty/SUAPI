@@ -90,7 +90,7 @@
                                 <select multiple class="custom-select form-control" id="itemYears" name="itemYears[]" size="6" required>
                                     #for(school in schoolYears) {
                                         #for(year in school) {
-                                        <option value="#(year.id)" #if(contains(selectedYears, year.id)) {selected="selected"}>#(year.yearName)</option>
+                                        <option value="#(year.id)" #if(contains(selectedYears, year)) {selected="selected"}>#(year.yearName)</option>
                                         }
                                     }
                                 </select>
@@ -104,7 +104,7 @@
                                 <label for="itemSizes">Sizes</label>
                                 <select multiple class="custom-select form-control" id="itemSizes" name="itemSizes[]" size="6" required>
                                     #for(size in sizes) {
-                                    <option value="#(size.id)" #if(contains(selectedSizes, size.id)) {selected="selected"}>#(size.sizeName)</option>
+                                    <option value="#(size.id)" #if(contains(selectedSizes, size)) {selected="selected"}>#(size.sizeName)</option>
                                     }
                                 </select>
                                 <span>(hold ctrl or cmd and click to select mulitple sizes)</span>

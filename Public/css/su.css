@@ -119,6 +119,11 @@ input[type="file"] {
     padding: 0;
 }
 
+a.category-items-header span {
+    color: #D52422;
+    font-size: 0.75em;
+}
+
 #itemForm label,
 legend,
 #itemStockForm label {

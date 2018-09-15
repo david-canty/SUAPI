@@ -4,7 +4,6 @@ import Foundation
 final class SUItemYear: MySQLUUIDPivot, ModifiablePivot {
     
     var id: UUID?
-    var timestamp: String?
     
     var itemID: SUItem.ID
     var yearID: SUSize.ID
@@ -18,13 +17,11 @@ final class SUItemYear: MySQLUUIDPivot, ModifiablePivot {
     init(_ itemID: SUItem.ID, _ yearID: SUYear.ID) {
         self.itemID = itemID
         self.yearID = yearID
-        self.timestamp = String(describing: Date())
     }
     
     init(_ item: SUItem, _ year: SUYear) throws {
         self.itemID = try item.requireID()
         self.yearID = try year.requireID()
-        self.timestamp = String(describing: Date())
     }
 }
 
@@ -37,7 +34,7 @@ extension SUItemYear: Migration {
             try addProperties(to: builder)
             
             builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
-            builder.reference(from: \.yearID, to: \SUYear.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.yearID, to: \SUYear.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }
 }

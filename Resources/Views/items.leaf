@@ -21,7 +21,7 @@
                         #for(categoryAndItems in itemsByCategory) {
                         
                             <h3>
-                                <a class="category-items-header" data-toggle="collapse" href="#items-#(categoryAndItems.category.id)" role="button" aria-expanded="true" aria-controls="#items-#(categoryAndItems.category.id)-items">#(categoryAndItems.category.categoryName)</a>
+                                <a class="category-items-header" data-toggle="collapse" href="#items-#(categoryAndItems.category.id)" role="button" aria-expanded="true" aria-controls="#items-#(categoryAndItems.category.id)-items">#(categoryAndItems.category.categoryName)<span> (#(count(categoryAndItems.items)) #if(count(categoryAndItems.items) == 1) {item} else {items})</span></a>
                             </h3>
                             
                             <div class="collapse show" id="items-#(categoryAndItems.category.id)">
@@ -71,9 +71,12 @@
                         
                         <h2>No Items</h2>
                     }
-                    
+                
                 </div>
+                
             </div>
+            
+            <br/>
             
             <div class="modal fade" id="item-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
