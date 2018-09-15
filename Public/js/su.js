@@ -610,7 +610,7 @@ $(document).ready(function() {
     
     // Item update submit
     $('#item-update-submit').click(function(e) {
-        
+
         e.preventDefault();
         
         var form = $(this).closest('form');

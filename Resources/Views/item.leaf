@@ -41,7 +41,7 @@
                             
                             <div class="form-group">
                                 <label for="itemDescription">Description</label>
-                                <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(itemDescription)"} />
+                                <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(item.itemDescription)"} />
                             </div>
                             
                             <div class="form-group">
@@ -115,7 +115,7 @@
                             
                             <div class="input-group">
                                 <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
-                                <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit } else {item-create-submit}"type="submit" value="#if(editing) {Update} else {Create}">
+                                <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit} else {item-create-submit}" type="submit" value="#if(editing) {Update} else {Create}">
                             </div
                             
                         </div>

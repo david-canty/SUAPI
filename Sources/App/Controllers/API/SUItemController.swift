@@ -126,17 +126,57 @@ struct SUItemController: RouteCollection {
     
     func updateHandler(_ req: Request) throws -> Future<SUItem> {
         
-        return try flatMap(to: SUItem.self, req.parameters.next(SUItem.self), req.content.decode(SUItem.self)) { item, updatedItem in
+        return try flatMap(to: SUItem.self, req.parameters.next(SUItem.self), req.content.decode(SUItemData.self)) { item, updatedItemData in
             
-            item.itemName = updatedItem.itemName
-            item.itemDescription = updatedItem.itemDescription
-            item.itemColor = updatedItem.itemColor
-            item.itemGender = updatedItem.itemGender
-            item.itemPrice = updatedItem.itemPrice
-            item.categoryID = updatedItem.categoryID
-            item.timestamp = String(describing: Date())
+            item.itemName = updatedItemData.itemName
+            item.itemDescription = updatedItemData.itemDescription
+            item.itemColor = updatedItemData.itemColor
+            item.itemGender = updatedItemData.itemGender
+            item.itemPrice = updatedItemData.itemPrice
+            item.categoryID = updatedItemData.categoryId
             
-            return item.update(on: req)
+            do {
+                
+                try item.validate()
+                item.timestamp = String(describing: Date())
+                
+            } catch {
+                
+                if let validationError = error as? ValidationError {
+                    
+                    let errorString = "Error updating item:\n\n"
+                    var validationErrorReason = errorString
+                    
+                    if validationError.reason.contains("'itemName'") {
+                        validationErrorReason += "Name must not be blank.\n\n"
+                    }
+                    
+                    if validationError.reason.contains("'itemColor'") {
+                        validationErrorReason += "Colour must not be blank.\n\n"
+                    }
+                    
+                    if validationError.reason.contains("'itemGender'") {
+                        validationErrorReason += "Gender must not be blank.\n\n"
+                    }
+                    
+                    if validationError.reason.contains("'itemPrice'") {
+                        validationErrorReason += "Price must not be negative.\n\n"
+                    }
+                    
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
+                    }
+                }
+            }
+            
+            return item.update(on: req).do() { item in
+                
+                
+                
+            }.catch() { error in
+                
+                print("Error updating item: (error)")
+            }
         }
     }
     
@@ -240,6 +280,7 @@ struct SUItemController: RouteCollection {
     
     // Data structs
     struct SUItemData: Content {
+        
         let itemName: String
         let itemDescription: String?
         let itemGender: String
