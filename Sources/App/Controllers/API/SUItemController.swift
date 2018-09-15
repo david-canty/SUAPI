@@ -81,38 +81,15 @@ struct SUItemController: RouteCollection {
             }
         }
         
-        return item.save(on: req).do() { item in
-            
-            // Add years
-            for yearId in itemData.itemYears {
-                
-                _ = SUYear.find(yearId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding year")).do() { year in
-                    
-                    _ = item.years.attach(year, on: req)
-                    
-                }.catch() { error in
-                
-                    print("Error attaching year to item: \(error)")
-                }
-            }
-            
-            // Add sizes
-            for sizeId in itemData.itemSizes {
-                
-                _ = SUSize.find(sizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding size")).do() { size in
-                    
-                    _ = item.sizes.attach(size, on: req)
-                    
-                    }.catch() { error in
-                        
-                        print("Error attaching size to item: \(error)")
-                }
-            }
-            
-        }.catch() { error in
-         
-            print("Error saving item: \(error)")
+        var yearSaveResults: [Future<SUItemYear>] = []
+        
+        for yearId in itemData.itemYears {
+            let year = SUYear.find(yearId, on: req).unwrap(or: Abort(.badRequest, reason: "Error finding year"))
+            let pivot = try SUItemYear(item.requireID(), year.requireID())
+            pivot.timestamp = String(describing: Date())
         }
+        
+        return item.save(on: req)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[SUItem]> {
@@ -163,6 +140,7 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUSize.self)) { item, size in
                             
                             let pivot = try SUItemSize(item.requireID(), size.requireID())
+                            pivot.timestamp = String(describing: Date())
                             return pivot.save(on: req).transform(to: .created)
                             
                             //return item.sizes.attach(size, on: req).transform(to: .created)
@@ -202,6 +180,7 @@ struct SUItemController: RouteCollection {
             return pivot.flatMap(to: HTTPStatus.self) { itemSize in
                 
                 itemSize?.itemSizeStock = stock
+                itemSize?.timestamp = String(describing: Date())
                 
                 return (itemSize?.save(on: req).transform(to: HTTPStatus.ok))!
             }
@@ -216,6 +195,7 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUYear.self)) { item, year in
                             
                             let pivot = try SUItemYear(item.requireID(), year.requireID())
+                            pivot.timestamp = String(describing: Date())
                             
                             return pivot.save(on: req).transform(to: .created)
         }
