@@ -171,7 +171,43 @@ struct SUItemController: RouteCollection {
             
             return item.update(on: req).do() { item in
                 
+                _ = item.years.detachAll(on: req).do {
+                    
+                    for yearId in updatedItemData.itemYears {
+                        
+                        _ = SUYear.find(yearId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding year")).do() { year in
+                            
+                            _ = item.years.attach(year, on: req)
+                            
+                            }.catch() { error in
+                                
+                                print("Error attaching year to item: (error)")
+                        }
+                    }
+                    
+                }.catch() { error in
+                    
+                    print("Error detaching years from item: \(error)")
+                }
                 
+                _ = item.sizes.detachAll(on: req).do {
+                
+                    for sizeId in updatedItemData.itemSizes {
+                        
+                        _ = SUSize.find(sizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding size")).do() { size in
+                            
+                            _ = item.sizes.attach(size, on: req)
+                            
+                            }.catch() { error in
+                                
+                                print("Error attaching size to item: (error)")
+                        }
+                    }
+                    
+                }.catch() { error in
+                    
+                    print("Error detaching sizes from item: \(error)")
+                }
                 
             }.catch() { error in
                 
