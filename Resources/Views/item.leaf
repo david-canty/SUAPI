@@ -31,20 +31,20 @@
                         
                         <div class="validation-wrapper">
                             
-                            <div class="form-group">
-                                <label for="itemName">Name</label>
+                            <label for="itemName">Name</label>
+                            <div class="input-group mb-2">
                                 <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Name" #if(editing) {value="#(item.itemName)"} required />
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>Name is required</p>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="itemDescription">Description</label>
+                            <label for="itemDescription">Description</label>
+                            <div class="input-group mb-2">
                                 <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(item.itemDescription)"} />
                             </div>
                             
-                            <div class="form-group">
+                            <div class="input-group mb-2">
                                 <fieldset>
                                     <legend>Gender</legend>
                                     #for(gender in genders) {
@@ -56,24 +56,27 @@
                                 </fieldset>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="itemColor">Colour</label>
+                            <label for="itemColor">Colour</label>
+                            <div class="input-group mb-2">
                                 <input class="form-control p-2" type="text" name="itemColor" id="itemColor" placeholder="Colour" #if(editing) {value="#(item.itemColor)"} required />
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>Colour is required</p>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="itemPrice">Price</label>
+                            <label for="itemPrice">Price</label>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">&pound;</span>
+                                </div>
                                 <input class="form-control p-2" type="number" step="any" min="0" name="itemPrice" id="itemPrice" placeholder="0.00" #if(editing) {value="#(item.itemPrice)"} required />
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Price is required</p>
+                                    <p>Valid price is required</p>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="categoryId">Category</label>
+                            <label for="categoryId">Category</label>
+                            <div class="input-group mb-2">
                                 <select class="custom-select form-control" id="categoryId" name="categoryId" required>
                                     <option value="">Select</option>
                                     #for(category in categories) {
@@ -85,8 +88,8 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="itemYears">Years</label>
+                            <label for="itemYears">Years</label>
+                            <div class="input-group mb-2">
                                 <select multiple class="custom-select form-control" id="itemYears" name="itemYears[]" size="6" required>
                                     #for(school in schoolYears) {
                                         #for(year in school) {
@@ -94,26 +97,26 @@
                                         }
                                     }
                                 </select>
-                                <span>(hold ctrl or cmd and click to select mulitple years)</span>
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>At least one year is required</p>
                                 </div>
                             </div>
+                            <p><span>(hold ctrl or cmd and click to select mulitple years)</span></p>
                             
-                            <div class="form-group">
-                                <label for="itemSizes">Sizes</label>
+                            <label for="itemSizes">Sizes</label>
+                            <div class="input-group mb-2">
                                 <select multiple class="custom-select form-control" id="itemSizes" name="itemSizes[]" size="6" required>
                                     #for(size in sizes) {
                                     <option value="#(size.id)" #if(contains(selectedSizes, size)) {selected="selected"}>#(size.sizeName)</option>
                                     }
                                 </select>
-                                <span>(hold ctrl or cmd and click to select mulitple sizes)</span>
                                 <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
                                     <p>At least one size is required</p>
                                 </div>
                             </div>
+                            <p><span>(hold ctrl or cmd and click to select mulitple sizes)</span></p>
                             
-                            <div class="input-group">
+                            <div class="input-group mb-2">
                                 <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
                                 <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit} else {item-create-submit}" type="submit" value="#if(editing) {Update} else {Create}">
                             </div

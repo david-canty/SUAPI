@@ -134,6 +134,16 @@ legend,
     font-weight: normal;
 }
 
+#itemForm span {
+    font-size: 1em;
+    font-style: italic;
+}
+
+#itemForm .input-group-text {
+    font-size: 0.75em;
+    font-style: normal;
+}
+
 .alert p,
 .invalid-feedback p {
     font-size: 0.75em;
@@ -195,11 +205,6 @@ ol.breadcrumb {
 #pagination span {
     color: #5054A1;
     font-size: 0.75em;
-}
-
-#itemForm span {
-    font-size: 0.75em;
-    font-style: italic;
 }
 
 .btn-toolbar .btn-link {
