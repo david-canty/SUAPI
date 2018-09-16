@@ -141,7 +141,10 @@ struct SUYearController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUYear.self).delete(on: req).transform(to: HTTPStatus.noContent)
+        return try req.parameters.next(SUYear.self).delete(on: req).transform(to: HTTPStatus.noContent).catchMap() { error in
+            
+            throw Abort(.conflict, reason: "Error deleting year:\n\nCannot delete this year because it contains uniform items. If you wish to delete this year, assign the related uniform items to another year.")
+        }
     }
     
     // School

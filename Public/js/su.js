@@ -130,6 +130,8 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
+                 
+            $(location).attr('href','/schools');
         });
     });
     
@@ -263,6 +265,8 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
+                 
+            location.reload(true);
         });
     });
     
@@ -394,6 +398,8 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
+            
+            $(location).attr('href','/categories');
         });
     });
     
@@ -569,6 +575,8 @@ $(document).ready(function() {
             var validationErrorString = responseJSON.reason;
             
             alert(validationErrorString);
+                 
+            $(location).attr('href','/sizes');
         });
     });
     

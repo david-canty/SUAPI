@@ -136,7 +136,10 @@ struct SUSchoolController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUSchool.self).delete(on: req).transform(to: HTTPStatus.noContent)
+        return try req.parameters.next(SUSchool.self).delete(on: req).transform(to: HTTPStatus.noContent).catchMap() { error in
+            
+            throw Abort(.conflict, reason: "Error deleting school:\n\nCannot delete this school because it contains school years. If you wish to delete this school, assign the related years to another school.")
+        }
     }
     
     // Years

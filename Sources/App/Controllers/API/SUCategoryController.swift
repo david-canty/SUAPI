@@ -136,7 +136,10 @@ struct SUCategoryController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUCategory.self).delete(on: req).transform(to: HTTPStatus.noContent)
+        return try req.parameters.next(SUCategory.self).delete(on: req).transform(to: HTTPStatus.noContent).catchMap() { error in
+                
+            throw Abort(.conflict, reason: "Error deleting category:\n\nCannot delete this category because it contains uniform items. If you wish to delete this category, assign the related uniform items to another category.")
+        }
     }
     
     // Items
