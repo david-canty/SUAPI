@@ -38,7 +38,7 @@
                             <input class="form-control" type="hidden" name="itemSizeIds[]" value="#(itemSizeWithSize.itemSize.id)" />
                             <input class="form-control" type="number" min="0" name="itemSizeStocks[]" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
                             <div class="invalid-feedback">
-                                <p>Stock value is required</p>
+                                <p>Valid stock value is required</p>
                             </div>
                         </div>
                         

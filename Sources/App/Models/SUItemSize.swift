@@ -1,5 +1,6 @@
 import FluentMySQL
 import Foundation
+import Vapor
 
 final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
     
@@ -37,5 +38,15 @@ extension SUItemSize: Migration {
             builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
             builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
+    }
+}
+
+extension SUItemSize: Validatable {
+    
+    static func validations() throws -> Validations<SUItemSize> {
+        
+        var validations = Validations(SUItemSize.self)
+        try validations.add(\.itemSizeStock, .range(0...))
+        return validations
     }
 }
