@@ -677,7 +677,7 @@ $(document).ready(function() {
         processData: false,
         success: function(response) {
 
-            window.location.href = baseUrl + "/items";
+            $(location).attr('href', '/items');
 
         }}).fail(function(xhr, ajaxOptions, thrownError) {
 

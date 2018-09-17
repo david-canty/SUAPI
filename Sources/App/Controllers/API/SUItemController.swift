@@ -270,38 +270,19 @@ struct SUItemController: RouteCollection {
             let itemSizeIds = itemSizeStockData.itemSizeIds
             let itemSizeStocks = itemSizeStockData.itemSizeStocks
             
-            .filter(\.id ~~ [1, 2, 3, 4])
-            
-//            for (index, itemSizeId) in itemSizeIds.enumerated() {
-//
-//                _ = SUItemSize.find(itemSizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding item_size")).do() { itemSize in
-//
-//                    itemSize.itemSizeStock = itemSizeStocks[index]
-//
-//                }.catch() { error in
-//
-//                    print("Error saving item_size: \(error)")
-//                }
-//            }
-            
-            return item.save(on: req).transform(to: HTTPStatus.ok)
+            return SUItemSize.query(on: req).filter(\SUItemSize.id ~~ itemSizeIds).all().flatMap(to: HTTPStatus.self) { itemSizes in
+                
+                var itemSizeSaveResults: [Future<SUItemSize>] = []
+                
+                for itemSize in itemSizes {
+                    let idIndex = itemSizeIds.index(of: itemSize.id!)!
+                    itemSize.itemSizeStock = itemSizeStocks[idIndex]
+                    itemSizeSaveResults.append(itemSize.update(on: req))
+                }
+                
+                return itemSizeSaveResults.flatten(on: req).transform(to: HTTPStatus.ok)
+            }
         }
-        
-//        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, stockData in
-//
-////            let pivot = try SUItemSize.query(on: req)
-////                .filter(\.itemID == item.requireID())
-////                .filter(\.sizeID == size.requireID())
-////                .first()
-////
-////            return pivot.flatMap(to: HTTPStatus.self) { itemSize in
-////
-////                itemSize!.itemSizeStock = stock
-////
-////                return (itemSize!.save(on: req).transform(to: HTTPStatus.ok))
-////            }
-//            return HTTPStatus.ok
-//        }
     }
     
     // Years
