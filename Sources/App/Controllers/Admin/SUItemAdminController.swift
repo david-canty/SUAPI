@@ -105,13 +105,13 @@ struct SUItemAdminController: RouteCollection {
             
             return try SUItemSize.query(on: req).filter(\.itemID == item.requireID()).all().flatMap(to: View.self) { itemSizes in
                 
-                return try item.siblings(related: SUSize.self, through: SUItemSize.self).query(on: req).all().flatMap(to: View.self) { sizes in
+                return try item.siblings(related: SUSize.self, through: SUItemSize.self).query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { sizes in
                     
                     var itemSizesWithSizes = [ItemSizeWithSize]()
-                    for itemSize in itemSizes {
+                    for size in sizes {
                      
-                        let size = sizes.filter{ $0.id == itemSize.sizeID }.first
-                        let itemSizeWithSize = ItemSizeWithSize(itemSize: itemSize, size: size!)
+                        let itemSize = itemSizes.filter{ $0.sizeID == size.id }.first
+                        let itemSizeWithSize = ItemSizeWithSize(itemSize: itemSize!, size: size)
                         itemSizesWithSizes.append(itemSizeWithSize)
                     }
                     

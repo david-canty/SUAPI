@@ -27,7 +27,7 @@
             
             <div class="row">
                 
-                <div class="col">
+                <div class="col-4">
                     
                     <form action="" method="" id="itemStockForm" novalidate>
                         
@@ -35,7 +35,7 @@
                         
                         <label for="itemSizeId#(itemSizeWithSize.itemSize.id)">#(itemSizeWithSize.size.sizeName)</label>
                         <div class="input-group mb-2">
-                            <input class="form-control stock-qty" type="number" min="0" name="itemSizeId#(itemSizeWithSize.itemSize.id)" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
+                            <input class="form-control" type="number" min="0" name="itemSizeId#(itemSizeWithSize.itemSize.id)" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
                             <div class="invalid-feedback">
                                 <p>Stock value is required</p>
                             </div>
