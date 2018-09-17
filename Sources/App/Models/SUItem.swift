@@ -74,4 +74,9 @@ extension SUItem {
         
         return siblings()
     }
+    
+    var images: Children<SUItem, SUImage> {
+        
+        return children(\.itemID)
+    }
 }
