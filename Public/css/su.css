@@ -126,7 +126,7 @@ a.category-items-header span {
 
 #itemForm label,
 legend,
-#itemStockForm label {
+#item-stock-container form label {
     font-weight: bold;
 }
 

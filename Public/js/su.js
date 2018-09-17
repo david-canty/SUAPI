@@ -653,6 +653,43 @@ $(document).ready(function() {
         });
     });
     
+    // Item stock update submit
+    $( "#item-stock-container" ).on( "click", "#item-stock-submit", function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var itemId = form.data('id');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        var formData = new FormData(form[0]);
+                     
+        $.ajax({
+        url: baseUrl + "/items/" + itemId + "/stock",
+        type: "PATCH",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+
+            window.location.href = baseUrl + "/items";
+
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
     // Item delete submit
     $('#items-container').on('click', '.item-delete-submit', function(e) {
         

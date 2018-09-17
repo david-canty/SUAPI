@@ -29,13 +29,14 @@
                 
                 <div class="col-4">
                     
-                    <form action="" method="" id="itemStockForm" novalidate>
+                    <form action="" method="" id="itemStockForm" data-id="#(item.id)" enctype="multipart/form-data" novalidate>
                         
                         #for(itemSizeWithSize in itemSizesWithSizes) {
                         
                         <label for="itemSizeId#(itemSizeWithSize.itemSize.id)">#(itemSizeWithSize.size.sizeName)</label>
                         <div class="input-group mb-2">
-                            <input class="form-control" type="number" min="0" name="itemSizeId#(itemSizeWithSize.itemSize.id)" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
+                            <input class="form-control" type="hidden" name="itemSizeIds[]" value="#(itemSizeWithSize.itemSize.id)" />
+                            <input class="form-control" type="number" min="0" name="itemSizeStocks[]" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
                             <div class="invalid-feedback">
                                 <p>Stock value is required</p>
                             </div>
@@ -45,7 +46,7 @@
                         
                         <div class="input-group mb-2">
                             <input class="btn btn-primary stock-cancel-submit mt-3 mb-3 mr-2" name="stockCancel" type="submit" value="Cancel" formaction="/items">
-                            <input class="btn btn-primary stock-save-submit mt-3 mb-3 mr-2" name="stockSave" type="submit" data-id="#(item.id)" value="Save">
+                            <input class="btn btn-primary mt-3 mb-3 mr-2" name="stockSave" id="item-stock-submit" type="submit" value="Save">
                         </div>
                                 
                     </form>

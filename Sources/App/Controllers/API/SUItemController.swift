@@ -35,7 +35,7 @@ struct SUItemController: RouteCollection {
         redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
         // Stock
-        redirectProtectedGroup.patch(SUItem.parameter, "sizes", SUSize.parameter, "stock", Int.parameter, use: updateStockHandler)
+        redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
         
         // Years
         redirectProtectedGroup.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
@@ -91,7 +91,7 @@ struct SUItemController: RouteCollection {
                 
                 }.catch() { error in
                     
-                    print("Error attaching year to item: (error)")
+                    print("Error attaching year to item: \(error)")
                 }
             }
             
@@ -103,13 +103,13 @@ struct SUItemController: RouteCollection {
                     
                 }.catch() { error in
                         
-                    print("Error attaching size to item: (error)")
+                    print("Error attaching size to item: \(error)")
                 }
             }
             
         }.catch() { error in
             
-            print("Error saving item: (error)")
+            print("Error saving item: \(error)")
         }
 
     }
@@ -181,7 +181,7 @@ struct SUItemController: RouteCollection {
                             
                             }.catch() { error in
                                 
-                                print("Error attaching year to item: (error)")
+                                print("Error attaching year to item: \(error)")
                         }
                     }
                     
@@ -200,7 +200,7 @@ struct SUItemController: RouteCollection {
                             
                             }.catch() { error in
                                 
-                                print("Error attaching size to item: (error)")
+                                print("Error attaching size to item: \(error)")
                         }
                     }
                     
@@ -211,7 +211,7 @@ struct SUItemController: RouteCollection {
                 
             }.catch() { error in
                 
-                print("Error updating item: (error)")
+                print("Error updating item: \(error)")
             }
         }
     }
@@ -265,22 +265,43 @@ struct SUItemController: RouteCollection {
     // Stock
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
     
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUSize.self)) { item, size in
-                            
-            let stock = try req.parameters.next(Int.self)
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemSizeStockData in
             
-            let pivot = try SUItemSize.query(on: req)
-                .filter(\.itemID == item.requireID())
-                .filter(\.sizeID == size.requireID())
-                .first()
+            let itemSizeIds = itemSizeStockData.itemSizeIds
+            let itemSizeStocks = itemSizeStockData.itemSizeStocks
             
-            return pivot.flatMap(to: HTTPStatus.self) { itemSize in
-                
-                itemSize?.itemSizeStock = stock
-                
-                return (itemSize?.save(on: req).transform(to: HTTPStatus.ok))!
-            }
+            .filter(\.id ~~ [1, 2, 3, 4])
+            
+//            for (index, itemSizeId) in itemSizeIds.enumerated() {
+//
+//                _ = SUItemSize.find(itemSizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding item_size")).do() { itemSize in
+//
+//                    itemSize.itemSizeStock = itemSizeStocks[index]
+//
+//                }.catch() { error in
+//
+//                    print("Error saving item_size: \(error)")
+//                }
+//            }
+            
+            return item.save(on: req).transform(to: HTTPStatus.ok)
         }
+        
+//        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, stockData in
+//
+////            let pivot = try SUItemSize.query(on: req)
+////                .filter(\.itemID == item.requireID())
+////                .filter(\.sizeID == size.requireID())
+////                .first()
+////
+////            return pivot.flatMap(to: HTTPStatus.self) { itemSize in
+////
+////                itemSize!.itemSizeStock = stock
+////
+////                return (itemSize!.save(on: req).transform(to: HTTPStatus.ok))
+////            }
+//            return HTTPStatus.ok
+//        }
     }
     
     // Years
@@ -325,5 +346,10 @@ struct SUItemController: RouteCollection {
         let categoryId: UUID
         let itemYears: [UUID]
         let itemSizes: [UUID]
+    }
+    
+    struct SUItemStockData: Content {
+        let itemSizeIds: [UUID]
+        let itemSizeStocks: [Int]
     }
 }
