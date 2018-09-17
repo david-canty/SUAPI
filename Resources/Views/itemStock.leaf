@@ -1,0 +1,63 @@
+#set("content") {
+
+    #embed("navigation")
+
+    <div class="container mt-3">
+        
+        <div id="item-stock-container">
+            
+            <div class="row">
+                <div class="col">
+                    <nav class="breadcrumb" aria-label="breadcrumb">
+                        <ol class="breadcrumb m-0 mt-1 mb-3 p-0">
+                            <li class="breadcrumb-item"><a href="/items">Items</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">#(item.itemName)</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="row">
+                
+                <div class="col">
+                    <h1>#(title)</h1>
+                </div>
+                
+            </div>
+            
+            <div class="row">
+                
+                <div class="col">
+                    
+                    <form action="" method="" id="itemStockForm" novalidate>
+                        
+                        #for(itemSizeWithSize in itemSizesWithSizes) {
+                        
+                        <label for="itemSizeId#(itemSizeWithSize.itemSize.id)">#(itemSizeWithSize.size.sizeName)</label>
+                        <div class="input-group mb-2">
+                            <input class="form-control stock-qty" type="number" min="0" name="itemSizeId#(itemSizeWithSize.itemSize.id)" id="itemSizeId#(itemSizeWithSize.itemSize.id)" value="#(itemSizeWithSize.itemSize.itemSizeStock)" aria-label="Stock Level" required>
+                            <div class="invalid-feedback">
+                                <p>Stock value is required</p>
+                            </div>
+                        </div>
+                        
+                        }
+                        
+                        <div class="input-group mb-2">
+                            <input class="btn btn-primary stock-cancel-submit mt-3 mb-3 mr-2" name="stockCancel" type="submit" value="Cancel" formaction="/items">
+                            <input class="btn btn-primary stock-save-submit mt-3 mb-3 mr-2" name="stockSave" type="submit" data-id="#(item.id)" value="Save">
+                        </div>
+                                
+                    </form>
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+
+}
+
+#embed("base")

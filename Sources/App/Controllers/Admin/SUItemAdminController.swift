@@ -13,6 +13,7 @@ struct SUItemAdminController: RouteCollection {
         redirectProtectedRoutes.get("create", use: createItemHandler)
         redirectProtectedRoutes.get(use: itemsHandler)
         redirectProtectedRoutes.get(SUItem.parameter, "edit", use: editItemHandler)
+        redirectProtectedRoutes.get(SUItem.parameter, "stock", use: itemStockHandler)
     }
     
     // CRUD handlers
@@ -97,6 +98,31 @@ struct SUItemAdminController: RouteCollection {
         }
     }
     
+    // Stock
+    func itemStockHandler(_ req: Request) throws -> Future<View> {
+        
+        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+            
+            return try SUItemSize.query(on: req).filter(\.itemID == item.requireID()).all().flatMap(to: View.self) { itemSizes in
+                
+                return try item.siblings(related: SUSize.self, through: SUItemSize.self).query(on: req).all().flatMap(to: View.self) { sizes in
+                    
+                    var itemSizesWithSizes = [ItemSizeWithSize]()
+                    for itemSize in itemSizes {
+                     
+                        let size = sizes.filter{ $0.id == itemSize.sizeID }.first
+                        let itemSizeWithSize = ItemSizeWithSize(itemSize: itemSize, size: size!)
+                        itemSizesWithSizes.append(itemSizeWithSize)
+                    }
+                    
+                    let user = try req.requireAuthenticated(SUUser.self)
+                    let context = ItemStockContext(authenticatedUser: user, item: item, itemSizesWithSizes: itemSizesWithSizes)
+                    return try req.view().render("itemStock", context)    
+                }
+            }
+        }
+    }
+    
     // Contexts
     struct CreateItemContext: Encodable {
         let title = "Create Item"
@@ -134,5 +160,17 @@ struct SUItemAdminController: RouteCollection {
         let selectedYears: EventLoopFuture<[SUYear]>
         let sizes: [SUSize]
         let selectedSizes: EventLoopFuture<[SUSize]>
+    }
+    
+    struct ItemStockContext: Encodable {
+        let title = "Item Stock"
+        let authenticatedUser: SUUser
+        let item: SUItem
+        let itemSizesWithSizes: [ItemSizeWithSize]
+    }
+    
+    struct ItemSizeWithSize: Encodable {
+        let itemSize: SUItemSize
+        let size: SUSize
     }
 }
