@@ -116,10 +116,23 @@
                             </div>
                             <p><span>(hold ctrl or cmd and click to select mulitple sizes)</span></p>
                             
+                            <label for="itemImages">Images</label>
+                            <div class="input-group mb-2">
+                                <input type="file" class="form-control" id="itemImages" name="itemImages" accept="image/*" multiple="multiple">
+                            </div>
+                            
+                            <div class="item-images">
+                                #if(count(images) > 0) {
+                                #for(image in images) {
+                                <img src="" alt="Item image" />
+                                }
+                                }
+                            </div>
+                            
                             <div class="input-group mb-2">
                                 <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
                                 <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit} else {item-create-submit}" type="submit" value="#if(editing) {Update} else {Create}">
-                            </div
+                            </div>
                             
                         </div>
                         

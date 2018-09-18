@@ -144,6 +144,14 @@ legend,
     font-style: normal;
 }
 
+.item-images img {
+    margin-top: 15px;
+    width: 100px;
+    height: 100px;
+    padding: 1px;
+    border: 1px solid #5054A1;
+}
+
 .alert p,
 .invalid-feedback p {
     font-size: 0.75em;
