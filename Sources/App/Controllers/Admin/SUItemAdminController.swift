@@ -13,6 +13,7 @@ struct SUItemAdminController: RouteCollection {
         redirectProtectedRoutes.get("create", use: createItemHandler)
         redirectProtectedRoutes.get(use: itemsHandler)
         redirectProtectedRoutes.get(SUItem.parameter, "edit", use: editItemHandler)
+        redirectProtectedRoutes.get(SUItem.parameter, "images", use: itemImagesHandler)
         redirectProtectedRoutes.get(SUItem.parameter, "stock", use: itemStockHandler)
     }
     
@@ -98,6 +99,20 @@ struct SUItemAdminController: RouteCollection {
         }
     }
     
+    // Images
+    func itemImagesHandler(_ req: Request) throws -> Future<View> {
+
+        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+            
+            return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { images in
+                
+                let user = try req.requireAuthenticated(SUUser.self)
+                let context = ItemImagesContext(authenticatedUser: user, item: item, images: images)
+                return try req.view().render("itemImages", context)
+            }
+        }
+    }
+    
     // Stock
     func itemStockHandler(_ req: Request) throws -> Future<View> {
         
@@ -160,6 +175,13 @@ struct SUItemAdminController: RouteCollection {
         let selectedYears: EventLoopFuture<[SUYear]>
         let sizes: [SUSize]
         let selectedSizes: EventLoopFuture<[SUSize]>
+    }
+    
+    struct ItemImagesContext: Encodable {
+        let title = "Item Images"
+        let authenticatedUser: SUUser
+        let item: SUItem
+        let images: [SUImage]
     }
     
     struct ItemStockContext: Encodable {

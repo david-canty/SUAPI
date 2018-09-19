@@ -28,112 +28,95 @@
                 <div class="col-6">
                     
                     <form action="" method="" id="itemForm" #if(editing) {data-id="#(item.id)"} enctype="multipart/form-data" novalidate>
+                            
+                        <label for="itemName">Name</label>
+                        <div class="input-group mb-2">
+                            <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Name" #if(editing) {value="#(item.itemName)"} required />
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Name is required</p>
+                            </div>
+                        </div>
                         
-                        <div class="validation-wrapper">
-                            
-                            <label for="itemName">Name</label>
-                            <div class="input-group mb-2">
-                                <input class="form-control p-2" type="text" name="itemName" id="itemName" placeholder="Name" #if(editing) {value="#(item.itemName)"} required />
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Name is required</p>
+                        <label for="itemDescription">Description</label>
+                        <div class="input-group mb-2">
+                            <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(item.itemDescription)"} />
+                        </div>
+                        
+                        <div class="input-group mb-2">
+                            <fieldset>
+                                <legend>Gender</legend>
+                                #for(gender in genders) {
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="itemGender" id="itemGender#(gender.name)" value="#(gender.name)" #if(gender.isSelected) {checked="checked"}>
+                                    <label class="form-check-label" for="itemGender#(gender.name)">#(gender.name)</label>
                                 </div>
-                            </div>
-                            
-                            <label for="itemDescription">Description</label>
-                            <div class="input-group mb-2">
-                                <input class="form-control p-2" type="text" name="itemDescription" id="itemDescription" placeholder="Description" #if(editing) {value="#(item.itemDescription)"} />
-                            </div>
-                            
-                            <div class="input-group mb-2">
-                                <fieldset>
-                                    <legend>Gender</legend>
-                                    #for(gender in genders) {
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="itemGender" id="itemGender#(gender.name)" value="#(gender.name)" #if(gender.isSelected) {checked="checked"}>
-                                        <label class="form-check-label" for="itemGender#(gender.name)">#(gender.name)</label>
-                                    </div>
-                                    }
-                                </fieldset>
-                            </div>
-                            
-                            <label for="itemColor">Colour</label>
-                            <div class="input-group mb-2">
-                                <input class="form-control p-2" type="text" name="itemColor" id="itemColor" placeholder="Colour" #if(editing) {value="#(item.itemColor)"} required />
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Colour is required</p>
-                                </div>
-                            </div>
-                            
-                            <label for="itemPrice">Price</label>
-                            <div class="input-group mb-2">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">&pound;</span>
-                                </div>
-                                <input class="form-control p-2" type="number" step="any" min="0" name="itemPrice" id="itemPrice" placeholder="0.00" #if(editing) {value="#(item.itemPrice)"} required />
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Valid price is required</p>
-                                </div>
-                            </div>
-                            
-                            <label for="categoryId">Category</label>
-                            <div class="input-group mb-2">
-                                <select class="custom-select form-control" id="categoryId" name="categoryId" required>
-                                    <option value="">Select</option>
-                                    #for(category in categories) {
-                                    <option value="#(category.id)" #if(category.id == item.categoryID) {selected="selected"}>#(category.categoryName)</option>
-                                    }
-                                </select>
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Category is required</p>
-                                </div>
-                            </div>
-                            
-                            <label for="itemYears">Years</label>
-                            <div class="input-group mb-2">
-                                <select multiple class="custom-select form-control" id="itemYears" name="itemYears[]" size="6" required>
-                                    #for(school in schoolYears) {
-                                        #for(year in school) {
-                                        <option value="#(year.id)" #if(contains(selectedYears, year)) {selected="selected"}>#(year.yearName)</option>
-                                        }
-                                    }
-                                </select>
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>At least one year is required</p>
-                                </div>
-                            </div>
-                            <p><span>(hold ctrl or cmd and click to select mulitple years)</span></p>
-                            
-                            <label for="itemSizes">Sizes</label>
-                            <div class="input-group mb-2">
-                                <select multiple class="custom-select form-control" id="itemSizes" name="itemSizes[]" size="6" required>
-                                    #for(size in sizes) {
-                                    <option value="#(size.id)" #if(contains(selectedSizes, size)) {selected="selected"}>#(size.sizeName)</option>
-                                    }
-                                </select>
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>At least one size is required</p>
-                                </div>
-                            </div>
-                            <p><span>(hold ctrl or cmd and click to select mulitple sizes)</span></p>
-                            
-                            <label for="itemImages">Images</label>
-                            <div class="input-group mb-2">
-                                <input type="file" class="form-control" id="itemImages" name="itemImages" accept="image/*" multiple="multiple">
-                            </div>
-                            
-                            <div class="item-images">
-                                #if(count(images) > 0) {
-                                #for(image in images) {
-                                <img src="" alt="Item image" />
                                 }
+                            </fieldset>
+                        </div>
+                        
+                        <label for="itemColor">Colour</label>
+                        <div class="input-group mb-2">
+                            <input class="form-control p-2" type="text" name="itemColor" id="itemColor" placeholder="Colour" #if(editing) {value="#(item.itemColor)"} required />
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Colour is required</p>
+                            </div>
+                        </div>
+                        
+                        <label for="itemPrice">Price</label>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">&pound;</span>
+                            </div>
+                            <input class="form-control p-2" type="number" step="any" min="0" name="itemPrice" id="itemPrice" placeholder="0.00" #if(editing) {value="#(item.itemPrice)"} required />
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Valid price is required</p>
+                            </div>
+                        </div>
+                        
+                        <label for="categoryId">Category</label>
+                        <div class="input-group mb-2">
+                            <select class="custom-select form-control" id="categoryId" name="categoryId" required>
+                                <option value="">Select</option>
+                                #for(category in categories) {
+                                <option value="#(category.id)" #if(category.id == item.categoryID) {selected="selected"}>#(category.categoryName)</option>
                                 }
+                            </select>
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Category is required</p>
                             </div>
-                            
-                            <div class="input-group mb-2">
-                                <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
-                                <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit} else {item-create-submit}" type="submit" value="#if(editing) {Update} else {Create}">
+                        </div>
+                        
+                        <label for="itemYears">Years</label>
+                        <div class="input-group mb-2">
+                            <select multiple class="custom-select form-control" id="itemYears" name="itemYears[]" size="6" required>
+                                #for(school in schoolYears) {
+                                    #for(year in school) {
+                                    <option value="#(year.id)" #if(contains(selectedYears, year)) {selected="selected"}>#(year.yearName)</option>
+                                    }
+                                }
+                            </select>
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>At least one year is required</p>
                             </div>
-                            
+                        </div>
+                        <p><span>(hold ctrl or cmd and click to select mulitple years)</span></p>
+                        
+                        <label for="itemSizes">Sizes</label>
+                        <div class="input-group mb-2">
+                            <select multiple class="custom-select form-control" id="itemSizes" name="itemSizes[]" size="6" required>
+                                #for(size in sizes) {
+                                <option value="#(size.id)" #if(contains(selectedSizes, size)) {selected="selected"}>#(size.sizeName)</option>
+                                }
+                            </select>
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>At least one size is required</p>
+                            </div>
+                        </div>
+                        <p><span>(hold ctrl or cmd and click to select mulitple sizes)</span></p>
+                        
+                        <div class="input-group mb-2">
+                            <input class="btn btn-primary item-cancel-submit mt-3 mb-3 mr-2" name="itemCancel" type="submit" value="Cancel" formaction="/items">
+                            <input class="btn btn-primary mt-3 mb-3" name="itemSubmit" id="#if(editing) {item-update-submit} else {item-create-submit}" type="submit" value="#if(editing) {Update} else {Create}">
                         </div>
                         
                     </form>

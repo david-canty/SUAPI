@@ -125,6 +125,7 @@ a.category-items-header span {
 }
 
 #itemForm label,
+#itemImagesForm label,
 legend,
 #item-stock-container form label {
     font-weight: bold;
@@ -144,12 +145,23 @@ legend,
     font-style: normal;
 }
 
-.item-images img {
-    margin-top: 15px;
+#item-images img {
     width: 100px;
     height: 100px;
     padding: 1px;
     border: 1px solid #5054A1;
+}
+
+#item-images ul {
+    margin: 0;
+    padding: 0;
+}
+
+#item-images li {
+    float: left;
+    list-style: none;
+    margin: 10px 15px 10px 0;
+    padding: 0;
 }
 
 .alert p,

@@ -29,23 +29,19 @@
                 <div class="col-6">
                     
                     <form action="" method="" #if(editing) {data-id="#(year.id)"} novalidate>
-                        
-                        <div class="validation-wrapper">
                             
-                            <div class="form-group">
-                                <label for="yearName">Year Name</label>
-                                <input class="form-control p-2" type="text" name="yearName" id="yearName" placeholder="Year Name" #if(editing) {value="#(year.yearName)"} required />
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Year name is required</p>
-                                </div>
-                                <input type="hidden" name="schoolID" value="#(school.id)">
+                        <div class="form-group">
+                            <label for="yearName">Year Name</label>
+                            <input class="form-control p-2" type="text" name="yearName" id="yearName" placeholder="Year Name" #if(editing) {value="#(year.yearName)"} required />
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Year name is required</p>
                             </div>
-                            
-                            <div class="input-group">
-                                <input class="btn btn-primary year-cancel-submit mt-3 mb-3 mr-2" name="yearCancel" type="submit" value="Cancel" formaction="/schools/#(school.id)/years">
-                                <input class="btn btn-primary #if(editing) {year-update-submit } else {year-create-submit } mt-3 mb-3" name="yearSubmit" type="submit" value="#if(editing) {Update} else {Create}">
-                            </div
-                                        
+                            <input type="hidden" name="schoolID" value="#(school.id)">
+                        </div>
+                        
+                        <div class="input-group">
+                            <input class="btn btn-primary year-cancel-submit mt-3 mb-3 mr-2" name="yearCancel" type="submit" value="Cancel" formaction="/schools/#(school.id)/years">
+                            <input class="btn btn-primary #if(editing) {year-update-submit } else {year-create-submit } mt-3 mb-3" name="yearSubmit" type="submit" value="#if(editing) {Update} else {Create}">
                         </div>
                                         
                     </form>

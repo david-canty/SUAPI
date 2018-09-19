@@ -34,6 +34,10 @@ struct SUItemController: RouteCollection {
         redirectProtectedGroup.post(SUItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
         redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
+        // Images
+        redirectProtectedGroup.post(SUItem.parameter, "images", use: uploadImagesHandler)
+        redirectProtectedGroup.patch(SUItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
+        
         // Stock
         redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
         
@@ -262,6 +266,47 @@ struct SUItemController: RouteCollection {
         }
     }
     
+    // Images
+    func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
+        
+        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, imageFiles in
+
+            return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: [SUImage].self) { itemImages in
+                
+                let fileManager = FileManager()
+                let dirConfig = DirectoryConfig.detect()
+                let imageDir = dirConfig.workDir + "Public/images"
+                
+                var imageSaveResults: [Future<SUImage>] = []
+                
+                for file in imageFiles.itemImages {
+                    
+                    let filename = String.random() + "_" + file.filename
+                    let imageData = file.data
+                    let imageDirWithFilename = imageDir + "/\(filename)"
+                    
+                    fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil)
+                    
+                    let image = SUImage(itemID: item.id!, imageFilename: filename)
+                    image.sortOrder = itemImages.count + imageSaveResults.count
+                    
+                    imageSaveResults.append(image.save(on: req))
+                }
+                
+                return imageSaveResults.flatten(on: req)
+            }
+        }
+    }
+    
+    func updateImageSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self), req.content.decode(SUImageSortOrderData.self)) { item, image, sortOrderData in
+            
+            image.sortOrder = sortOrderData.sortOrder
+            return image.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
     // Stock
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
     
@@ -332,5 +377,28 @@ struct SUItemController: RouteCollection {
     struct SUItemStockData: Content {
         let itemSizeIds: [UUID]
         let itemSizeStocks: [Int]
+    }
+    
+    struct SUItemImageData: Content {
+        let itemImages: [File]
+    }
+    
+    struct SUImageSortOrderData: Content {
+        let sortOrder: Int
+    }
+}
+
+extension String {
+    
+    static func random(length: Int = 16) -> String {
+        
+        let base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        var randomString: String = ""
+        
+        for _ in 0..<length {
+            let randomValue = arc4random_uniform(UInt32(base.count))
+            randomString += "\(base[base.index(base.startIndex, offsetBy: Int(randomValue))])"
+        }
+        return randomString
     }
 }

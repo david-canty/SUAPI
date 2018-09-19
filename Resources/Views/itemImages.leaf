@@ -1,0 +1,80 @@
+#set("content") {
+
+    #embed("navigation")
+
+    <div class="container mt-3">
+        
+        <div id="item-images-container">
+            
+            <div class="row">
+                <div class="col">
+                    <nav class="breadcrumb" aria-label="breadcrumb">
+                        <ol class="breadcrumb m-0 mt-1 mb-3 p-0">
+                            <li class="breadcrumb-item"><a href="/items">Items</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">#(item.itemName)</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <h1>#(title)</h1>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <form action="" method="" id="itemImagesForm" data-id="#(item.id)" enctype="multipart/form-data" novalidate>
+                        <div class="form-group mt-3 mb-1">
+                            <input type="file" class="form-control-file" id="itemImages" name="itemImages[]" accept="image/png, image/jpg, image/jpeg" multiple="multiple" required />
+                            <div class="invalid-feedback alert alert-danger mt-4 mb-0 p-2" role="alert">
+                                <p>No files selected</p>
+                            </div>
+                            <input class="btn btn-primary mt-4 mb-1" name="imagesUpload" id="images-upload-submit" type="submit" value="Upload" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <hr/>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <div id="item-images" class="float-left">
+                        <ul>
+                        #for(image in images) {
+                        <li id="#(image.id)"><img src="/images/#(image.imageFilename)" alt="Item image" /></li>
+                        }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <hr/>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <form action="/items" method="">
+                        <div class="form-group mb-2">
+                            <input class="btn btn-primary mt-2 mb-3" name="imagesDone" id="images-done-submit" type="submit" value="Done" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+
+}
+
+#embed("base")

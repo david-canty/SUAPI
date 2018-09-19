@@ -46,6 +46,7 @@
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="actionButton#(item.id)">
                                                         <a class="dropdown-item" href="/items/#(item.id)/edit">Edit Item</a>
+                                                        <a class="dropdown-item" href="/items/#(item.id)/images">Item Images</a>
                                                         <a class="dropdown-item" href="/items/#(item.id)/stock">Item Stock</a>
                                                         <div class="dropdown-divider"></div>
                                                         <a class="dropdown-item" href="" data-toggle="modal" data-target="#item-delete-modal" data-id="#(item.id)">Delete Item</a>

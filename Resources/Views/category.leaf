@@ -28,22 +28,18 @@
                 <div class="col-6">
                     
                     <form action="" method="" #if(editing) {data-id="#(category.id)"} novalidate>
-                        
-                        <div class="validation-wrapper">
                             
-                            <div class="form-group">
-                                <label for="categoryName">Category Name</label>
-                                <input class="form-control p-2" type="text" name="categoryName" id="categoryName" placeholder="Category Name" #if(editing) {value="#(category.categoryName)"} required />
-                                <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
-                                    <p>Category name is required</p>
-                                </div>
+                        <div class="form-group">
+                            <label for="categoryName">Category Name</label>
+                            <input class="form-control p-2" type="text" name="categoryName" id="categoryName" placeholder="Category Name" #if(editing) {value="#(category.categoryName)"} required />
+                            <div class="invalid-feedback alert alert-danger mt-2 p-2" role="alert">
+                                <p>Category name is required</p>
                             </div>
-                            
-                            <div class="input-group">
-                                <input class="btn btn-primary category-cancel-submit mt-3 mb-3 mr-2" name="categoryCancel" type="submit" value="Cancel" formaction="/categories">
-                                <input class="btn btn-primary #if(editing) {category-update-submit } else {category-create-submit } mt-3 mb-3" name="categorySubmit" type="submit" value="#if(editing) {Update} else {Create}">
-                            </div
-                            
+                        </div>
+                        
+                        <div class="input-group">
+                            <input class="btn btn-primary category-cancel-submit mt-3 mb-3 mr-2" name="categoryCancel" type="submit" value="Cancel" formaction="/categories">
+                            <input class="btn btn-primary #if(editing) {category-update-submit } else {category-create-submit } mt-3 mb-3" name="categorySubmit" type="submit" value="#if(editing) {Update} else {Create}">
                         </div>
                             
                     </form>

@@ -652,6 +652,82 @@ $(document).ready(function() {
             alert(validationErrorString);
         });
     });
+                  
+    // Item images
+    $( "#item-images-container" ).on( "click", "#images-upload-submit", function(e) {
+        
+        e.preventDefault();
+        
+        var form = $(this).closest('form');
+        var itemId = form.data('id');
+        
+        form.addClass('was-validated');
+        if (form[0].checkValidity() === false) {
+            return false
+        }
+        
+        var formData = new FormData(form[0]);
+        
+        $.ajax({
+        url: baseUrl + '/items/' + itemId + '/images',
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            
+            location.reload(true);
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+                  
+    // Item image sort order
+    $('#item-images-container #item-images ul').sortable({ update: function(event, ui) {
+        
+        updateItemImageSortOrders();
+        
+    }}).disableSelection();
+    
+    function updateItemImageSortOrders() {
+        
+        // Get form and item id
+        var form = $('#itemImagesForm');
+        var itemId = form.data('id');
+        
+        // Get array of sorted image ids
+        var sortedImageIds = $('#item-images ul').sortable('toArray');
+        
+        // Patch each image with new sort order
+        $.each(sortedImageIds, function(index, imageId) {
+            
+            var json = {"sortOrder": index};
+            
+            $.ajax({
+            url: baseUrl + '/items/' + itemId + '/images/' + imageId + '/sort-order',
+            type: 'PATCH',
+            data: JSON.stringify(json),
+            processData: false,
+            contentType: "application/json",
+                success: function(response) {  }}).fail(function(xhr, ajaxOptions, thrownError) {
+                    
+                    var statusCode = xhr.status;
+                    var statusText = xhr.statusText;
+                    var responseJSON = JSON.parse(xhr.responseText);
+                    var validationErrorString = responseJSON.reason;
+                    
+                    alert(validationErrorString);
+                });
+        });
+    }
     
     // Item stock update submit
     $( "#item-stock-container" ).on( "click", "#item-stock-submit", function(e) {

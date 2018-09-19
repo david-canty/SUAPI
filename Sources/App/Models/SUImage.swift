@@ -5,13 +5,13 @@ import FluentMySQL
 final class SUImage: Codable {
     
     var id: UUID?
-    var image: Data
     var itemID: SUItem.ID
+    var imageFilename: String
     var sortOrder: Int?
     
-    init(image: Data, itemID: SUItem.ID) {
-        self.image = image
+    init(itemID: SUItem.ID, imageFilename: String) {
         self.itemID = itemID
+        self.imageFilename = imageFilename
     }
 }
 
