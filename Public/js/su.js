@@ -728,7 +728,9 @@ $(document).ready(function() {
                 });
         });
     }
-       
+    
+    updateItemImageSortOrders();
+    
     $( "#item-images" ).on( "click", ".image-delete-button", function(e) {
         
         e.preventDefault();
@@ -744,8 +746,7 @@ $(document).ready(function() {
         type: 'DELETE',
         success: function(response) {
             
-            //location.reload(true);
-            updateItemImageSortOrders();
+            location.reload(true);
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             

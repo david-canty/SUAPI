@@ -312,7 +312,17 @@ struct SUItemController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self)) { item, image in
             
-            // delete image file
+            let fileManager = FileManager()
+            let dirConfig = DirectoryConfig.detect()
+            let imageDir = dirConfig.workDir + "Public/images"
+            let filename = image.imageFilename
+            let imageDirWithFilename = imageDir + "/\(filename)"
+            
+            do {
+                try fileManager.removeItem(atPath: imageDirWithFilename)
+            } catch {
+                print("Error removing item image file: \(error)")
+            }
             
             return image.delete(on: req).transform(to: HTTPStatus.noContent)
         }
