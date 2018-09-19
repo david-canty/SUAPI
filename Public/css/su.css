@@ -145,13 +145,6 @@ legend,
     font-style: normal;
 }
 
-#item-images img {
-    width: 100px;
-    height: 100px;
-    padding: 1px;
-    border: 1px solid #5054A1;
-}
-
 #item-images ul {
     margin: 0;
     padding: 0;
@@ -162,6 +155,13 @@ legend,
     list-style: none;
     margin: 10px 15px 10px 0;
     padding: 0;
+}
+
+#item-images li img {
+    width: 100px;
+    height: 100px;
+    padding: 1px;
+    border: 1px solid #5054A1;
 }
 
 .alert p,

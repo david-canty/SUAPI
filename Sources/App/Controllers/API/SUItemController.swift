@@ -37,6 +37,7 @@ struct SUItemController: RouteCollection {
         // Images
         redirectProtectedGroup.post(SUItem.parameter, "images", use: uploadImagesHandler)
         redirectProtectedGroup.patch(SUItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
+        redirectProtectedGroup.delete(SUItem.parameter, "images", SUImage.parameter, use: deleteItemImageHandler)
         
         // Stock
         redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
@@ -304,6 +305,16 @@ struct SUItemController: RouteCollection {
             
             image.sortOrder = sortOrderData.sortOrder
             return image.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
+    func deleteItemImageHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self)) { item, image in
+            
+            // delete image file
+            
+            return image.delete(on: req).transform(to: HTTPStatus.noContent)
         }
     }
     

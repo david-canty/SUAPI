@@ -728,6 +728,35 @@ $(document).ready(function() {
                 });
         });
     }
+       
+    $( "#item-images" ).on( "click", ".image-delete-button", function(e) {
+        
+        e.preventDefault();
+        
+        var itemImagesForm = $('#itemImagesForm');
+        var itemId = itemImagesForm.data('id');
+        
+        var li = $(this).closest('li');
+        var imageId = li.attr('id');
+        
+        $.ajax({
+        url: baseUrl + '/items/' + itemId + '/images/' + imageId,
+        type: 'DELETE',
+        success: function(response) {
+            
+            //location.reload(true);
+            updateItemImageSortOrders();
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
     
     // Item stock update submit
     $( "#item-stock-container" ).on( "click", "#item-stock-submit", function(e) {

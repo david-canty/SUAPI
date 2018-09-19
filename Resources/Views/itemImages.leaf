@@ -46,11 +46,18 @@
             <div class="row">
                 <div class="col">
                     <div id="item-images" class="float-left">
+                        #if(count(images) > 0) {
                         <ul>
-                        #for(image in images) {
-                        <li id="#(image.id)"><img src="/images/#(image.imageFilename)" alt="Item image" /></li>
-                        }
+                            #for(image in images) {
+                            <li id="#(image.id)">
+                                <img src="/images/#(image.imageFilename)" alt="Item image" />
+                                <a class="btn btn-danger image-delete-button pt-0 pr-1 pb-0 pl-1" href="" role="button">&times;</a>
+                            </li>
+                            }
                         </ul>
+                        } else {
+                        <h4>No images</h4>
+                        }
                     </div>
                 </div>
             </div>
