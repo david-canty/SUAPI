@@ -282,16 +282,21 @@ struct SUItemController: RouteCollection {
                 
                 for file in imageFiles.itemImages {
                     
-                    let filename = String.random() + "_" + file.filename
+                    let filename = String.randomString() + "_" + file.filename
                     let imageData = file.data
                     let imageDirWithFilename = imageDir + "/\(filename)"
                     
-                    fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil)
+                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
                     
-                    let image = SUImage(itemID: item.id!, imageFilename: filename)
-                    image.sortOrder = itemImages.count + imageSaveResults.count
-                    
-                    imageSaveResults.append(image.save(on: req))
+                        let image = SUImage(itemID: item.id!, imageFilename: filename)
+                        image.sortOrder = itemImages.count + imageSaveResults.count
+                        
+                        imageSaveResults.append(image.save(on: req))
+                        
+                    } else {
+                        
+                        print("Error creating image file")
+                    }
                 }
                 
                 return imageSaveResults.flatten(on: req)
@@ -411,15 +416,15 @@ struct SUItemController: RouteCollection {
 
 extension String {
     
-    static func random(length: Int = 16) -> String {
+    static func randomString(length: Int = 16) -> String {
         
         let base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        var randomString: String = ""
+        var randomStr: String = ""
         
         for _ in 0..<length {
-            let randomValue = arc4random_uniform(UInt32(base.count))
-            randomString += "\(base[base.index(base.startIndex, offsetBy: Int(randomValue))])"
+            let randomValue = Int.random(in: 0..<base.count)
+            randomStr += "\(base[base.index(base.startIndex, offsetBy: randomValue)])"
         }
-        return randomString
+        return randomStr
     }
 }
