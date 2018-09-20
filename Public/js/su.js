@@ -689,7 +689,7 @@ $(document).ready(function() {
             //var validationErrorString = responseJSON.reason;
             
             //alert(validationErrorString);
-            alert(statusText);
+            alert(xhr.responseText);
         });
     });
                   
