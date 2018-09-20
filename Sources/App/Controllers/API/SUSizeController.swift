@@ -137,9 +137,31 @@ struct SUSizeController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUSize.self).delete(on: req).transform(to: HTTPStatus.noContent).catchMap() { error in
+        return try req.parameters.next(SUSize.self).flatMap(to: HTTPStatus.self) { size in
             
-            throw Abort(.conflict, reason: "Error deleting size:\n\nCannot delete this size because it contains uniform items. If you wish to delete this size, assign the related uniform items to another size.")
+            return req.transaction(on: .mysql) { conn in
+                
+                let deletedSizeSortOrder = size.sortOrder!
+                
+                return SUSize.query(on: conn).filter(\.sortOrder > deletedSizeSortOrder).sort(\.sortOrder, .ascending).all().flatMap(to: HTTPStatus.self) { sizesAfterDeleted in
+                    
+                    var sizesAfterDeletedSaveResults: [Future<SUSize>] = []
+                    
+                    for sizeAfter in sizesAfterDeleted {
+                        
+                        sizeAfter.sortOrder = sizeAfter.sortOrder! - 1
+                        sizesAfterDeletedSaveResults.append(sizeAfter.update(on: conn))
+                    }
+                    
+                    return sizesAfterDeletedSaveResults.flatten(on: conn).flatMap(to: HTTPStatus.self) { _ in
+                        
+                        size.delete(on: conn).transform(to: HTTPStatus.noContent).catchMap() { error in
+                            
+                            throw Abort(.conflict, reason: "Error deleting size:\n\nCannot delete this size because it contains uniform items. If you wish to delete this size, assign the related uniform items to another size.")
+                        }
+                    }
+                }
+            }
         }
     }
     

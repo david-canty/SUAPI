@@ -473,6 +473,8 @@ $(document).ready(function() {
 
     }}).disableSelection();
 
+    updateSizeSortOrders();
+    
     function updateSizeSortOrders() {
 
         // Update size table sort orders
@@ -697,6 +699,8 @@ $(document).ready(function() {
         
     }}).disableSelection();
     
+    updateItemImageSortOrders();
+    
     function updateItemImageSortOrders() {
         
         // Get form and item id
@@ -728,8 +732,6 @@ $(document).ready(function() {
                 });
         });
     }
-    
-    updateItemImageSortOrders();
     
     $( "#item-images" ).on( "click", ".image-delete-button", function(e) {
         
