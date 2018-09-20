@@ -296,6 +296,7 @@ struct SUItemController: RouteCollection {
                     } else {
                         
                         print("Error creating image file")
+                        throw Abort(HTTPResponseStatus.conflict, reason: "Error creating image file")
                     }
                 }
                 
