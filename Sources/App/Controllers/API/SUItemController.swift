@@ -286,6 +286,7 @@ struct SUItemController: RouteCollection {
                     let imageData = file.data
                     let imageDirWithFilename = imageDir + "/\(filename)"
                     
+                    
                     if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
                     
                         let image = SUImage(itemID: item.id!, imageFilename: filename)
@@ -296,7 +297,7 @@ struct SUItemController: RouteCollection {
                     } else {
                         
                         print("Error creating image file")
-                        throw Abort(HTTPResponseStatus.conflict, reason: "Error creating image file")
+                        throw Abort(HTTPResponseStatus.conflict, reason: imageDirWithFilename)
                     }
                 }
                 
