@@ -685,11 +685,10 @@ $(document).ready(function() {
             
             var statusCode = xhr.status;
             var statusText = xhr.statusText;
-            //var responseJSON = JSON.parse(xhr.responseText);
-            //var validationErrorString = responseJSON.reason;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
             
-            //alert(validationErrorString);
-            alert(xhr.responseText);
+            alert(validationErrorString);
         });
     });
                   
