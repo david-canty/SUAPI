@@ -299,7 +299,7 @@ struct SUItemController: RouteCollection {
                         
                     } catch {
                         
-                        print(error)
+                        throw Abort(.badRequest, reason: error.localizedDescription)
                     }
                     
 //                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {

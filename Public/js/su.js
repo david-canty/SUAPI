@@ -688,7 +688,7 @@ $(document).ready(function() {
             var responseJSON = JSON.parse(xhr.responseText);
             var validationErrorString = responseJSON.reason;
             
-            alert(validationErrorString);
+            alert(xhr.responseText);
         });
     });
                   
