@@ -286,18 +286,33 @@ struct SUItemController: RouteCollection {
                     let imageData = file.data
                     let imageDirWithFilename = imageDir + "/\(filename)"
                     
+                    let imageURL = URL(fileURLWithPath: imageDirWithFilename)
                     
-                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
-                    
+                    do {
+                        
+                    try imageData.write(to: imageURL)
+                        
                         let image = SUImage(itemID: item.id!, imageFilename: filename)
                         image.sortOrder = itemImages.count + imageSaveResults.count
                         
                         imageSaveResults.append(image.save(on: req))
                         
-                    } else {
+                    } catch {
                         
-                        print("Error creating image file")
+                        print(error)
                     }
+                    
+//                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
+//
+//                        let image = SUImage(itemID: item.id!, imageFilename: filename)
+//                        image.sortOrder = itemImages.count + imageSaveResults.count
+//
+//                        imageSaveResults.append(image.save(on: req))
+//
+//                    } else {
+//
+//                        print("Error creating image file")
+//                    }
                 }
                 
                 return imageSaveResults.flatten(on: req)
@@ -417,7 +432,7 @@ struct SUItemController: RouteCollection {
 
 extension String {
     
-    static func randomString(length: Int = 16) -> String {
+    static func randomString(length: Int = 8) -> String {
         
         let base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         var randomStr: String = ""
