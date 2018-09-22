@@ -286,33 +286,18 @@ struct SUItemController: RouteCollection {
                     let imageData = file.data
                     let imageDirWithFilename = imageDir + "/\(filename)"
                     
-                    let imageURL = URL(fileURLWithPath: imageDirWithFilename)
                     
-                    do {
-                        
-                    try imageData.write(to: imageURL)
-                        
+                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
+                    
                         let image = SUImage(itemID: item.id!, imageFilename: filename)
                         image.sortOrder = itemImages.count + imageSaveResults.count
                         
                         imageSaveResults.append(image.save(on: req))
                         
-                    } catch {
+                    } else {
                         
-                        throw Abort(.badRequest, reason: error.localizedDescription)
+                        print("Error creating image file")
                     }
-                    
-//                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
-//
-//                        let image = SUImage(itemID: item.id!, imageFilename: filename)
-//                        image.sortOrder = itemImages.count + imageSaveResults.count
-//
-//                        imageSaveResults.append(image.save(on: req))
-//
-//                    } else {
-//
-//                        print("Error creating image file")
-//                    }
                 }
                 
                 return imageSaveResults.flatten(on: req)
