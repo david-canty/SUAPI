@@ -286,7 +286,6 @@ struct SUItemController: RouteCollection {
                     let imageData = file.data
                     let imageDirWithFilename = imageDir + "/\(filename)"
                     
-                    
                     if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
                     
                         let image = SUImage(itemID: item.id!, imageFilename: filename)
