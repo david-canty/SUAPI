@@ -1,40 +1,59 @@
-import FluentMySQL
 import Foundation
+import Vapor
+import FluentMySQL
 
-final class SUOrderItem: MySQLUUIDPivot, ModifiablePivot {
+final class SUOrderItem: Codable {
     
     var id: UUID?
-    
+    var orderID: SUOrder.ID
     var itemID: SUItem.ID
-    var yearID: SUSize.ID
+    var itemSizeID: SUItemSize.ID
+    var orderQty: Int
     
-    typealias Left = SUItem
-    typealias Right = SUYear
-    
-    static let leftIDKey: LeftIDKey = \.itemID
-    static let rightIDKey: RightIDKey = \.yearID
-    
-    init(_ itemID: SUItem.ID, _ yearID: SUYear.ID) {
+    init(orderID: SUOrder.ID,
+         itemID: SUItem.ID,
+         itemSizeID: SUItemSize.ID,
+         orderQty: Int) {
+        
+        self.orderID = orderID
         self.itemID = itemID
-        self.yearID = yearID
-    }
-    
-    init(_ item: SUItem, _ year: SUYear) throws {
-        self.itemID = try item.requireID()
-        self.yearID = try year.requireID()
+        self.itemSizeID = itemSizeID
+        self.orderQty = orderQty
     }
 }
 
-extension SUItemYear: Migration {
+extension SUOrderItem: MySQLUUIDModel {}
+extension SUOrderItem: Content {}
+extension SUOrderItem: Parameter {}
+
+extension SUOrderItem: Migration {
     
     static func prepare(on connection: MySQLConnection) -> Future<Void> {
         
         return Database.create(self, on: connection) { builder in
             
             try addProperties(to: builder)
-            
-            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
-            builder.reference(from: \.yearID, to: \SUYear.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.orderID, to: \SUOrder.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.itemSizeID, to: \SUItemSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
+    }
+}
+
+extension SUOrderItem: Validatable {
+    
+    static func validations() throws -> Validations<SUOrderItem> {
+        
+        var validations = Validations(SUOrderItem.self)
+        try validations.add(\.orderQty, .range(1...))
+        return validations
+    }
+}
+
+extension SUOrderItem {
+    
+    var order: Parent<SUOrderItem, SUOrder> {
+        
+        return parent(\.orderID)
     }
 }

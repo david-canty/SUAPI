@@ -37,8 +37,8 @@ extension SUOrder {
         return parent(\.customerID)
     }
     
-    var items: Siblings<SUOrder, SUItem, SUOrderItem> {
+    var orderItems: Children<SUOrder, SUOrderItem> {
         
-        return siblings()
+        return children(\.orderID)
     }
 }
