@@ -23,7 +23,6 @@
                                 <th>Date</th>
                                 <th>Name</th>
                                 <th>Items</th>
-                                <th>Total</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -33,7 +32,6 @@
                                 <td>#(orderDetail.order.orderDate)</td>
                                 <td>#(orderDetail.customer.firstname) #(orderDetail.customer.lastname)</td>
                                 <td>#count(orderDetail.orderItems)</td>
-                                <td>&pound;#(orderDetail.orderTotal)</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

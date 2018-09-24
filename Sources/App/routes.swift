@@ -35,6 +35,9 @@ public func routes(_ router: Router) throws {
     let itemAdminController = SUItemAdminController()
     try router.register(collection: itemAdminController)
     
+    let orderAdminController = SUOrderAdminController()
+    try router.register(collection: orderAdminController)
+    
     let userAdminController = SUUserAdminController()
     try router.register(collection: userAdminController)
 }

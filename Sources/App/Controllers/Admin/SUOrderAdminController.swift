@@ -24,11 +24,7 @@ struct SUOrderAdminController: RouteCollection {
             
                 let customer = order.customer.get(on: req)
                 let orderItems = try order.orderItems.query(on: req).all()
-                
-                // orderTotal = for each order item - get item (from orderItem.itemID) price * orderItem orderQty
-                let orderTotal = 0.0
-                
-                let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems, orderTotal: orderTotal)
+                let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems)
                 orderList.append(orderDetail)
             }
             
@@ -42,14 +38,10 @@ struct SUOrderAdminController: RouteCollection {
     func viewOrderHandler(_ req: Request) throws -> Future<View> {
         
         return try req.parameters.next(SUOrder.self).flatMap(to: View.self) { order in
-                
+            
             let customer = order.customer.get(on: req)
             let orderItems = try order.orderItems.query(on: req).all()
-            
-            // orderTotal = for each order item - get item (from orderItem.itemID) price * orderItem orderQty
-            let orderTotal = 0.0
-            
-            let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems, orderTotal: orderTotal)
+            let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems)
             
             let user = try req.requireAuthenticated(SUUser.self)
             let context = ViewOrderContext(authenticatedUser: user, order: orderDetail)
@@ -75,6 +67,5 @@ struct SUOrderAdminController: RouteCollection {
         let customer:  EventLoopFuture<SUCustomer>
         let order: SUOrder
         let orderItems: EventLoopFuture<[SUOrderItem]>
-        let orderTotal: Double
     }
 }
