@@ -1,0 +1,87 @@
+#set("content") {
+
+    #embed("navigation")
+
+    <div class="container mt-3">
+        
+        <div id="orders-container">
+            
+            <div class="row">
+                <div class="col">
+                    <h1>#(title)</h1>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    
+                    #if(count(orderList) > 0) {
+                    
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            #for(orderDetail in orderList) {
+                            <tr>
+                                <td>#(orderDetail.order.orderDate)</td>
+                                <td>#(orderDetail.customer.firstname) #(orderDetail.customer.lastname)</td>
+                                <td>#count(orderDetail.orderItems)</td>
+                                <td>&pound;#(orderDetail.orderTotal)</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Action
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="actionButton#(orderDetail.order.id)">
+                                            <a class="dropdown-item" href="/orders/#(orderDetail.order.id)">View Order</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="#(orderDetail.order.id)">Cancel Order</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                    
+                    } else {
+                    
+                    <h2>No Orders</h2>
+                    
+                    }
+                </div>
+            </div>
+            
+            <div class="modal fade" id="order-cancel-modal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="cancelModalLabel">Cancel Order?</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you wish to cancel this order?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                            <button type="button" class="btn btn-danger order-cancel-submit">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+}
+
+#embed("base")
