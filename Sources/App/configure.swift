@@ -10,7 +10,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
     
-    try services.register(s3: s3SignerConfig, defaultBucket: "su-api-rhs")
+    guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError) }
+    guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError) }
+    guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError) }
+    
+    let s3SignerConfig = S3Signer.Config(accessKey: awsAccessKey, secretKey: awsSecretKey, region: Region(name: .euWest2))
+    try services.register(s3: s3SignerConfig, defaultBucket: awsS3Bucket)
     
     services.register(KeyedCache.self) { container in
         try container.keyedCache(for: .mysql)
@@ -33,21 +38,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     var databases = DatabasesConfig()
     let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
+    let databasePort = 3306
     let username = Environment.get("DATABASE_USER") ?? "suapi"
     let password = Environment.get("DATABASE_PASSWORD") ?? "password"
-    
-    let databaseName: String
-    let databasePort: Int
-    if (env == .testing) {
-        
-        databaseName = "suapi-test"
-        databasePort = 3307
-        
-    } else {
-        
-        databaseName = Environment.get("DATABASE_DB") ?? "suapi"
-        databasePort = 3306
-    }
+    let databaseName = Environment.get("DATABASE_DB") ?? "suapi"
     
     let databaseConfig = MySQLDatabaseConfig(
         hostname: hostname,
