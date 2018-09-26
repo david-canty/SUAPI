@@ -1,6 +1,7 @@
 import Vapor
 import Fluent
 import Authentication
+import S3
 
 struct SUItemController: RouteCollection {
     
@@ -272,31 +273,23 @@ struct SUItemController: RouteCollection {
         
         return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, imageFiles in
 
-            return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: [SUImage].self) { itemImages in
-                
-                let fileManager = FileManager()
-                let dirConfig = DirectoryConfig.detect()
-                let imageDir = dirConfig.workDir + "Public/images"
+            return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
                 var imageSaveResults: [Future<SUImage>] = []
+                let s3 = try req.makeS3Client()
                 
                 for file in imageFiles.itemImages {
                     
-                    let filename = String.randomString() + "_" + file.filename
                     let imageData = file.data
-                    let imageDirWithFilename = imageDir + "/\(filename)"
+                    let filename = String.randomString() + "_" + file.filename
+                    let s3FileUpload = File.Upload(data: imageData, destination: filename)
                     
-                    if fileManager.createFile(atPath: imageDirWithFilename, contents: imageData, attributes: nil) {
-                    
-                        let image = SUImage(itemID: item.id!, imageFilename: filename)
-                        image.sortOrder = itemImages.count + imageSaveResults.count
-                        
-                        imageSaveResults.append(image.save(on: req))
-                        
-                    } else {
-                        
-                        print("Error creating image file")
-                    }
+                    //var filePUTResponses: [EventLoopFuture<File.Response>] = []
+                    try s3.put(file: s3FileUpload, on: req)
+
+                    let image = SUImage(itemID: item.id!, imageFilename: filename)
+                    image.sortOrder = itemImageCount + imageSaveResults.count
+                    imageSaveResults.append(image.save(on: req))
                 }
                 
                 return imageSaveResults.flatten(on: req)
@@ -406,7 +399,7 @@ struct SUItemController: RouteCollection {
     }
     
     struct SUItemImageData: Content {
-        let itemImages: [File]
+        let itemImages: [Vapor.File]
     }
     
     struct SUImageSortOrderData: Content {
