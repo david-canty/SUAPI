@@ -10,7 +10,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
     
-    let s3SignerConfig = S3Signer.Config(accessKey: "AKIAJXXUW3ITKMHTGB4A", secretKey: "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", region: Region(name: .euWest2))
     try services.register(s3: s3SignerConfig, defaultBucket: "su-api-rhs")
     
     services.register(KeyedCache.self) { container in
