@@ -276,16 +276,21 @@ struct SUItemController: RouteCollection {
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
                 var imageSaveResults: [Future<SUImage>] = []
-                let s3 = try req.makeS3Client()
+                let s3Client = try req.makeS3Client()
                 
                 for file in imageFiles.itemImages {
                     
+                    req.transaction(on: .mysql) { conn in
+
+
+                    }
+                    
                     let imageData = file.data
                     let filename = String.randomString() + "_" + file.filename
-                    let s3FileUpload = File.Upload(data: imageData, destination: filename)
                     
-                    //var filePUTResponses: [EventLoopFuture<File.Response>] = []
-                    try s3.put(file: s3FileUpload, on: req)
+                    var fileSaveResponses: [EventLoopFuture<Void>] = []
+                    let saveResponse = try self.save(imageData: imageData, to: filename, withS3Client: s3Client, on: req)
+                    fileSaveResponses.append(saveResponse)
 
                     let image = SUImage(itemID: item.id!, imageFilename: filename)
                     image.sortOrder = itemImageCount + imageSaveResults.count
@@ -295,6 +300,20 @@ struct SUItemController: RouteCollection {
                 return imageSaveResults.flatten(on: req)
             }
         }
+    }
+    
+    public func save(imageData: Data, to filename: String, withS3Client s3Client: S3Client, on container: Container) throws -> EventLoopFuture<Void> {
+        
+        let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
+        
+        return try s3Client.put(file: file, on: container).map(to: Void.self) { response in
+            
+            return Void()
+            
+            }.catchMap({ error in
+                
+                throw Abort(.internalServerError, reason: "Error putting file '\(filename)': \(error)")
+            })
     }
     
     func updateImageSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
