@@ -269,29 +269,59 @@ struct SUItemController: RouteCollection {
     }
     
     // Images
+//    func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
+//
+//        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
+//
+//            return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
+//
+//                var fileSaveResponses: [EventLoopFuture<File.Response>] = []
+//                let s3Client = try req.makeS3Client()
+//
+//                for file in uploadedImageFiles.itemImages {
+//
+//                    let imageData = file.data
+//                    let filename = String.randomString() + "_" + file.filename
+//
+//                    let saveResponse = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
+//                    fileSaveResponses.append(saveResponse)
+//                }
+//
+//                return fileSaveResponses.flatten(on: req).flatMap(to: [SUImage].self) { files in
+//
+//                    var imageSaveResults: [Future<SUImage>] = []
+//
+//                    for file in files {
+//
+//                        let image = SUImage(itemID: item.id!, imageFilename: file.path)
+//                        image.sortOrder = itemImageCount + imageSaveResults.count
+//                        imageSaveResults.append(image.save(on: req))
+//                    }
+//
+//                    return imageSaveResults.flatten(on: req)
+//                }
+//            }
+//        }
+//    }
+    
     func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
-        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, imageFiles in
-
+        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
+            
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
+                //var fileSaveResponses: [EventLoopFuture<File.Response>] = []
                 var imageSaveResults: [Future<SUImage>] = []
                 let s3Client = try req.makeS3Client()
                 
-                for file in imageFiles.itemImages {
-                    
-                    req.transaction(on: .mysql) { conn in
-
-
-                    }
+                for file in uploadedImageFiles.itemImages {
                     
                     let imageData = file.data
                     let filename = String.randomString() + "_" + file.filename
                     
-                    var fileSaveResponses: [EventLoopFuture<Void>] = []
-                    let saveResponse = try self.save(imageData: imageData, to: filename, withS3Client: s3Client, on: req)
-                    fileSaveResponses.append(saveResponse)
+                    _ = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
 
+                    
                     let image = SUImage(itemID: item.id!, imageFilename: filename)
                     image.sortOrder = itemImageCount + imageSaveResults.count
                     imageSaveResults.append(image.save(on: req))
@@ -302,7 +332,7 @@ struct SUItemController: RouteCollection {
         }
     }
     
-    public func save(imageData: Data, to filename: String, withS3Client s3Client: S3Client, on container: Container) throws -> EventLoopFuture<Void> {
+    public func save(imageData: Data, to filename: String, with s3Client: S3Client, on container: Container) throws -> EventLoopFuture<Void> {
         
         let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
         
@@ -329,19 +359,16 @@ struct SUItemController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self)) { item, image in
             
-            let fileManager = FileManager()
-            let dirConfig = DirectoryConfig.detect()
-            let imageDir = dirConfig.workDir + "Public/images"
-            let filename = image.imageFilename
-            let imageDirWithFilename = imageDir + "/\(filename)"
+            let s3Client = try req.makeS3Client()
             
-            do {
-                try fileManager.removeItem(atPath: imageDirWithFilename)
-            } catch {
-                print("Error removing item image file: \(error)")
+            return try s3Client.delete(file: image, on: req).flatMap(to: HTTPStatus.self) {
+                
+                return image.delete(on: req).transform(to: HTTPStatus.noContent)
+                
+                }.catchMap { error in
+                
+                throw Abort(.internalServerError, reason: "Error deleting file '\(image.imageFilename)': \(error)")
             }
-            
-            return image.delete(on: req).transform(to: HTTPStatus.noContent)
         }
     }
     

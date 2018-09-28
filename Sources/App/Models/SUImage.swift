@@ -1,6 +1,7 @@
 import Foundation
 import Vapor
 import FluentMySQL
+import S3
 
 final class SUImage: Codable {
     
@@ -36,5 +37,20 @@ extension SUImage {
     var item: Parent<SUImage, SUItem> {
         
         return parent(\.itemID)
+    }
+}
+
+extension SUImage: LocationConvertible {
+    
+    public var bucket: String? {
+        return Environment.get("AWS_S3_BUCKET")
+    }
+    
+    public var path: String {
+        return self.imageFilename
+    }
+
+    public var region: Region? {
+        return Region(name: .euWest2)
     }
 }
