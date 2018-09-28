@@ -107,7 +107,15 @@ struct SUItemAdminController: RouteCollection {
             return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { images in
                 
                 let user = try req.requireAuthenticated(SUUser.self)
-                let context = ItemImagesContext(authenticatedUser: user, item: item, images: images)
+                
+                let awsRegion = "eu-west-2"
+                guard let s3Bucket = Environment.get("AWS_S3_BUCKET") else {
+                    throw Abort(.internalServerError, reason: "Error getting S3 bucket name")
+                }
+                
+                let s3ImagesPath = "https://s3." + awsRegion + ".amazonaws.com/" + s3Bucket
+                
+                let context = ItemImagesContext(authenticatedUser: user, item: item, images: images, s3ImagesPath: s3ImagesPath)
                 return try req.view().render("itemImages", context)
             }
         }
@@ -182,6 +190,7 @@ struct SUItemAdminController: RouteCollection {
         let authenticatedUser: SUUser
         let item: SUItem
         let images: [SUImage]
+        let s3ImagesPath: String
     }
     
     struct ItemStockContext: Encodable {

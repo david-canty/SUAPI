@@ -50,7 +50,7 @@
                         <ul>
                             #for(image in images) {
                             <li id="#(image.id)">
-                                <img src="/images/#(image.imageFilename)" alt="Item image" />
+                                <img src="#(s3ImagesPath)/#(image.imageFilename)" alt="Item image" />
                                 <a class="btn btn-danger image-delete-button pt-0 pr-1 pb-0 pl-1" href="" role="button">&times;</a>
                             </li>
                             }
