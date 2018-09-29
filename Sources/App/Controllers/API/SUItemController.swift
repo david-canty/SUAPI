@@ -320,7 +320,6 @@ struct SUItemController: RouteCollection {
                     let filename = String.randomString() + "_" + file.filename
                     
                     _ = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
-
                     
                     let image = SUImage(itemID: item.id!, imageFilename: filename)
                     image.sortOrder = itemImageCount + imageSaveResults.count
