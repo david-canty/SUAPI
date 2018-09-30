@@ -310,7 +310,6 @@ struct SUItemController: RouteCollection {
             
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
-                //var fileSaveResponses: [EventLoopFuture<File.Response>] = []
                 var imageSaveResults: [Future<SUImage>] = []
                 let s3Client = try req.makeS3Client()
                 
