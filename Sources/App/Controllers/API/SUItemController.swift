@@ -318,12 +318,18 @@ struct SUItemController: RouteCollection {
                     let imageData = file.data
                     let filename = String.randomString() + "_" + file.filename
                     
-                    _ = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
-                    
-                    let image = SUImage(itemID: item.id!, imageFilename: filename)
-                    image.sortOrder = itemImageCount + imageSaveCount
-                    imageSaveCount += 1
-                    return image.save(on: req)
+                    return try self.save(imageData: imageData, to: filename, with: s3Client, on: req).flatMap(to: SUImage.self) { saveResponse in
+                        
+                        let image = SUImage(itemID: item.id!, imageFilename: filename)
+                        image.sortOrder = itemImageCount + imageSaveCount
+                        imageSaveCount += 1
+                        
+                        return image.save(on: req)
+                        
+                        }.catchMap({ error in
+                            
+                            throw Abort(.internalServerError, reason: "Error saving image file '\(filename)' to S3: \(error)")
+                        })
                     
                 }.flatten(on: req)
             }
