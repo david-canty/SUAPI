@@ -10,8 +10,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
     
-    guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError) }
-    guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError) }
+    guard let awsAccessKey = Environment.get("AWS_ACCESS") else { throw Abort(.internalServerError) }
+    guard let awsSecretKey = Environment.get("AWS_SECRET") else { throw Abort(.internalServerError) }
     guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError) }
     
     let s3SignerConfig = S3Signer.Config(accessKey: awsAccessKey, secretKey: awsSecretKey, region: Region(name: .euWest2))
