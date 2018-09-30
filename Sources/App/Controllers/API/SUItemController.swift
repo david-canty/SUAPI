@@ -310,10 +310,10 @@ struct SUItemController: RouteCollection {
             
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
-                var imageSaveResults: [Future<SUImage>] = []
+                var imageSaveCount = 0
                 let s3Client = try req.makeS3Client()
                 
-                for file in uploadedImageFiles.itemImages {
+                return try uploadedImageFiles.itemImages.compactMap { file -> EventLoopFuture<SUImage> in
                     
                     let imageData = file.data
                     let filename = String.randomString() + "_" + file.filename
@@ -321,11 +321,11 @@ struct SUItemController: RouteCollection {
                     _ = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
                     
                     let image = SUImage(itemID: item.id!, imageFilename: filename)
-                    image.sortOrder = itemImageCount + imageSaveResults.count
-                    imageSaveResults.append(image.save(on: req))
-                }
-                
-                return imageSaveResults.flatten(on: req)
+                    image.sortOrder = itemImageCount + imageSaveCount
+                    imageSaveCount += 1
+                    return image.save(on: req)
+                    
+                }.flatten(on: req)
             }
         }
     }
