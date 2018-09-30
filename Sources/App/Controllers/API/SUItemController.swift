@@ -317,8 +317,9 @@ struct SUItemController: RouteCollection {
                     
                     let imageData = file.data
                     let filename = String.randomString() + "_" + file.filename
+                    let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
                     
-                    return try self.save(imageData: imageData, to: filename, with: s3Client, on: req).flatMap(to: SUImage.self) { saveResponse in
+                    return try s3Client.put(file: file, on: req).flatMap(to: SUImage.self) { putResponse in
                         
                         let image = SUImage(itemID: item.id!, imageFilename: filename)
                         image.sortOrder = itemImageCount + imageSaveCount
@@ -334,30 +335,6 @@ struct SUItemController: RouteCollection {
                 }.flatten(on: req)
             }
         }
-    }
-    
-//    static func prepare(on connection: Database.Connection) -> Future<Void> {
-//        return [1, 2, 3]
-//            .map { i in
-//                Forum(id: i, name: "Forum \(i)")
-//            }
-//            .map { $0.save(on: connection) }
-//            .flatten(on: connection)
-//            .transform(to: ())
-//    }
-    
-    public func save(imageData: Data, to filename: String, with s3Client: S3Client, on container: Container) throws -> EventLoopFuture<Void> {
-        
-        let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
-        
-        return try s3Client.put(file: file, on: container).map(to: Void.self) { response in
-            
-            return Void()
-            
-            }.catchMap({ error in
-                
-                throw Abort(.internalServerError, reason: "Error putting file '\(filename)': \(error)")
-            })
     }
     
     func updateImageSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
