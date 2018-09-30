@@ -330,6 +330,16 @@ struct SUItemController: RouteCollection {
         }
     }
     
+//    static func prepare(on connection: Database.Connection) -> Future<Void> {
+//        return [1, 2, 3]
+//            .map { i in
+//                Forum(id: i, name: "Forum \(i)")
+//            }
+//            .map { $0.save(on: connection) }
+//            .flatten(on: connection)
+//            .transform(to: ())
+//    }
+    
     public func save(imageData: Data, to filename: String, with s3Client: S3Client, on container: Container) throws -> EventLoopFuture<Void> {
         
         let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
