@@ -11,23 +11,21 @@ final class SUCustomer: Codable {
     var email: String
     var tel: String?
     var mobile: String?
-    var addressLine1: String
-    var addressLine2: String
-    var addressLine3: String
-    var postCode: String
-    var country: String
+    var addressLine1: String?
+    var addressLine2: String?
+    var addressLine3: String?
+    var postcode: String?
     
     init(firebaseUserID: String,
          firstName: String,
          lastName: String,
          email: String,
-         tel: String? = "",
-         mobile: String? = "",
-         addressLine1: String,
-         addressLine2: String,
-         addressLine3: String,
-         postCode: String,
-         country: String = "United Kingdom") {
+         tel: String? = nil,
+         mobile: String? = nil,
+         addressLine1: String? = nil,
+         addressLine2: String? = nil,
+         addressLine3: String? = nil,
+         postcode: String? = nil) {
         
         self.firebaseUserID = firebaseUserID
         self.firstName = firstName
@@ -38,8 +36,7 @@ final class SUCustomer: Codable {
         self.addressLine1 = addressLine1
         self.addressLine2 = addressLine2
         self.addressLine3 = addressLine3
-        self.postCode = postCode
-        self.country = country
+        self.postcode = postcode
     }
 }
 
@@ -74,11 +71,10 @@ extension SUCustomer: Validatable {
         try validations.add(\.tel, .count(1...) && .characterSet(telCharacterSet) || .nil)
         try validations.add(\.mobile, .count(1...) && .characterSet(telCharacterSet) || .nil)
         
-        try validations.add(\.addressLine1, .count(1...) && .ascii)
-        try validations.add(\.addressLine2, .count(1...) && .ascii)
-        try validations.add(\.addressLine3, .count(1...) && .ascii)
-        try validations.add(\.postCode, .count(1...) && .ascii)
-        try validations.add(\.country, .count(1...) && .ascii)
+        try validations.add(\.addressLine1, .count(1...) && .ascii || .nil)
+        try validations.add(\.addressLine2, .count(1...) && .ascii || .nil)
+        try validations.add(\.addressLine3, .count(1...) && .ascii || .nil)
+        try validations.add(\.postcode, .count(1...) && .ascii || .nil)
         
         return validations
     }

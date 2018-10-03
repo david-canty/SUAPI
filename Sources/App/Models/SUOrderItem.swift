@@ -7,18 +7,18 @@ final class SUOrderItem: Codable {
     var id: UUID?
     var orderID: SUOrder.ID
     var itemID: SUItem.ID
-    var itemSizeID: SUItemSize.ID
-    var orderQty: Int
+    var sizeID: SUSize.ID
+    var quantity: Int
     
     init(orderID: SUOrder.ID,
          itemID: SUItem.ID,
-         itemSizeID: SUItemSize.ID,
-         orderQty: Int) {
+         sizeID: SUSize.ID,
+         quantity: Int) {
         
         self.orderID = orderID
         self.itemID = itemID
-        self.itemSizeID = itemSizeID
-        self.orderQty = orderQty
+        self.sizeID = sizeID
+        self.quantity = quantity
     }
 }
 
@@ -35,7 +35,7 @@ extension SUOrderItem: Migration {
             try addProperties(to: builder)
             builder.reference(from: \.orderID, to: \SUOrder.id, onUpdate: .cascade, onDelete: .restrict)
             builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .restrict)
-            builder.reference(from: \.itemSizeID, to: \SUItemSize.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }
 }
@@ -45,7 +45,7 @@ extension SUOrderItem: Validatable {
     static func validations() throws -> Validations<SUOrderItem> {
         
         var validations = Validations(SUOrderItem.self)
-        try validations.add(\.orderQty, .range(1...))
+        try validations.add(\.quantity, .range(1...))
         return validations
     }
 }
