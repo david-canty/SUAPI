@@ -7,12 +7,12 @@ final class SUImage: Codable {
     
     var id: UUID?
     var itemID: SUItem.ID
-    var imageFilename: String
+    var filename: String
     var sortOrder: Int?
     
-    init(itemID: SUItem.ID, imageFilename: String) {
+    init(itemID: SUItem.ID, filename: String) {
         self.itemID = itemID
-        self.imageFilename = imageFilename
+        self.filename = filename
     }
 }
 
@@ -47,7 +47,7 @@ extension SUImage: LocationConvertible {
     }
     
     public var path: String {
-        return self.imageFilename
+        return self.filename
     }
 
     public var region: Region? {

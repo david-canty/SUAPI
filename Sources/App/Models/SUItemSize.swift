@@ -5,7 +5,7 @@ import Vapor
 final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
     
     var id: UUID?
-    var itemSizeStock: Int = 0
+    var stock: Int = 0
     
     var itemID: SUItem.ID
     var sizeID: SUSize.ID
@@ -46,7 +46,7 @@ extension SUItemSize: Validatable {
     static func validations() throws -> Validations<SUItemSize> {
         
         var validations = Validations(SUItemSize.self)
-        try validations.add(\.itemSizeStock, .range(0...))
+        try validations.add(\.stock, .range(0...))
         return validations
     }
 }

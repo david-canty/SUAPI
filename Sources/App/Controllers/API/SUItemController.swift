@@ -268,42 +268,6 @@ struct SUItemController: RouteCollection {
         }
     }
     
-    // Images
-//    func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
-//
-//        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
-//
-//            return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
-//
-//                var fileSaveResponses: [EventLoopFuture<File.Response>] = []
-//                let s3Client = try req.makeS3Client()
-//
-//                for file in uploadedImageFiles.itemImages {
-//
-//                    let imageData = file.data
-//                    let filename = String.randomString() + "_" + file.filename
-//
-//                    let saveResponse = try self.save(imageData: imageData, to: filename, with: s3Client, on: req)
-//                    fileSaveResponses.append(saveResponse)
-//                }
-//
-//                return fileSaveResponses.flatten(on: req).flatMap(to: [SUImage].self) { files in
-//
-//                    var imageSaveResults: [Future<SUImage>] = []
-//
-//                    for file in files {
-//
-//                        let image = SUImage(itemID: item.id!, imageFilename: file.path)
-//                        image.sortOrder = itemImageCount + imageSaveResults.count
-//                        imageSaveResults.append(image.save(on: req))
-//                    }
-//
-//                    return imageSaveResults.flatten(on: req)
-//                }
-//            }
-//        }
-//    }
-    
     func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
         return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
@@ -321,7 +285,7 @@ struct SUItemController: RouteCollection {
                     
                     return try s3Client.put(file: file, on: req).flatMap(to: SUImage.self) { putResponse in
                         
-                        let image = SUImage(itemID: item.id!, imageFilename: filename)
+                        let image = SUImage(itemID: item.id!, filename: filename)
                         image.sortOrder = itemImageCount + imageSaveCount
                         imageSaveCount += 1
                         
@@ -358,7 +322,7 @@ struct SUItemController: RouteCollection {
                 
                 }.catchMap { error in
                 
-                throw Abort(.internalServerError, reason: "Error deleting file '\(image.imageFilename)': \(error)")
+                throw Abort(.internalServerError, reason: "Error deleting file '\(image.filename)': \(error)")
             }
         }
     }
@@ -366,10 +330,10 @@ struct SUItemController: RouteCollection {
     // Stock
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
     
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemSizeStockData in
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemStockData in
             
-            let itemSizeIds = itemSizeStockData.itemSizeIds
-            let itemSizeStocks = itemSizeStockData.itemSizeStocks
+            let itemSizeIds = itemStockData.itemSizeIds
+            let itemSizeStocks = itemStockData.itemSizeStocks
             
             return SUItemSize.query(on: req).filter(\SUItemSize.id ~~ itemSizeIds).all().flatMap(to: HTTPStatus.self) { itemSizes in
                 
@@ -377,7 +341,7 @@ struct SUItemController: RouteCollection {
                 
                 for itemSize in itemSizes {
                     let idIndex = itemSizeIds.index(of: itemSize.id!)!
-                    itemSize.itemSizeStock = itemSizeStocks[idIndex]
+                    itemSize.stock = itemSizeStocks[idIndex]
                     itemSizeSaveResults.append(itemSize.update(on: req))
                 }
                 
