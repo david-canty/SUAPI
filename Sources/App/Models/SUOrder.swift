@@ -7,6 +7,7 @@ final class SUOrder: Codable {
     var id: UUID?
     var customerID: SUCustomer.ID
     var orderDate: String
+    var timestamp: String?
     var status: String
     
     init(customerID: SUCustomer.ID,
@@ -15,6 +16,7 @@ final class SUOrder: Codable {
         
         self.customerID = customerID
         self.orderDate = orderDate
+        self.timestamp = orderDate
         self.status = status
     }
 }

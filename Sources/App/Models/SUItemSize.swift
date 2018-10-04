@@ -6,6 +6,7 @@ final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
     
     var id: UUID?
     var stock: Int = 0
+    var timestamp: String?
     
     var itemID: SUItem.ID
     var sizeID: SUSize.ID
@@ -19,11 +20,13 @@ final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
     init(_ itemID: SUItem.ID, _ sizeID: SUSize.ID) {
         self.itemID = itemID
         self.sizeID = sizeID
+        self.timestamp = String(describing: Date())
     }
     
     init(_ item: SUItem, _ size: SUSize) throws {
         self.itemID = try item.requireID()
         self.sizeID = try size.requireID()
+        self.timestamp = String(describing: Date())
     }
 }
 

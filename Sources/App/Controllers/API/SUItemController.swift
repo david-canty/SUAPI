@@ -342,6 +342,7 @@ struct SUItemController: RouteCollection {
                 for itemSize in itemSizes {
                     let idIndex = itemSizeIds.index(of: itemSize.id!)!
                     itemSize.stock = itemSizeStocks[idIndex]
+                    itemSize.timestamp = String(describing: Date())
                     itemSizeSaveResults.append(itemSize.update(on: req))
                 }
                 
