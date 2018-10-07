@@ -333,8 +333,17 @@ struct SUItemController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self), req.content.decode(SUImageSortOrderData.self)) { item, image, sortOrderData in
             
+            item.timestamp = String(describing: Date())
             image.sortOrder = sortOrderData.sortOrder
-            return image.update(on: req).transform(to: HTTPStatus.ok)
+            
+            return req.transaction(on: .mysql) { conn in
+             
+                return item.update(on: conn).flatMap { _ in
+                    
+                    return image.update(on: conn)
+                    
+                }.transform(to: HTTPStatus.ok)
+            }
         }
     }
     
