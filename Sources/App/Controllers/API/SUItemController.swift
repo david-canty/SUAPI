@@ -20,6 +20,9 @@ struct SUItemController: RouteCollection {
             // Sizes
             jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
             
+            // Images
+            jwtProtectedGroup.get(SUItem.parameter, "images", use: getImagesHandler)
+            
             // Years
             jwtProtectedGroup.get(SUItem.parameter, "years", use: getYearsHandler)
         }
@@ -120,9 +123,25 @@ struct SUItemController: RouteCollection {
 
     }
     
-    func getAllHandler(_ req: Request) throws -> Future<[SUItem]> {
+    func getAllHandler(_ req: Request) throws -> Future<[SUItemWithRelations]> {
         
-        return SUItem.query(on: req).all()
+        return SUItem.query(on: req).all().flatMap(to: [SUItemWithRelations].self) { (items) -> Future<[SUItemWithRelations]> in
+
+            return try items.compactMap { (item) -> Future<SUItemWithRelations> in
+
+                return try item.sizes.query(on: req).all().flatMap(to: SUItemWithRelations.self) { (sizes) -> Future<SUItemWithRelations> in
+
+                    return try item.years.query(on: req).all().flatMap(to: SUItemWithRelations.self) { (years) -> Future<SUItemWithRelations> in
+                        
+                        return try item.images.query(on: req).all().map(to: SUItemWithRelations.self) { (images) -> SUItemWithRelations in
+                            
+                            return SUItemWithRelations(item: item, sizes: sizes, years: years, images: images)
+                        }
+                    }
+                }
+                
+            }.flatten(on: req)
+        }
     }
     
     func getHandler(_ req: Request) throws -> Future<SUItem> {
@@ -268,6 +287,7 @@ struct SUItemController: RouteCollection {
         }
     }
     
+    // Images
     func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
         return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
@@ -298,6 +318,14 @@ struct SUItemController: RouteCollection {
                     
                 }.flatten(on: req)
             }
+        }
+    }
+    
+    func getImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
+        
+        return try req.parameters.next(SUItem.self).flatMap(to: [SUImage].self) { item in
+            
+            try item.images.query(on: req).all()
         }
     }
     
@@ -393,6 +421,13 @@ struct SUItemController: RouteCollection {
         let categoryId: UUID
         let itemYears: [UUID]
         let itemSizes: [UUID]
+    }
+    
+    struct SUItemWithRelations: Content {
+        let item: SUItem
+        let sizes: [SUSize]
+        let years: [SUYear]
+        let images: [SUImage]
     }
     
     struct SUItemStockData: Content {
