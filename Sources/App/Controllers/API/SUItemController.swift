@@ -21,6 +21,7 @@ struct SUItemController: RouteCollection {
             jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
             
             // Stock
+            jwtProtectedGroup.get("sizes", "stock", use: getAllSizesStockHandler)
             jwtProtectedGroup.get(SUItem.parameter, "sizes", "stock", use: getSizesStockHandler)
             
             // Images
@@ -291,6 +292,11 @@ struct SUItemController: RouteCollection {
     }
     
     // Stock
+    func getAllSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
+            
+        return SUItemSize.query(on: req).all()
+    }
+    
     func getSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
         
         return try req.parameters.next(SUItem.self).flatMap(to: [SUItemSize].self) { item in
