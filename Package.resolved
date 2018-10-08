@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueCryptor.git",
         "state": {
           "branch": null,
-          "revision": "efdb770164a7d3b222d6dcb78f253633c38a2ec2",
-          "version": "1.0.10"
+          "revision": "a960efc2759c8816b00baed5db7b3d903a402e78",
+          "version": "1.0.14"
         }
       },
       {
@@ -24,17 +24,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueRSA.git",
         "state": {
           "branch": null,
-          "revision": "1eef094f105db228649643d1180896e8e4b376f9",
-          "version": "1.0.7"
-        }
-      },
-      {
-        "package": "CommonCrypto",
-        "repositoryURL": "https://github.com/IBM-Swift/CommonCrypto.git",
-        "state": {
-          "branch": null,
-          "revision": "9156d238dbc4c15455b77b45e721b2bb0b995e31",
-          "version": "1.0.0"
+          "revision": "11b05221724c7adc22a5bc086605bc6e1db618ce",
+          "version": "1.0.11"
         }
       },
       {
@@ -51,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "eb876a758733166a4fb20f3f0a17b480c5ea563e",
-          "version": "3.4.3"
+          "revision": "96ce86ebf9198328795c4b9cb711489460be083c",
+          "version": "3.4.4"
         }
       },
       {
@@ -105,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/http.git",
         "state": {
           "branch": null,
-          "revision": "9e3eff9dfa4df7fc282bf27f801c72b3ffbfd984",
-          "version": "3.1.4"
+          "revision": "272b22be8cb3364e42a4701c2e0676e37480ec5a",
+          "version": "3.1.5"
         }
       },
       {

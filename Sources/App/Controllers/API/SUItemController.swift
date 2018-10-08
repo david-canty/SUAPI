@@ -20,6 +20,9 @@ struct SUItemController: RouteCollection {
             // Sizes
             jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
             
+            // Stock
+            jwtProtectedGroup.get(SUItem.parameter, "sizes", "stock", use: getSizesStockHandler)
+            
             // Images
             jwtProtectedGroup.get(SUItem.parameter, "images", use: getImagesHandler)
             
@@ -38,13 +41,13 @@ struct SUItemController: RouteCollection {
         redirectProtectedGroup.post(SUItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
         redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
+        // Stock
+        redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
+        
         // Images
         redirectProtectedGroup.post(SUItem.parameter, "images", use: uploadImagesHandler)
         redirectProtectedGroup.patch(SUItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
         redirectProtectedGroup.delete(SUItem.parameter, "images", SUImage.parameter, use: deleteItemImageHandler)
-        
-        // Stock
-        redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
         
         // Years
         redirectProtectedGroup.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
@@ -273,7 +276,7 @@ struct SUItemController: RouteCollection {
         
         return try req.parameters.next(SUItem.self).flatMap(to: [SUSize].self) { item in
             
-            try item.sizes.query(on: req).all()
+            return try item.sizes.query(on: req).all()
         }
     }
     
@@ -284,6 +287,38 @@ struct SUItemController: RouteCollection {
                            req.parameters.next(SUSize.self)) { item, size in
                             
                             return item.sizes.detach(size, on: req).transform(to: HTTPStatus.noContent)
+        }
+    }
+    
+    // Stock
+    func getSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
+        
+        return try req.parameters.next(SUItem.self).flatMap(to: [SUItemSize].self) { item in
+            
+            return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all()
+        }
+    }
+    
+    func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemStockData in
+            
+            let itemSizeIds = itemStockData.itemSizeIds
+            let itemSizeStocks = itemStockData.itemSizeStocks
+            
+            return SUItemSize.query(on: req).filter(\SUItemSize.id ~~ itemSizeIds).all().flatMap(to: HTTPStatus.self) { itemSizes in
+                
+                var itemSizeSaveResults: [Future<SUItemSize>] = []
+                
+                for itemSize in itemSizes {
+                    let idIndex = itemSizeIds.index(of: itemSize.id!)!
+                    itemSize.stock = itemSizeStocks[idIndex]
+                    itemSize.timestamp = String(describing: Date())
+                    itemSizeSaveResults.append(itemSize.update(on: req))
+                }
+                
+                return itemSizeSaveResults.flatten(on: req).transform(to: HTTPStatus.ok)
+            }
         }
     }
     
@@ -360,30 +395,6 @@ struct SUItemController: RouteCollection {
                 }.catchMap { error in
                 
                 throw Abort(.internalServerError, reason: "Error deleting file '\(image.filename)': \(error)")
-            }
-        }
-    }
-    
-    // Stock
-    func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
-    
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemStockData in
-            
-            let itemSizeIds = itemStockData.itemSizeIds
-            let itemSizeStocks = itemStockData.itemSizeStocks
-            
-            return SUItemSize.query(on: req).filter(\SUItemSize.id ~~ itemSizeIds).all().flatMap(to: HTTPStatus.self) { itemSizes in
-                
-                var itemSizeSaveResults: [Future<SUItemSize>] = []
-                
-                for itemSize in itemSizes {
-                    let idIndex = itemSizeIds.index(of: itemSize.id!)!
-                    itemSize.stock = itemSizeStocks[idIndex]
-                    itemSize.timestamp = String(describing: Date())
-                    itemSizeSaveResults.append(itemSize.update(on: req))
-                }
-                
-                return itemSizeSaveResults.flatten(on: req).transform(to: HTTPStatus.ok)
             }
         }
     }

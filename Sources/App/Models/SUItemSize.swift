@@ -2,7 +2,7 @@ import FluentMySQL
 import Foundation
 import Vapor
 
-final class SUItemSize: MySQLUUIDPivot, ModifiablePivot {
+final class SUItemSize: MySQLUUIDPivot, ModifiablePivot, Content {
     
     var id: UUID?
     var stock: Int = 0
