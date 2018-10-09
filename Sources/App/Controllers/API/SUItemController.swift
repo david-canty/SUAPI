@@ -396,7 +396,15 @@ struct SUItemController: RouteCollection {
             
             return try s3Client.delete(file: image, on: req).flatMap(to: HTTPStatus.self) {
                 
-                return image.delete(on: req).transform(to: HTTPStatus.noContent)
+                return req.transaction(on: .mysql) { conn in
+                    
+                    item.timestamp = String(describing: Date())
+                    return item.update(on: conn).flatMap { _ in
+                        
+                        return image.delete(on: conn)
+                        
+                        }.transform(to: HTTPStatus.noContent)
+                }
                 
                 }.catchMap { error in
                 
