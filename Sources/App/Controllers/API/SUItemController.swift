@@ -19,10 +19,10 @@ struct SUItemController: RouteCollection {
             
             // Sizes
             jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
+            jwtProtectedGroup.get("sizes", use: getAllItemSizesHandler)
             
             // Stock
-            jwtProtectedGroup.get("sizes", "stock", use: getAllSizesStockHandler)
-            jwtProtectedGroup.get(SUItem.parameter, "sizes", "stock", use: getSizesStockHandler)
+//            jwtProtectedGroup.get(SUItem.parameter, "sizes", "stock", use: getSizesStockHandler)
             
             // Images
             jwtProtectedGroup.get(SUItem.parameter, "images", use: getImagesHandler)
@@ -281,6 +281,11 @@ struct SUItemController: RouteCollection {
         }
     }
     
+    func getAllItemSizesHandler(_ req: Request) throws -> Future<[SUItemSize]> {
+        
+        return SUItemSize.query(on: req).all()
+    }
+    
     func deleteSizeHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self,
@@ -292,18 +297,13 @@ struct SUItemController: RouteCollection {
     }
     
     // Stock
-    func getAllSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
-            
-        return SUItemSize.query(on: req).all()
-    }
-    
-    func getSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
-        
-        return try req.parameters.next(SUItem.self).flatMap(to: [SUItemSize].self) { item in
-            
-            return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all()
-        }
-    }
+//    func getSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
+//
+//        return try req.parameters.next(SUItem.self).flatMap(to: [SUItemSize].self) { item in
+//
+//            return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all()
+//        }
+//    }
     
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
