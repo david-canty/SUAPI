@@ -2,6 +2,9 @@ import Vapor
 
 public func routes(_ router: Router) throws {
 
+    let allController = SUAllController()
+    try router.register(collection: allController)
+    
     let categoryController = SUCategoryController()
     try router.register(collection: categoryController)
     
