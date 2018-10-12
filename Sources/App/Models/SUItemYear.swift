@@ -6,7 +6,7 @@ final class SUItemYear: MySQLUUIDPivot, ModifiablePivot {
     var id: UUID?
     
     var itemID: SUItem.ID
-    var yearID: SUSize.ID
+    var yearID: SUYear.ID
     
     typealias Left = SUItem
     typealias Right = SUYear
