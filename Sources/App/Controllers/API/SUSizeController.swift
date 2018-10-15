@@ -130,7 +130,9 @@ struct SUSizeController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUSize.self), req.content.decode(SUSizeSortOrderData.self)) { size, sortOrderData in
             
+            size.timestamp = String(describing: Date())
             size.sortOrder = sortOrderData.sortOrder
+            
             return size.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
@@ -149,7 +151,9 @@ struct SUSizeController: RouteCollection {
                     
                     for sizeAfter in sizesAfterDeleted {
                         
+                        sizeAfter.timestamp = String(describing: Date())
                         sizeAfter.sortOrder = sizeAfter.sortOrder! - 1
+                        
                         sizesAfterDeletedSaveResults.append(sizeAfter.update(on: conn))
                     }
                     
