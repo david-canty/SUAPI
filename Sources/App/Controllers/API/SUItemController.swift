@@ -200,6 +200,7 @@ struct SUItemController: RouteCollection {
             
             return item.update(on: req).do() { item in
                 
+                // Update item years
                 _ = item.years.detachAll(on: req).do {
                     
                     for yearId in updatedItemData.itemYears {
@@ -219,29 +220,50 @@ struct SUItemController: RouteCollection {
                     print("Error detaching years from item: \(error)")
                 }
                 
-                _ = item.sizes.detachAll(on: req).do {
-                
-                    for sizeId in updatedItemData.itemSizes {
-                        
-                        _ = SUSize.find(sizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding size")).do() { size in
-                            
-                            _ = item.sizes.attach(size, on: req)
-                            
-                            }.catch() { error in
-                                
-                                print("Error attaching size to item: \(error)")
-                        }
-                    }
-                    
-                }.catch() { error in
-                    
-                    print("Error detaching sizes from item: \(error)")
-                }
+                // Update item sizes
+                self.updateSizesForItem(item: item, withData: updatedItemData, on: req)
                 
             }.catch() { error in
                 
                 print("Error updating item: \(error)")
             }
+        }
+    }
+    
+    func updateSizesForItem(item: SUItem, withData data: SUItemData, on req: Request) {
+     
+        // Attach newly selected sizes
+        _ = data.itemSizes.map { sizeId in
+            
+            _ = SUSize.find(sizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding size")).do() { size in
+                
+                _ = item.sizes.isAttached(size, on: req).map(to: Void.self, { isAttached in
+                    
+                    if !isAttached {
+                        
+                        _ = item.sizes.attach(size, on: req)
+                    }
+                })
+            }
+        }
+        
+        // Detach deselected item sizes
+        do {
+            
+            _ = try item.sizes.query(on: req).all().do { sizes in
+                
+                _ = sizes.map() { size in
+                    
+                    if !data.itemSizes.contains(size.id!) {
+                        
+                        _ = item.sizes.detach(size, on: req)
+                    }
+                }
+            }
+            
+        } catch {
+            
+            print("Error detaching size from item")
         }
     }
     
