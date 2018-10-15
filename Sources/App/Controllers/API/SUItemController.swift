@@ -237,13 +237,13 @@ struct SUItemController: RouteCollection {
             
             _ = SUSize.find(sizeId, on: req).unwrap(or: Abort(.internalServerError, reason: "Error finding size")).do() { size in
                 
-                _ = item.sizes.isAttached(size, on: req).map(to: Void.self, { isAttached in
+                _ = item.sizes.isAttached(size, on: req).map { isAttached in
                     
                     if !isAttached {
                         
                         _ = item.sizes.attach(size, on: req)
                     }
-                })
+                }
             }
         }
         
