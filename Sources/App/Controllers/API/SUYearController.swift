@@ -134,10 +134,15 @@ struct SUYearController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUYear.self), req.content.decode(SUYearSortOrderData.self)) { year, sortOrderData in
             
-            year.timestamp = String(describing: Date())
-            year.sortOrder = sortOrderData.sortOrder
+            if year.sortOrder != sortOrderData.sortOrder {
+                
+                year.timestamp = String(describing: Date())
+                year.sortOrder = sortOrderData.sortOrder
+                
+                return year.update(on: req).transform(to: HTTPStatus.ok)
+            }
             
-            return year.update(on: req).transform(to: HTTPStatus.ok)
+            return req.future(HTTPStatus.ok)
         }
     }
     

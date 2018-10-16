@@ -130,10 +130,15 @@ struct SUSizeController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUSize.self), req.content.decode(SUSizeSortOrderData.self)) { size, sortOrderData in
             
-            size.timestamp = String(describing: Date())
-            size.sortOrder = sortOrderData.sortOrder
+            if size.sortOrder != sortOrderData.sortOrder {
+                
+                size.timestamp = String(describing: Date())
+                size.sortOrder = sortOrderData.sortOrder
+                
+                return size.update(on: req).transform(to: HTTPStatus.ok)
+            }
             
-            return size.update(on: req).transform(to: HTTPStatus.ok)
+            return req.future(HTTPStatus.ok)
         }
     }
     

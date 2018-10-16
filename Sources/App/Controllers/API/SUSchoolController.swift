@@ -129,10 +129,15 @@ struct SUSchoolController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUSchool.self), req.content.decode(SUSchoolSortOrderData.self)) { school, sortOrderData in
             
-            school.timestamp = String(describing: Date())
-            school.sortOrder = sortOrderData.sortOrder
-            
-            return school.update(on: req).transform(to: HTTPStatus.ok)
+            if school.sortOrder != sortOrderData.sortOrder {
+                
+                school.timestamp = String(describing: Date())
+                school.sortOrder = sortOrderData.sortOrder
+                
+                return school.update(on: req).transform(to: HTTPStatus.ok)
+            }
+
+            return req.future(HTTPStatus.ok)
         }
     }
     

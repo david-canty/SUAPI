@@ -128,11 +128,16 @@ struct SUCategoryController: RouteCollection {
     func updateSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUCategory.self), req.content.decode(SUCategorySortOrderData.self)) { category, sortOrderData in
-         
-            category.timestamp = String(describing: Date())
-            category.sortOrder = sortOrderData.sortOrder
             
-            return category.update(on: req).transform(to: HTTPStatus.ok)
+            if category.sortOrder != sortOrderData.sortOrder {
+                
+                category.timestamp = String(describing: Date())
+                category.sortOrder = sortOrderData.sortOrder
+                
+                return category.update(on: req).transform(to: HTTPStatus.ok)
+            }
+            
+            return req.future(HTTPStatus.ok)
         }
     }
     
