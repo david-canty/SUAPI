@@ -41,7 +41,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let databasePort = 3306
     let username = Environment.get("DATABASE_USER") ?? "suapi"
     let password = Environment.get("DATABASE_PASSWORD") ?? "password"
-    let databaseName = Environment.get("DATABASE_DB") ?? "suapi"
+    //let databaseName = Environment.get("DATABASE_DB") ?? "suapi"
+    let databaseName = Environment.get("DB_MYSQL") ?? "suapi"
     
     let databaseConfig = MySQLDatabaseConfig(
         hostname: hostname,
