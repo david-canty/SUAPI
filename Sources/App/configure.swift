@@ -3,6 +3,7 @@ import Vapor
 import Leaf
 import Authentication
 import S3
+import Stripe
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
@@ -20,6 +21,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(KeyedCache.self) { container in
         try container.keyedCache(for: .mysql)
     }
+    
+    let stripeConfig = StripeConfig(apiKey: "pk_test_boaAcGP1oTQ6JZ7pbUpOnA0n")
+    services.register(stripeConfig)
+    try services.register(StripeProvider())
 
     let router = EngineRouter.default()
     try routes(router)

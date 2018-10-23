@@ -173,6 +173,15 @@
         }
       },
       {
+        "package": "Stripe",
+        "repositoryURL": "https://github.com/vapor-community/stripe-provider.git",
+        "state": {
+          "branch": null,
+          "revision": "f153cfe204ef92265d94eb66f2fcf6cf2b0ced13",
+          "version": "2.2.4"
+        }
+      },
+      {
         "package": "SwiftJWT",
         "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT",
         "state": {
