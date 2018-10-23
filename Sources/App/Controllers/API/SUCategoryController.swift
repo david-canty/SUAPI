@@ -150,9 +150,9 @@ struct SUCategoryController: RouteCollection {
     }
     
     // Items
-    func getItemsHandler(_ req: Request) throws -> Future<[SUItem]> {
+    func getItemsHandler(_ req: Request) throws -> Future<[SUShopItem]> {
         
-        return try req.parameters.next(SUCategory.self).flatMap(to: [SUItem].self) { category in
+        return try req.parameters.next(SUCategory.self).flatMap(to: [SUShopItem].self) { category in
             
             try category.items.query(on: req).all()
         }

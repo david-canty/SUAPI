@@ -8,22 +8,22 @@ final class SUItemSize: MySQLUUIDPivot, ModifiablePivot, Content {
     var stock: Int = 0
     var timestamp: String?
     
-    var itemID: SUItem.ID
+    var itemID: SUShopItem.ID
     var sizeID: SUSize.ID
     
-    typealias Left = SUItem
+    typealias Left = SUShopItem
     typealias Right = SUSize
     
     static let leftIDKey: LeftIDKey = \.itemID
     static let rightIDKey: RightIDKey = \.sizeID
     
-    init(_ itemID: SUItem.ID, _ sizeID: SUSize.ID) {
+    init(_ itemID: SUShopItem.ID, _ sizeID: SUSize.ID) {
         self.itemID = itemID
         self.sizeID = sizeID
         self.timestamp = String(describing: Date())
     }
     
-    init(_ item: SUItem, _ size: SUSize) throws {
+    init(_ item: SUShopItem, _ size: SUSize) throws {
         self.itemID = try item.requireID()
         self.sizeID = try size.requireID()
         self.timestamp = String(describing: Date())
@@ -38,7 +38,7 @@ extension SUItemSize: Migration {
             
             try addProperties(to: builder)
             
-            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.itemID, to: \SUShopItem.id, onUpdate: .cascade, onDelete: .cascade)
             builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }

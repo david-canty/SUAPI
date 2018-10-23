@@ -8,7 +8,7 @@ public func routes(_ router: Router) throws {
     let categoryController = SUCategoryController()
     try router.register(collection: categoryController)
     
-    let itemController = SUItemController()
+    let itemController = SUShopItemController()
     try router.register(collection: itemController)
     
     let sizeController = SUSizeController()
@@ -35,7 +35,7 @@ public func routes(_ router: Router) throws {
     let sizeAdminController = SUSizeAdminController()
     try router.register(collection: sizeAdminController)
     
-    let itemAdminController = SUItemAdminController()
+    let itemAdminController = SUShopItemAdminController()
     try router.register(collection: itemAdminController)
     
     let orderAdminController = SUOrderAdminController()

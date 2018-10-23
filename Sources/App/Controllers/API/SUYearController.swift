@@ -14,7 +14,7 @@ struct SUYearController: RouteCollection {
             jwtProtectedGroup.get(SUYear.parameter, use: getHandler)
             
             // School
-            jwtProtectedGroup.get(SUItem.parameter, "school", use: getSchoolHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, "school", use: getSchoolHandler)
             
             // Items
             jwtProtectedGroup.get(SUYear.parameter, "items", use: getItemsHandler)
@@ -164,9 +164,9 @@ struct SUYearController: RouteCollection {
     }
     
     // Items
-    func getItemsHandler(_ req: Request) throws -> Future<[SUItem]> {
+    func getItemsHandler(_ req: Request) throws -> Future<[SUShopItem]> {
         
-        return try req.parameters.next(SUYear.self).flatMap(to: [SUItem].self) { year in
+        return try req.parameters.next(SUYear.self).flatMap(to: [SUShopItem].self) { year in
             
             try year.items.query(on: req).all()
         }

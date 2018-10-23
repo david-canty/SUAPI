@@ -71,7 +71,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     var migrations = MigrationConfig()
     migrations.add(model: SUCategory.self, database: .mysql)
-    migrations.add(model: SUItem.self, database: .mysql)
+    migrations.add(model: SUShopItem.self, database: .mysql)
     migrations.add(model: SUImage.self, database: .mysql)
     migrations.add(model: SUSize.self, database: .mysql)
     migrations.add(model: SUItemSize.self, database: .mysql)

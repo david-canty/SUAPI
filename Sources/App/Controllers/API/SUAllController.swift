@@ -30,17 +30,17 @@ struct SUAllController: RouteCollection {
                      
                         return SUSize.query(on: req).all().flatMap(to: SUAllData.self) { (sizes) -> Future<SUAllData> in
                             
-                            return SUItem.query(on: req).all().flatMap(to: SUAllData.self) { (items) -> Future<SUAllData> in
+                            return SUShopItem.query(on: req).all().flatMap(to: SUAllData.self) { (items) -> Future<SUAllData> in
                             
-                                return try items.compactMap { (item) -> Future<SUItemData> in
+                                return try items.compactMap { (item) -> Future<SUShopItemData> in
                                     
-                                    return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all().flatMap(to: SUItemData.self) { (sizes) -> Future<SUItemData> in
+                                    return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all().flatMap(to: SUShopItemData.self) { (sizes) -> Future<SUShopItemData> in
                                         
-                                        return try item.years.query(on: req).all().flatMap(to: SUItemData.self) { (years) -> Future<SUItemData> in
+                                        return try item.years.query(on: req).all().flatMap(to: SUShopItemData.self) { (years) -> Future<SUShopItemData> in
                                             
-                                            return try item.images.query(on: req).all().map(to: SUItemData.self) { (images) -> SUItemData in
+                                            return try item.images.query(on: req).all().map(to: SUShopItemData.self) { (images) -> SUShopItemData in
                                                 
-                                                return SUItemData(item: item, sizes: sizes, years: years, images: images)
+                                                return SUShopItemData(item: item, sizes: sizes, years: years, images: images)
                                             }
                                         }
                                     }
@@ -59,7 +59,7 @@ struct SUAllController: RouteCollection {
         let schools: [SUSchoolData]
         let categories: [SUCategory]
         let sizes: [SUSize]
-        let items: [SUItemData]
+        let items: [SUShopItemData]
     }
     
     struct SUSchoolData: Content {
@@ -67,8 +67,8 @@ struct SUAllController: RouteCollection {
         let years: [SUYear]
     }
     
-    struct SUItemData: Content {
-        let item: SUItem
+    struct SUShopItemData: Content {
+        let item: SUShopItem
         let sizes: [SUItemSize]
         let years: [SUYear]
         let images: [SUImage]

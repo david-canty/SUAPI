@@ -5,21 +5,21 @@ final class SUItemYear: MySQLUUIDPivot, ModifiablePivot {
     
     var id: UUID?
     
-    var itemID: SUItem.ID
+    var itemID: SUShopItem.ID
     var yearID: SUYear.ID
     
-    typealias Left = SUItem
+    typealias Left = SUShopItem
     typealias Right = SUYear
     
     static let leftIDKey: LeftIDKey = \.itemID
     static let rightIDKey: RightIDKey = \.yearID
     
-    init(_ itemID: SUItem.ID, _ yearID: SUYear.ID) {
+    init(_ itemID: SUShopItem.ID, _ yearID: SUYear.ID) {
         self.itemID = itemID
         self.yearID = yearID
     }
     
-    init(_ item: SUItem, _ year: SUYear) throws {
+    init(_ item: SUShopItem, _ year: SUYear) throws {
         self.itemID = try item.requireID()
         self.yearID = try year.requireID()
     }
@@ -33,7 +33,7 @@ extension SUItemYear: Migration {
             
             try addProperties(to: builder)
             
-            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.itemID, to: \SUShopItem.id, onUpdate: .cascade, onDelete: .cascade)
             builder.reference(from: \.yearID, to: \SUYear.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }

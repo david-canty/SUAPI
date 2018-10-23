@@ -43,7 +43,7 @@ extension SUSize: Validatable {
 
 extension SUSize {
     
-    var items: Siblings<SUSize, SUItem, SUItemSize> {
+    var items: Siblings<SUSize, SUShopItem, SUItemSize> {
         
         return siblings()
     }

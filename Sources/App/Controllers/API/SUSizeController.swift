@@ -175,9 +175,9 @@ struct SUSizeController: RouteCollection {
     }
     
     // Items
-    func getItemsHandler(_ req: Request) throws -> Future<[SUItem]> {
+    func getItemsHandler(_ req: Request) throws -> Future<[SUShopItem]> {
         
-        return try req.parameters.next(SUSize.self).flatMap(to: [SUItem].self) { size in
+        return try req.parameters.next(SUSize.self).flatMap(to: [SUShopItem].self) { size in
             
             try size.items.query(on: req).all()
         }

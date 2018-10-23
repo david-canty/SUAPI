@@ -6,11 +6,11 @@ import S3
 final class SUImage: Codable {
     
     var id: UUID?
-    var itemID: SUItem.ID
+    var itemID: SUShopItem.ID
     var filename: String
     var sortOrder: Int?
     
-    init(itemID: SUItem.ID, filename: String) {
+    init(itemID: SUShopItem.ID, filename: String) {
         self.itemID = itemID
         self.filename = filename
     }
@@ -27,14 +27,14 @@ extension SUImage: Migration {
         return Database.create(self, on: connection) { builder in
             
             try addProperties(to: builder)
-            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .cascade)
+            builder.reference(from: \.itemID, to: \SUShopItem.id, onUpdate: .cascade, onDelete: .cascade)
         }
     }
 }
 
 extension SUImage {
     
-    var item: Parent<SUImage, SUItem> {
+    var item: Parent<SUImage, SUShopItem> {
         
         return parent(\.itemID)
     }

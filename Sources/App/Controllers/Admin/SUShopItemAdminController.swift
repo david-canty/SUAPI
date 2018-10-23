@@ -3,7 +3,7 @@ import Leaf
 import Fluent
 import Authentication
 
-struct SUItemAdminController: RouteCollection {
+struct SUShopItemAdminController: RouteCollection {
     
     func boot(router: Router) throws {
         
@@ -12,9 +12,9 @@ struct SUItemAdminController: RouteCollection {
         
         redirectProtectedRoutes.get("create", use: createItemHandler)
         redirectProtectedRoutes.get(use: itemsHandler)
-        redirectProtectedRoutes.get(SUItem.parameter, "edit", use: editItemHandler)
-        redirectProtectedRoutes.get(SUItem.parameter, "images", use: itemImagesHandler)
-        redirectProtectedRoutes.get(SUItem.parameter, "stock", use: itemStockHandler)
+        redirectProtectedRoutes.get(SUShopItem.parameter, "edit", use: editItemHandler)
+        redirectProtectedRoutes.get(SUShopItem.parameter, "images", use: itemImagesHandler)
+        redirectProtectedRoutes.get(SUShopItem.parameter, "stock", use: itemStockHandler)
     }
     
     // CRUD handlers
@@ -66,7 +66,7 @@ struct SUItemAdminController: RouteCollection {
     
     func editItemHandler(_ req: Request) throws -> Future<View> {
 
-        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: View.self) { item in
 
             return SUCategory.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { categories in
                 
@@ -102,7 +102,7 @@ struct SUItemAdminController: RouteCollection {
     // Images
     func itemImagesHandler(_ req: Request) throws -> Future<View> {
 
-        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: View.self) { item in
             
             return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { images in
                 
@@ -124,7 +124,7 @@ struct SUItemAdminController: RouteCollection {
     // Stock
     func itemStockHandler(_ req: Request) throws -> Future<View> {
         
-        return try req.parameters.next(SUItem.self).flatMap(to: View.self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: View.self) { item in
             
             return try SUItemSize.query(on: req).filter(\.itemID == item.requireID()).all().flatMap(to: View.self) { itemSizes in
                 
@@ -169,14 +169,14 @@ struct SUItemAdminController: RouteCollection {
     
     struct CategoryAndItems: Encodable {
         let category: SUCategory
-        let items: EventLoopFuture<[SUItem]>
+        let items: EventLoopFuture<[SUShopItem]>
     }
     
     struct EditItemContext: Encodable {
         let title = "Edit Item"
         let authenticatedUser: SUUser
         let editing = true
-        let item: SUItem
+        let item: SUShopItem
         let categories: [SUCategory]
         let genders: [Gender]
         let schoolYears: [EventLoopFuture<[SUYear]>]
@@ -188,7 +188,7 @@ struct SUItemAdminController: RouteCollection {
     struct ItemImagesContext: Encodable {
         let title = "Item Images"
         let authenticatedUser: SUUser
-        let item: SUItem
+        let item: SUShopItem
         let images: [SUImage]
         let s3ImagesPath: String
     }
@@ -196,7 +196,7 @@ struct SUItemAdminController: RouteCollection {
     struct ItemStockContext: Encodable {
         let title = "Item Stock"
         let authenticatedUser: SUUser
-        let item: SUItem
+        let item: SUShopItem
         let itemSizesWithSizes: [ItemSizeWithSize]
     }
     

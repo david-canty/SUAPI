@@ -3,7 +3,7 @@ import Fluent
 import Authentication
 import S3
 
-struct SUItemController: RouteCollection {
+struct SUShopItemController: RouteCollection {
     
     func boot(router: Router) throws {
         
@@ -12,53 +12,53 @@ struct SUItemController: RouteCollection {
         itemRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
             
             jwtProtectedGroup.get(use: getAllHandler)
-            jwtProtectedGroup.get(SUItem.parameter, use: getHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, use: getHandler)
             
             // Category
-            jwtProtectedGroup.get(SUItem.parameter, "category", use: getCategoryHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, "category", use: getCategoryHandler)
             
             // Sizes
-            jwtProtectedGroup.get(SUItem.parameter, "sizes", use: getSizesHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, "sizes", use: getSizesHandler)
             jwtProtectedGroup.get("sizes", use: getAllItemSizesHandler)
             
             // Stock
-//            jwtProtectedGroup.get(SUItem.parameter, "sizes", "stock", use: getSizesStockHandler)
+//            jwtProtectedGroup.get(SUShopItem.parameter, "sizes", "stock", use: getSizesStockHandler)
             
             // Images
-            jwtProtectedGroup.get(SUItem.parameter, "images", use: getImagesHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, "images", use: getImagesHandler)
             
             // Years
-            jwtProtectedGroup.get(SUItem.parameter, "years", use: getYearsHandler)
+            jwtProtectedGroup.get(SUShopItem.parameter, "years", use: getYearsHandler)
         }
         
         let authSessionRoutes = itemRoutes.grouped(SUUser.authSessionsMiddleware())
         let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
-        redirectProtectedGroup.post(SUItemData.self, use: createHandler)
-        redirectProtectedGroup.put(SUItem.parameter, use: updateHandler)
-        redirectProtectedGroup.delete(SUItem.parameter, use: deleteHandler)
+        redirectProtectedGroup.post(SUShopItemData.self, use: createHandler)
+        redirectProtectedGroup.put(SUShopItem.parameter, use: updateHandler)
+        redirectProtectedGroup.delete(SUShopItem.parameter, use: deleteHandler)
         
         // Sizes
-        redirectProtectedGroup.post(SUItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
-        redirectProtectedGroup.delete(SUItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
+        redirectProtectedGroup.post(SUShopItem.parameter, "sizes", SUSize.parameter, use: addSizeHandler)
+        redirectProtectedGroup.delete(SUShopItem.parameter, "sizes", SUSize.parameter, use: deleteSizeHandler)
         
         // Stock
-        redirectProtectedGroup.patch(SUItem.parameter, "stock", use: updateStockHandler)
+        redirectProtectedGroup.patch(SUShopItem.parameter, "stock", use: updateStockHandler)
         
         // Images
-        redirectProtectedGroup.post(SUItem.parameter, "images", use: uploadImagesHandler)
-        redirectProtectedGroup.patch(SUItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
-        redirectProtectedGroup.delete(SUItem.parameter, "images", SUImage.parameter, use: deleteItemImageHandler)
+        redirectProtectedGroup.post(SUShopItem.parameter, "images", use: uploadImagesHandler)
+        redirectProtectedGroup.patch(SUShopItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
+        redirectProtectedGroup.delete(SUShopItem.parameter, "images", SUImage.parameter, use: deleteItemImageHandler)
         
         // Years
-        redirectProtectedGroup.post(SUItem.parameter, "years", SUYear.parameter, use: addYearHandler)
-        redirectProtectedGroup.delete(SUItem.parameter, "years", SUYear.parameter, use: deleteYearHandler)
+        redirectProtectedGroup.post(SUShopItem.parameter, "years", SUYear.parameter, use: addYearHandler)
+        redirectProtectedGroup.delete(SUShopItem.parameter, "years", SUYear.parameter, use: deleteYearHandler)
     }
     
     // CRUD
-    func createHandler(_ req: Request, itemData: SUItemData) throws -> Future<SUItem> {
+    func createHandler(_ req: Request, itemData: SUShopItemData) throws -> Future<SUShopItem> {
         
-        let item = SUItem(name: itemData.itemName, description: itemData.itemDescription, color: itemData.itemColor, gender: itemData.itemGender, price: itemData.itemPrice, categoryID: itemData.categoryId)
+        let item = SUShopItem(name: itemData.itemName, description: itemData.itemDescription, color: itemData.itemColor, gender: itemData.itemGender, price: itemData.itemPrice, categoryID: itemData.categoryId)
         
         do {
             
@@ -127,19 +127,19 @@ struct SUItemController: RouteCollection {
 
     }
     
-    func getAllHandler(_ req: Request) throws -> Future<[SUItemWithRelations]> {
+    func getAllHandler(_ req: Request) throws -> Future<[SUShopItemWithRelations]> {
         
-        return SUItem.query(on: req).all().flatMap(to: [SUItemWithRelations].self) { (items) -> Future<[SUItemWithRelations]> in
+        return SUShopItem.query(on: req).all().flatMap(to: [SUShopItemWithRelations].self) { (items) -> Future<[SUShopItemWithRelations]> in
 
-            return try items.compactMap { (item) -> Future<SUItemWithRelations> in
+            return try items.compactMap { (item) -> Future<SUShopItemWithRelations> in
 
-                return try item.sizes.query(on: req).all().flatMap(to: SUItemWithRelations.self) { (sizes) -> Future<SUItemWithRelations> in
+                return try item.sizes.query(on: req).all().flatMap(to: SUShopItemWithRelations.self) { (sizes) -> Future<SUShopItemWithRelations> in
 
-                    return try item.years.query(on: req).all().flatMap(to: SUItemWithRelations.self) { (years) -> Future<SUItemWithRelations> in
+                    return try item.years.query(on: req).all().flatMap(to: SUShopItemWithRelations.self) { (years) -> Future<SUShopItemWithRelations> in
                         
-                        return try item.images.query(on: req).all().map(to: SUItemWithRelations.self) { (images) -> SUItemWithRelations in
+                        return try item.images.query(on: req).all().map(to: SUShopItemWithRelations.self) { (images) -> SUShopItemWithRelations in
                             
-                            return SUItemWithRelations(item: item, sizes: sizes, years: years, images: images)
+                            return SUShopItemWithRelations(item: item, sizes: sizes, years: years, images: images)
                         }
                     }
                 }
@@ -148,14 +148,14 @@ struct SUItemController: RouteCollection {
         }
     }
     
-    func getHandler(_ req: Request) throws -> Future<SUItem> {
+    func getHandler(_ req: Request) throws -> Future<SUShopItem> {
         
-        return try req.parameters.next(SUItem.self)
+        return try req.parameters.next(SUShopItem.self)
     }
     
-    func updateHandler(_ req: Request) throws -> Future<SUItem> {
+    func updateHandler(_ req: Request) throws -> Future<SUShopItem> {
         
-        return try flatMap(to: SUItem.self, req.parameters.next(SUItem.self), req.content.decode(SUItemData.self)) { item, updatedItemData in
+        return try flatMap(to: SUShopItem.self, req.parameters.next(SUShopItem.self), req.content.decode(SUShopItemData.self)) { item, updatedItemData in
             
             item.itemName = updatedItemData.itemName
             item.itemDescription = updatedItemData.itemDescription
@@ -230,7 +230,7 @@ struct SUItemController: RouteCollection {
         }
     }
     
-    func updateSizesForItem(item: SUItem, withData data: SUItemData, on req: Request) {
+    func updateSizesForItem(item: SUShopItem, withData data: SUShopItemData, on req: Request) {
      
         // Attach newly selected sizes
         _ = data.itemSizes.map { sizeId in
@@ -269,13 +269,13 @@ struct SUItemController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUItem.self).delete(on: req).transform(to: HTTPStatus.noContent)
+        return try req.parameters.next(SUShopItem.self).delete(on: req).transform(to: HTTPStatus.noContent)
     }
     
     // Category
     func getCategoryHandler(_ req: Request) throws -> Future<SUCategory> {
         
-        return try req.parameters.next(SUItem.self).flatMap(to: SUCategory.self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: SUCategory.self) { item in
             
             item.category.get(on: req)
         }
@@ -285,7 +285,7 @@ struct SUItemController: RouteCollection {
     func addSizeHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self,
-                           req.parameters.next(SUItem.self),
+                           req.parameters.next(SUShopItem.self),
                            req.parameters.next(SUSize.self)) { item, size in
                             
                             let pivot = try SUItemSize(item.requireID(), size.requireID())
@@ -297,7 +297,7 @@ struct SUItemController: RouteCollection {
     
     func getSizesHandler(_ req: Request) throws -> Future<[SUSize]> {
         
-        return try req.parameters.next(SUItem.self).flatMap(to: [SUSize].self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: [SUSize].self) { item in
             
             return try item.sizes.query(on: req).all()
         }
@@ -311,7 +311,7 @@ struct SUItemController: RouteCollection {
     func deleteSizeHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self,
-                           req.parameters.next(SUItem.self),
+                           req.parameters.next(SUShopItem.self),
                            req.parameters.next(SUSize.self)) { item, size in
                             
                             return item.sizes.detach(size, on: req).transform(to: HTTPStatus.noContent)
@@ -321,7 +321,7 @@ struct SUItemController: RouteCollection {
     // Stock
 //    func getSizesStockHandler(_ req: Request) throws -> Future<[SUItemSize]> {
 //
-//        return try req.parameters.next(SUItem.self).flatMap(to: [SUItemSize].self) { item in
+//        return try req.parameters.next(SUShopItem.self).flatMap(to: [SUItemSize].self) { item in
 //
 //            return try SUItemSize.query(on: req).filter(\SUItemSize.itemID == item.requireID()).all()
 //        }
@@ -329,7 +329,7 @@ struct SUItemController: RouteCollection {
     
     func updateStockHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.content.decode(SUItemStockData.self)) { item, itemStockData in
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.content.decode(SUShopItemStockData.self)) { item, itemStockData in
             
             let itemSizeIds = itemStockData.itemSizeIds
             let itemSizeStocks = itemStockData.itemSizeStocks
@@ -353,7 +353,7 @@ struct SUItemController: RouteCollection {
     // Images
     func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
-        return try flatMap(to: [SUImage].self, req.parameters.next(SUItem.self), req.content.decode(SUItemImageData.self)) { item, uploadedImageFiles in
+        return try flatMap(to: [SUImage].self, req.parameters.next(SUShopItem.self), req.content.decode(SUShopItemImageData.self)) { item, uploadedImageFiles in
             
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
@@ -386,7 +386,7 @@ struct SUItemController: RouteCollection {
     
     func getImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
-        return try req.parameters.next(SUItem.self).flatMap(to: [SUImage].self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: [SUImage].self) { item in
             
             try item.images.query(on: req).all()
         }
@@ -394,7 +394,7 @@ struct SUItemController: RouteCollection {
     
     func updateImageSortOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self), req.content.decode(SUImageSortOrderData.self)) { item, image, sortOrderData in
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.parameters.next(SUImage.self), req.content.decode(SUImageSortOrderData.self)) { item, image, sortOrderData in
             
             item.timestamp = String(describing: Date())
             image.sortOrder = sortOrderData.sortOrder
@@ -412,7 +412,7 @@ struct SUItemController: RouteCollection {
     
     func deleteItemImageHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUItem.self), req.parameters.next(SUImage.self)) { item, image in
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.parameters.next(SUImage.self)) { item, image in
             
             let s3Client = try req.makeS3Client()
             
@@ -439,7 +439,7 @@ struct SUItemController: RouteCollection {
     func addYearHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self,
-                           req.parameters.next(SUItem.self),
+                           req.parameters.next(SUShopItem.self),
                            req.parameters.next(SUYear.self)) { item, year in
                             
                             let pivot = try SUItemYear(item.requireID(), year.requireID())
@@ -450,7 +450,7 @@ struct SUItemController: RouteCollection {
     
     func getYearsHandler(_ req: Request) throws -> Future<[SUYear]> {
         
-        return try req.parameters.next(SUItem.self).flatMap(to: [SUYear].self) { item in
+        return try req.parameters.next(SUShopItem.self).flatMap(to: [SUYear].self) { item in
             
             try item.years.query(on: req).all()
         }
@@ -459,7 +459,7 @@ struct SUItemController: RouteCollection {
     func deleteYearHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self,
-                           req.parameters.next(SUItem.self),
+                           req.parameters.next(SUShopItem.self),
                            req.parameters.next(SUYear.self)) { item, year in
                             
                             return item.years.detach(year, on: req).transform(to: HTTPStatus.noContent)
@@ -467,7 +467,7 @@ struct SUItemController: RouteCollection {
     }
     
     // Data structs
-    struct SUItemData: Content {
+    struct SUShopItemData: Content {
         
         let itemName: String
         let itemDescription: String?
@@ -479,19 +479,19 @@ struct SUItemController: RouteCollection {
         let itemSizes: [UUID]
     }
     
-    struct SUItemWithRelations: Content {
-        let item: SUItem
+    struct SUShopItemWithRelations: Content {
+        let item: SUShopItem
         let sizes: [SUSize]
         let years: [SUYear]
         let images: [SUImage]
     }
     
-    struct SUItemStockData: Content {
+    struct SUShopItemStockData: Content {
         let itemSizeIds: [UUID]
         let itemSizeStocks: [Int]
     }
     
-    struct SUItemImageData: Content {
+    struct SUShopItemImageData: Content {
         let itemImages: [Vapor.File]
     }
     

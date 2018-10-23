@@ -43,7 +43,7 @@ extension SUCategory: Validatable {
 
 extension SUCategory {
     
-    var items: Children<SUCategory, SUItem> {
+    var items: Children<SUCategory, SUShopItem> {
         
         return children(\.categoryID)
     }

@@ -1,7 +1,7 @@
 import Vapor
 import FluentMySQL
 
-final class SUItem: Codable {
+final class SUShopItem: Codable {
     
     var id: UUID?
     var itemName: String
@@ -29,11 +29,11 @@ final class SUItem: Codable {
     }
 }
 
-extension SUItem: MySQLUUIDModel {}
-extension SUItem: Content {}
-extension SUItem: Parameter {}
+extension SUShopItem: MySQLUUIDModel {}
+extension SUShopItem: Content {}
+extension SUShopItem: Parameter {}
 
-extension SUItem: Migration {
+extension SUShopItem: Migration {
     
     static func prepare(on connection: MySQLConnection) -> Future<Void> {
         
@@ -45,11 +45,11 @@ extension SUItem: Migration {
     }
 }
 
-extension SUItem: Validatable {
+extension SUShopItem: Validatable {
     
-    static func validations() throws -> Validations<SUItem> {
+    static func validations() throws -> Validations<SUShopItem> {
         
-        var validations = Validations(SUItem.self)
+        var validations = Validations(SUShopItem.self)
         try validations.add(\.itemName, .count(1...))
         try validations.add(\.itemColor, .count(1...))
         try validations.add(\.itemGender, .count(1...))
@@ -58,24 +58,24 @@ extension SUItem: Validatable {
     }
 }
 
-extension SUItem {
+extension SUShopItem {
     
-    var category: Parent<SUItem, SUCategory> {
+    var category: Parent<SUShopItem, SUCategory> {
         
         return parent(\.categoryID)
     }
     
-    var sizes: Siblings<SUItem, SUSize, SUItemSize> {
+    var sizes: Siblings<SUShopItem, SUSize, SUItemSize> {
         
         return siblings()
     }
     
-    var years: Siblings<SUItem, SUYear, SUItemYear> {
+    var years: Siblings<SUShopItem, SUYear, SUItemYear> {
         
         return siblings()
     }
     
-    var images: Children<SUItem, SUImage> {
+    var images: Children<SUShopItem, SUImage> {
         
         return children(\.itemID)
     }

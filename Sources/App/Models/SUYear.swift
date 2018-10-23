@@ -51,7 +51,7 @@ extension SUYear {
         return parent(\.schoolID)
     }
     
-    var items: Siblings<SUYear, SUItem, SUItemYear> {
+    var items: Siblings<SUYear, SUShopItem, SUItemYear> {
         
         return siblings()
     }

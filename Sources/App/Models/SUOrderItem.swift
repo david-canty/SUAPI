@@ -6,12 +6,12 @@ final class SUOrderItem: Codable {
     
     var id: UUID?
     var orderID: SUOrder.ID
-    var itemID: SUItem.ID
+    var itemID: SUShopItem.ID
     var sizeID: SUSize.ID
     var quantity: Int
     
     init(orderID: SUOrder.ID,
-         itemID: SUItem.ID,
+         itemID: SUShopItem.ID,
          sizeID: SUSize.ID,
          quantity: Int) {
         
@@ -34,7 +34,7 @@ extension SUOrderItem: Migration {
             
             try addProperties(to: builder)
             builder.reference(from: \.orderID, to: \SUOrder.id, onUpdate: .cascade, onDelete: .restrict)
-            builder.reference(from: \.itemID, to: \SUItem.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.itemID, to: \SUShopItem.id, onUpdate: .cascade, onDelete: .restrict)
             builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
     }
