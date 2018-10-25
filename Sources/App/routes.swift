@@ -43,4 +43,7 @@ public func routes(_ router: Router) throws {
     
     let userAdminController = SUUserAdminController()
     try router.register(collection: userAdminController)
+    
+    let stripeController = SUStripeController()
+    try router.register(collection: stripeController)
 }
