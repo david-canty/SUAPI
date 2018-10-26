@@ -7,16 +7,46 @@ struct SUStripeController: RouteCollection {
     
     func boot(router: Router) throws {
         
-        let stripeRoutes = router.grouped("api")
+        let stripeRoutes = router.grouped("api", "stripe")
         stripeRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
             
+            jwtProtectedGroup.post("ephemeral-key", use: ephemeralKeyHandler)
+            jwtProtectedGroup.post("customer", use: createCustomerHandler)
             jwtProtectedGroup.post("charge", use: chargeHandler)
         }
     }
     
+    // MARK: - Ephemeral Key
+    func ephemeralKeyHandler(_ req: Request) throws -> Future<StripeEphemeralKey> {
+        
+        return try req.content.decode(SUSTPEphemeralKeyPostData.self).flatMap(to: StripeEphemeralKey.self) { keyPostData in
+         
+            let customerId = keyPostData.customerId
+            let apiVersion = keyPostData.apiVersion
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.ephemeralKey.create(customer: customerId, apiVersion: apiVersion)
+        }
+    }
+    
+    // MARK: - Customer
+    func createCustomerHandler(_ req: Request) throws -> Future<StripeCustomer> {
+     
+        return try req.content.decode(SUSTPCustomerPostData.self).flatMap(to: StripeCustomer.self) { customerPostData in
+         
+            let email = customerPostData.email
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.customer.create(email: email)
+        }
+    }
+    
+    // MARK: - Charge
     func chargeHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.content.decode(SUChargeData.self).flatMap(to: HTTPStatus.self) { chargeData in
+        return try req.content.decode(SUSTPChargeData.self).flatMap(to: HTTPStatus.self) { chargeData in
             
             let amount = chargeData.amount
             
@@ -41,7 +71,18 @@ struct SUStripeController: RouteCollection {
         }
     }
     
-    struct SUChargeData: Content {
+    // MARK: - Data Structs
+    
+    struct SUSTPEphemeralKeyPostData: Content {
+        let customerId: String
+        let apiVersion: String
+    }
+    
+    struct SUSTPCustomerPostData: Content {
+        let email: String
+    }
+    
+    struct SUSTPChargeData: Content {
         let token: String
         let amount: Int
         let currency: String
