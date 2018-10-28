@@ -12,6 +12,7 @@ struct SUStripeController: RouteCollection {
             
             jwtProtectedGroup.post("ephemeral-key", use: ephemeralKeyHandler)
             jwtProtectedGroup.post("customer", use: createCustomerHandler)
+            jwtProtectedGroup.get("customer", String.parameter, use: getCustomerHandler)
             jwtProtectedGroup.post("charge", use: chargeHandler)
         }
     }
@@ -41,6 +42,14 @@ struct SUStripeController: RouteCollection {
             
             return try stripeClient.customer.create(email: email)
         }
+    }
+    
+    func getCustomerHandler(_ req: Request) throws -> Future<StripeCustomer> {
+        
+        let customerId = try req.parameters.next(String.self)
+        let stripeClient = try req.make(StripeClient.self)
+        
+        return try stripeClient.customer.retrieve(customer: customerId)
     }
     
     // MARK: - Charge
