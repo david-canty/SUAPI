@@ -8,11 +8,15 @@ struct SUStripeController: RouteCollection {
     func boot(router: Router) throws {
         
         let stripeRoutes = router.grouped("api", "stripe")
+        
         stripeRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
             
             jwtProtectedGroup.post("ephemeral-key", use: ephemeralKeyHandler)
+            
             jwtProtectedGroup.post("customer", use: createCustomerHandler)
             jwtProtectedGroup.get("customer", String.parameter, use: getCustomerHandler)
+            jwtProtectedGroup.post("customer", String.parameter, "source", use: createSourceHandler)
+            
             jwtProtectedGroup.post("charge", use: chargeHandler)
         }
     }
@@ -52,6 +56,19 @@ struct SUStripeController: RouteCollection {
         return try stripeClient.customer.retrieve(customer: customerId)
     }
     
+    func createSourceHandler(_ req: Request) throws -> Future<StripeCard> {
+        
+        return try req.content.decode(SUSTPCustomerSourceData.self).flatMap(to: StripeCard.self) { sourcePostData in
+            
+            let customerId = try req.parameters.next(String.self)
+            let source = sourcePostData.source
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.customer.addNewCardSource(customer: customerId, source: source)
+        }
+    }
+    
     // MARK: - Charge
     func chargeHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
@@ -89,6 +106,10 @@ struct SUStripeController: RouteCollection {
     
     struct SUSTPCustomerPostData: Content {
         let email: String
+    }
+    
+    struct SUSTPCustomerSourceData: Content {
+        let source: String
     }
     
     struct SUSTPChargeData: Content {
