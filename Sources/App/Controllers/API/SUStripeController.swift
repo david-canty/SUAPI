@@ -15,6 +15,7 @@ struct SUStripeController: RouteCollection {
             
             jwtProtectedGroup.post("customer", use: createCustomerHandler)
             jwtProtectedGroup.get("customer", String.parameter, use: getCustomerHandler)
+            jwtProtectedGroup.put("customer", String.parameter, use: updateCustomerHandler)
             jwtProtectedGroup.post("customer", String.parameter, "source", use: createSourceHandler)
             
             jwtProtectedGroup.post("charge", use: chargeHandler)
@@ -54,6 +55,19 @@ struct SUStripeController: RouteCollection {
         let stripeClient = try req.make(StripeClient.self)
         
         return try stripeClient.customer.retrieve(customer: customerId)
+    }
+    
+    func updateCustomerHandler(_ req: Request) throws -> Future<StripeCustomer> {
+        
+        return try req.content.decode(SUSTPCustomerUpdateData.self).flatMap(to: StripeCustomer.self) { customerUpdateData in
+            
+            let customerId = try req.parameters.next(String.self)
+            let source = customerUpdateData.source
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.customer.update(customer: customerId, defaultSource: source)
+        }
     }
     
     func createSourceHandler(_ req: Request) throws -> Future<StripeCard> {
@@ -106,6 +120,10 @@ struct SUStripeController: RouteCollection {
     
     struct SUSTPCustomerPostData: Content {
         let email: String
+    }
+    
+    struct SUSTPCustomerUpdateData: Content {
+        let source: String
     }
     
     struct SUSTPCustomerSourceData: Content {
