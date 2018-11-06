@@ -95,11 +95,11 @@ struct SUStripeController: RouteCollection {
             }
             
             let description = chargeData.description
-            let source = chargeData.token
+            let customer = chargeData.customerId
             
             let stripeClient = try req.make(StripeClient.self)
             
-            return try stripeClient.charge.create(amount: amount, currency: currency, description: description, source: source).flatMap(to: HTTPStatus.self) { charge in
+            return try stripeClient.charge.create(amount: amount, currency: currency, description: description, customer: customer).flatMap(to: HTTPStatus.self) { charge in
              
                 return req.future(HTTPStatus.ok)
                 
@@ -131,9 +131,9 @@ struct SUStripeController: RouteCollection {
     }
     
     struct SUSTPChargeData: Content {
-        let token: String
         let amount: Int
         let currency: String
         let description: String
+        let customerId: String
     }
 }
