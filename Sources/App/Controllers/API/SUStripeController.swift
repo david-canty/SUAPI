@@ -15,8 +15,8 @@ struct SUStripeController: RouteCollection {
             
             jwtProtectedGroup.post("customer", use: createCustomerHandler)
             jwtProtectedGroup.get("customer", String.parameter, use: getCustomerHandler)
-            jwtProtectedGroup.put("customer", String.parameter, use: updateCustomerHandler)
             jwtProtectedGroup.post("customer", String.parameter, "source", use: createSourceHandler)
+            jwtProtectedGroup.patch("customer", String.parameter, "default-source", use: defaultSourceHandler)
             
             jwtProtectedGroup.post("charge", use: chargeHandler)
         }
@@ -57,19 +57,6 @@ struct SUStripeController: RouteCollection {
         return try stripeClient.customer.retrieve(customer: customerId)
     }
     
-    func updateCustomerHandler(_ req: Request) throws -> Future<StripeCustomer> {
-        
-        return try req.content.decode(SUSTPCustomerUpdateData.self).flatMap(to: StripeCustomer.self) { customerUpdateData in
-            
-            let customerId = try req.parameters.next(String.self)
-            let source = customerUpdateData.source
-            
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.customer.update(customer: customerId, defaultSource: source)
-        }
-    }
-    
     func createSourceHandler(_ req: Request) throws -> Future<StripeCard> {
         
         return try req.content.decode(SUSTPCustomerSourceData.self).flatMap(to: StripeCard.self) { sourcePostData in
@@ -80,6 +67,19 @@ struct SUStripeController: RouteCollection {
             let stripeClient = try req.make(StripeClient.self)
             
             return try stripeClient.customer.addNewCardSource(customer: customerId, source: source)
+        }
+    }
+    
+    func defaultSourceHandler(_ req: Request) throws -> Future<StripeCustomer> {
+        
+        return try req.content.decode(SUSTPDefaultSourceData.self).flatMap(to: StripeCustomer.self) { defaultSourceData in
+            
+            let customerId = try req.parameters.next(String.self)
+            let source = defaultSourceData.source
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.customer.update(customer: customerId, defaultSource: source)
         }
     }
     
@@ -122,7 +122,7 @@ struct SUStripeController: RouteCollection {
         let email: String
     }
     
-    struct SUSTPCustomerUpdateData: Content {
+    struct SUSTPDefaultSourceData: Content {
         let source: String
     }
     
