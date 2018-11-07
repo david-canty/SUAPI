@@ -23,6 +23,9 @@ public func routes(_ router: Router) throws {
     let userController = SUUserController()
     try router.register(collection: userController)
     
+    let customerController = SUCustomerController()
+    try router.register(collection: customerController)
+    
     let adminController = SUAdminController()
     try router.register(collection: adminController)
     
@@ -43,6 +46,9 @@ public func routes(_ router: Router) throws {
     
     let userAdminController = SUUserAdminController()
     try router.register(collection: userAdminController)
+    
+//    let customerAdminController = SUCustomerAdminController()
+//    try router.register(collection: customerAdminController)
     
     let stripeController = SUStripeController()
     try router.register(collection: stripeController)

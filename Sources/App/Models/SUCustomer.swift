@@ -5,9 +5,9 @@ import FluentMySQL
 final class SUCustomer: Codable {
     
     var id: UUID?
-    var firebaseUserID: String
-    var firstName: String
-    var lastName: String
+    var firebaseUserId: String
+    var firstName: String?
+    var lastName: String?
     var email: String
     var tel: String?
     var mobile: String?
@@ -15,10 +15,11 @@ final class SUCustomer: Codable {
     var addressLine2: String?
     var addressLine3: String?
     var postcode: String?
+    var timestamp: String?
     
-    init(firebaseUserID: String,
-         firstName: String,
-         lastName: String,
+    init(firebaseUserId: String,
+         firstName: String? = nil,
+         lastName: String? = nil,
          email: String,
          tel: String? = nil,
          mobile: String? = nil,
@@ -27,7 +28,7 @@ final class SUCustomer: Codable {
          addressLine3: String? = nil,
          postcode: String? = nil) {
         
-        self.firebaseUserID = firebaseUserID
+        self.firebaseUserId = firebaseUserId
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
@@ -37,6 +38,7 @@ final class SUCustomer: Codable {
         self.addressLine2 = addressLine2
         self.addressLine3 = addressLine3
         self.postcode = postcode
+        self.timestamp = String(describing: Date())
     }
 }
 
@@ -51,7 +53,8 @@ extension SUCustomer: Migration {
         return Database.create(self, on: connection) { builder in
             
             try addProperties(to: builder)
-            builder.unique(on: \.firebaseUserID)
+            builder.unique(on: \.firebaseUserId)
+            builder.unique(on: \.email)
         }
     }
 }
@@ -62,9 +65,9 @@ extension SUCustomer: Validatable {
         
         var validations = Validations(SUCustomer.self)
         
-        try validations.add(\.firebaseUserID, .count(1...))
-        try validations.add(\.firstName, .count(1...) && .ascii)
-        try validations.add(\.lastName, .count(1...) && .ascii)
+        try validations.add(\.firebaseUserId, .count(1...))
+        try validations.add(\.firstName, .count(1...) && .ascii || .nil)
+        try validations.add(\.lastName, .count(1...) && .ascii || .nil)
         try validations.add(\.email, .email)
         
         let telCharacterSet = CharacterSet(charactersIn: "+ ()0123456789")
