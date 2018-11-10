@@ -26,6 +26,9 @@ public func routes(_ router: Router) throws {
     let customerController = SUCustomerController()
     try router.register(collection: customerController)
     
+    let orderController = SUOrderController()
+    try router.register(collection: orderController)
+    
     let adminController = SUAdminController()
     try router.register(collection: adminController)
     
