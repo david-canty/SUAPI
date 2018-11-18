@@ -10,7 +10,7 @@ final class SUShopItem: Codable {
     var itemGender: String
     var itemPrice: Double
     var categoryID: SUCategory.ID
-    var timestamp: String?
+    var timestamp: Date?
     
     init(name: String,
          description: String? = nil,
@@ -25,7 +25,7 @@ final class SUShopItem: Codable {
         self.itemGender = gender
         self.itemPrice = price
         self.categoryID = categoryID
-        self.timestamp = String(describing: Date())
+        self.timestamp = Date()
     }
 }
 

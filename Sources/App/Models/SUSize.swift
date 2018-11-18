@@ -7,11 +7,11 @@ final class SUSize: Codable {
     var id: UUID?
     var sizeName: String
     var sortOrder: Int?
-    var timestamp: String?
+    var timestamp: Date?
     
     init(name: String) {
         self.sizeName = name
-        self.timestamp = String(describing: Date())
+        self.timestamp = Date()
     }
 }
 

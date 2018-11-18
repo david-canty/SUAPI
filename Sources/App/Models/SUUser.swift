@@ -10,12 +10,13 @@ final class SUUser: Codable {
     var username: String
     var password: String
     var isEnabled = true
-    var timestamp = String(describing: Date())
+    var timestamp: Date?
     
     init(name: String, username: String, password: String) {
         self.name = name
         self.username = username
         self.password = password
+        self.timestamp = Date()
     }
     
     final class Public: Codable {
@@ -24,9 +25,9 @@ final class SUUser: Codable {
         var name: String
         var username: String
         var isEnabled: Bool
-        var timestamp: String
+        var timestamp: Date?
         
-        init(id: UUID?, name: String, username: String, isEnabled: Bool, timestamp: String) {
+        init(id: UUID?, name: String, username: String, isEnabled: Bool, timestamp: Date?) {
             self.id = id
             self.name = name
             self.username = username

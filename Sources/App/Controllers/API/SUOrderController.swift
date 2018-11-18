@@ -34,7 +34,7 @@ struct SUOrderController: RouteCollection {
             return req.transaction(on: .mysql) { conn in
              
                 let order = SUOrder(customerID: customer.id!,
-                                    orderDate: String(describing: Date()),
+                                    orderDate: Date(),
                                     orderStatus: OrderStatus.ordered.rawValue,
                                     paymentMethod: orderData.paymentMethod)
                 

@@ -32,7 +32,7 @@ struct SUSizeController: RouteCollection {
         do {
             
             try size.validate()
-            size.timestamp = String(describing: Date())
+            size.timestamp = Date()
             
         } catch {
             
@@ -91,7 +91,7 @@ struct SUSizeController: RouteCollection {
             do {
                 
                 try size.validate()
-                size.timestamp = String(describing: Date())
+                size.timestamp = Date()
                 
             } catch {
                 
@@ -132,7 +132,7 @@ struct SUSizeController: RouteCollection {
             
             if size.sortOrder != sortOrderData.sortOrder {
                 
-                size.timestamp = String(describing: Date())
+                size.timestamp = Date()
                 size.sortOrder = sortOrderData.sortOrder
                 
                 return size.update(on: req).transform(to: HTTPStatus.ok)
@@ -156,7 +156,7 @@ struct SUSizeController: RouteCollection {
                     
                     for sizeAfter in sizesAfterDeleted {
                         
-                        sizeAfter.timestamp = String(describing: Date())
+                        sizeAfter.timestamp = Date()
                         sizeAfter.sortOrder = sizeAfter.sortOrder! - 1
                         
                         sizesAfterDeletedSaveResults.append(sizeAfter.update(on: conn))

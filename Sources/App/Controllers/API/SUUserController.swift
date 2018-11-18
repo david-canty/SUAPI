@@ -90,7 +90,7 @@ struct SUUserController: RouteCollection {
             do {
                 
                 try user.validate()
-                user.timestamp = String(describing: Date())
+                user.timestamp = Date()
                 
             } catch {
 

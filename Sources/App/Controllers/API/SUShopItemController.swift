@@ -63,7 +63,7 @@ struct SUShopItemController: RouteCollection {
         do {
             
             try item.validate()
-            item.timestamp = String(describing: Date())
+            item.timestamp = Date()
             
         } catch {
             
@@ -167,7 +167,7 @@ struct SUShopItemController: RouteCollection {
             do {
                 
                 try item.validate()
-                item.timestamp = String(describing: Date())
+                item.timestamp = Date()
                 
             } catch {
                 
@@ -341,7 +341,7 @@ struct SUShopItemController: RouteCollection {
                 for itemSize in itemSizes {
                     let idIndex = itemSizeIds.index(of: itemSize.id!)!
                     itemSize.stock = itemSizeStocks[idIndex]
-                    itemSize.timestamp = String(describing: Date())
+                    itemSize.timestamp = Date()
                     itemSizeSaveResults.append(itemSize.update(on: req))
                 }
                 
@@ -396,7 +396,7 @@ struct SUShopItemController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.parameters.next(SUImage.self), req.content.decode(SUImageSortOrderData.self)) { item, image, sortOrderData in
             
-            item.timestamp = String(describing: Date())
+            item.timestamp = Date()
             image.sortOrder = sortOrderData.sortOrder
             
             return req.transaction(on: .mysql) { conn in
@@ -420,7 +420,7 @@ struct SUShopItemController: RouteCollection {
                 
                 return req.transaction(on: .mysql) { conn in
                     
-                    item.timestamp = String(describing: Date())
+                    item.timestamp = Date()
                     return item.update(on: conn).flatMap { _ in
                         
                         return image.delete(on: conn)

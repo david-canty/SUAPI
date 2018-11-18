@@ -15,7 +15,7 @@ final class SUCustomer: Codable {
     var addressLine2: String?
     var addressLine3: String?
     var postcode: String?
-    var timestamp: String?
+    var timestamp: Date?
     
     init(firebaseUserId: String,
          firstName: String? = nil,
@@ -38,7 +38,7 @@ final class SUCustomer: Codable {
         self.addressLine2 = addressLine2
         self.addressLine3 = addressLine3
         self.postcode = postcode
-        self.timestamp = String(describing: Date())
+        self.timestamp = Date()
     }
 }
 

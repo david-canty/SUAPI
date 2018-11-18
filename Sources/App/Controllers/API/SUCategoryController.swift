@@ -32,7 +32,7 @@ struct SUCategoryController: RouteCollection {
         do {
             
             try category.validate()
-            category.timestamp = String(describing: Date())
+            category.timestamp = Date()
             
         } catch {
             
@@ -90,7 +90,7 @@ struct SUCategoryController: RouteCollection {
             do {
                 
                 try category.validate()
-                category.timestamp = String(describing: Date())
+                category.timestamp = Date()
                 
             } catch {
                 
@@ -131,7 +131,7 @@ struct SUCategoryController: RouteCollection {
             
             if category.sortOrder != sortOrderData.sortOrder {
                 
-                category.timestamp = String(describing: Date())
+                category.timestamp = Date()
                 category.sortOrder = sortOrderData.sortOrder
                 
                 return category.update(on: req).transform(to: HTTPStatus.ok)

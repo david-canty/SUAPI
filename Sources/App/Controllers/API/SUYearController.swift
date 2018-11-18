@@ -35,7 +35,7 @@ struct SUYearController: RouteCollection {
         do {
             
             try year.validate()
-            year.timestamp = String(describing: Date())
+            year.timestamp = Date()
             
         } catch {
             
@@ -95,7 +95,7 @@ struct SUYearController: RouteCollection {
             do {
                 
                 try year.validate()
-                year.timestamp = String(describing: Date())
+                year.timestamp = Date()
                 
             } catch {
                 
@@ -136,7 +136,7 @@ struct SUYearController: RouteCollection {
             
             if year.sortOrder != sortOrderData.sortOrder {
                 
-                year.timestamp = String(describing: Date())
+                year.timestamp = Date()
                 year.sortOrder = sortOrderData.sortOrder
                 
                 return year.update(on: req).transform(to: HTTPStatus.ok)

@@ -32,7 +32,7 @@ struct SUSchoolController: RouteCollection {
         do {
             
             try school.validate()
-            school.timestamp = String(describing: Date())
+            school.timestamp = Date()
             
         } catch {
             
@@ -90,7 +90,7 @@ struct SUSchoolController: RouteCollection {
             do {
                 
                 try school.validate()
-                school.timestamp = String(describing: Date())
+                school.timestamp = Date()
                 
             } catch {
                 
@@ -131,7 +131,7 @@ struct SUSchoolController: RouteCollection {
             
             if school.sortOrder != sortOrderData.sortOrder {
                 
-                school.timestamp = String(describing: Date())
+                school.timestamp = Date()
                 school.sortOrder = sortOrderData.sortOrder
                 
                 return school.update(on: req).transform(to: HTTPStatus.ok)

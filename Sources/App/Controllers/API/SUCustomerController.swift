@@ -23,7 +23,7 @@ struct SUCustomerController: RouteCollection {
         do {
             
             try customer.validate()
-            customer.timestamp = String(describing: Date())
+            customer.timestamp = Date()
             
         } catch {
             

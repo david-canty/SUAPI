@@ -6,13 +6,13 @@ final class SUOrder: Codable {
     
     var id: UUID?
     var customerID: SUCustomer.ID
-    var orderDate: String
+    var orderDate: Date
     var orderStatus: String
     var paymentMethod: String
-    var timestamp: String
+    var timestamp: Date?
     
     init(customerID: SUCustomer.ID,
-         orderDate: String,
+         orderDate: Date,
          orderStatus: String,
          paymentMethod: String) {
         
