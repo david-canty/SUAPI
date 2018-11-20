@@ -33,7 +33,7 @@
                                 <td>#date(orderDetail.order.orderDate, "d MMMM yyyy, HH:mm:ss")</td>
                                 <td>#(orderDetail.customer.email)</td>
                                 <td>#(orderDetail.itemCount)</td>
-                                <td>0</td>
+                                <td>#(orderDetail.orderTotal)</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

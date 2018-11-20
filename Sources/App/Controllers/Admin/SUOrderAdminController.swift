@@ -15,89 +15,50 @@ struct SUOrderAdminController: RouteCollection {
     }
     
     // CRUD handlers
-    func ordersHandler(_ req: Request) throws -> Future<View> {
+    
+    func getTotal(forOrder order: SUOrder, on req: Request) throws -> EventLoopFuture<Double> {
         
-        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap(to: View.self) { orders in
+        return try order.orderItems.query(on: req).all().flatMap(to: Double.self) { orderItems in
             
-            return try orders.compactMap { order in
+            return orderItems.compactMap { orderItem in
                 
-                return try order.orderItems.query(on: req).all().map(to: OrderDetail.self) { orderItems in
-                 
-                    var itemCount = 0
-                    for item in orderItems {
-                        itemCount += item.quantity
-                    }
+                return SUShopItem.find(orderItem.itemID, on: req).map(to: Double.self) { item in
                     
-                        let customer = order.customer.get(on: req)
-                        return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount)
+                    return item!.itemPrice * Double(orderItem.quantity)
+                }
+                
+            }.map(to: Double.self, on: req) { orderItemTotals in
                     
-                    }
-                }.flatMap(to: View.self, on: req) { orderDetails in
-                        
-                        let user = try req.requireAuthenticated(SUUser.self)
-                        let context = OrdersContext(authenticatedUser: user, orderDetails: orderDetails)
-                        
-                        return try req.view().render("orders", context)
+                return orderItemTotals.reduce(0.0, +)
             }
         }
     }
     
-//    func ordersHandler(_ req: Request) throws -> Future<View> {
-//
-//        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap(to: View.self) { orders in
-//
-//            let orderList = try orders.map { order -> OrderDetail in
-//
-//                let customer = order.customer.get(on: req)
-//                let orderItems = try order.orderItems.query(on: req).all()
-//                return OrderDetail(customer: customer, order: order, orderItems: orderItems)
-//            }
-//
-//            let user = try req.requireAuthenticated(SUUser.self)
-//            let context = OrdersContext(authenticatedUser: user, orderList: orderList)
-//
-//            return try req.view().render("orders", context)
-//
-//        }
-//    }
-    
-//    func ordersHandler(_ req: Request) throws -> Future<View> {
-//
-//        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap(to: View.self) { orders in
-//        
-//            var orderList: [OrderDetail] = []
-//            for order in orders {
-//
-//                let customer = order.customer.get(on: req)
-//                let orderItems = try order.orderItems.query(on: req).all()
-//
-//
-//
-//                let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems)
-//                orderList.append(orderDetail)
-//            }
-//
-//            let user = try req.requireAuthenticated(SUUser.self)
-//            let context = OrdersContext(authenticatedUser: user, orderList: orderList)
-//
-//            return try req.view().render("orders", context)
-//        }
-//    }
-    
-//    func viewOrderHandler(_ req: Request) throws -> Future<View> {
-//
-//        return try req.parameters.next(SUOrder.self).flatMap(to: View.self) { order in
-//
-//            let customer = order.customer.get(on: req)
-//            let orderItems = try order.orderItems.query(on: req).all()
-//            let orderDetail = OrderDetail(customer: customer, order: order, orderItems: orderItems)
-//
-//            let user = try req.requireAuthenticated(SUUser.self)
-//            let context = ViewOrderContext(authenticatedUser: user, order: orderDetail)
-//
-//            return try req.view().render("order", context)
-//        }
-//    }
+    func ordersHandler(_ req: Request) throws -> Future<View> {
+
+        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap(to: View.self) { orders in
+
+            return try orders.compactMap { order in
+
+                return try order.orderItems.query(on: req).all().map(to: OrderDetail.self) { orderItems in
+
+                    let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                    let customer = order.customer.get(on: req)
+                    let orderTotal = try self.getTotal(forOrder: order, on: req)
+
+                    return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, orderTotal: orderTotal)
+
+                }
+
+                }.flatMap(to: View.self, on: req) { orderDetails in
+
+                    let user = try req.requireAuthenticated(SUUser.self)
+                    let context = OrdersContext(authenticatedUser: user, orderDetails: orderDetails)
+
+                    return try req.view().render("orders", context)
+            }
+        }
+    }
     
     // Contexts
     struct OrdersContext: Encodable {
@@ -117,6 +78,6 @@ struct SUOrderAdminController: RouteCollection {
         let order: SUOrder
         let orderItems: [SUOrderItem]
         let itemCount: Int
-//        let orderTotal: Double
+        let orderTotal: EventLoopFuture<Double>
     }
 }
