@@ -21,7 +21,7 @@
                         <thead class="thead-light">
                             <tr>
                                 <th>Date</th>
-                                <th>Email</th>
+                                <th>Status</th>
                                 <th>Items</th>
                                 <th>Total</th>
                                 <th>Action</th>
@@ -30,10 +30,10 @@
                         <tbody>
                             #for(orderDetail in orderDetails) {
                             <tr>
-                                <td>#date(orderDetail.order.orderDate, "d MMMM yyyy, HH:mm:ss")</td>
-                                <td>#(orderDetail.customer.email)</td>
+                                <td>#date(orderDetail.order.orderDate, "d MMM yyyy, HH:mm")</td>
+                                <td>#(orderDetail.order.orderStatus)</td>
                                 <td>#(orderDetail.itemCount)</td>
-                                <td>#(orderDetail.orderTotal)</td>
+                                <td>#(orderDetail.formattedOrderTotal)</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

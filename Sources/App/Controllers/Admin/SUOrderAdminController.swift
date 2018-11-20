@@ -28,7 +28,7 @@ struct SUOrderAdminController: RouteCollection {
                 }
                 
             }.map(to: Double.self, on: req) { orderItemTotals in
-                    
+        
                 return orderItemTotals.reduce(0.0, +)
             }
         }
@@ -40,14 +40,20 @@ struct SUOrderAdminController: RouteCollection {
 
             return try orders.compactMap { order in
 
-                return try order.orderItems.query(on: req).all().map(to: OrderDetail.self) { orderItems in
+                return try order.orderItems.query(on: req).all().flatMap(to: OrderDetail.self) { orderItems in
 
-                    let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
                     let customer = order.customer.get(on: req)
-                    let orderTotal = try self.getTotal(forOrder: order, on: req)
-
-                    return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, orderTotal: orderTotal)
-
+                    let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                    
+                    return try self.getTotal(forOrder: order, on: req).map(to: OrderDetail.self) { orderTotal in
+                        
+                        let formatter = NumberFormatter()
+                        formatter.numberStyle = .currency
+                        formatter.currencySymbol = "£"
+                        let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                        
+                        return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                    }
                 }
 
                 }.flatMap(to: View.self, on: req) { orderDetails in
@@ -78,6 +84,6 @@ struct SUOrderAdminController: RouteCollection {
         let order: SUOrder
         let orderItems: [SUOrderItem]
         let itemCount: Int
-        let orderTotal: EventLoopFuture<Double>
+        let formattedOrderTotal: String
     }
 }
