@@ -21,15 +21,14 @@ struct SUCustomerController: RouteCollection {
             let email = customerData.email
             
             let customer = SUCustomer(firebaseUserId: firebaseUserId, email: email)
-            return customer.save(on: req)
             
-//            do {
-//
-//                try customer.validate()
-//                customer.timestamp = Date()
-//
-//            } catch {
-//
+            do {
+                
+                try customer.validate()
+                //customer.timestamp = Date()
+                
+            } catch {
+                
 //                if let validationError = error as? ValidationError {
 //
 //                    let errorString = "Error creating customer:\n\n"
@@ -43,9 +42,10 @@ struct SUCustomerController: RouteCollection {
 //                        throw Abort(.badRequest, reason: validationErrorReason)
 //                    }
 //                }
-//            }
-//
-//            return customer.save(on: req).catchMap { error in
+            }
+            
+            return customer.save(on: req)
+//                .catchMap { error in
 //
 //                let errorDescription = error.localizedDescription.lowercased()
 //
