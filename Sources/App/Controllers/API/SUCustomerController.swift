@@ -22,13 +22,13 @@ struct SUCustomerController: RouteCollection {
             
             let customer = SUCustomer(firebaseUserId: firebaseUserId, email: email)
             
-            do {
-                
-                try customer.validate()
-                //customer.timestamp = Date()
-                
-            } catch {
-                
+//            do {
+//
+//                try customer.validate()
+//                customer.timestamp = Date()
+//
+//            } catch {
+//
 //                if let validationError = error as? ValidationError {
 //
 //                    let errorString = "Error creating customer:\n\n"
@@ -42,22 +42,21 @@ struct SUCustomerController: RouteCollection {
 //                        throw Abort(.badRequest, reason: validationErrorReason)
 //                    }
 //                }
-            }
-            
-            return customer.save(on: req)
-//                .catchMap { error in
-//
-//                let errorDescription = error.localizedDescription.lowercased()
-//
-//                switch errorDescription {
-//
-//                case let str where str.contains("duplicate"):
-//                    throw Abort(.conflict, reason: "Error creating customer:\n\nA customer with this email exists.")
-//
-//                default:
-//                    throw Abort(.internalServerError, reason: error.localizedDescription)
-//                }
 //            }
+            
+            return customer.save(on: req).catchMap { error in
+
+                let errorDescription = error.localizedDescription.lowercased()
+
+                switch errorDescription {
+
+                case let str where str.contains("duplicate"):
+                    throw Abort(.conflict, reason: "Error creating customer:\n\nA customer with this email exists.")
+
+                default:
+                    throw Abort(.internalServerError, reason: error.localizedDescription)
+                }
+            }
         }
     }
 
