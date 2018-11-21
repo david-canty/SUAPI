@@ -21,42 +21,43 @@ struct SUCustomerController: RouteCollection {
             let email = customerData.email
             
             let customer = SUCustomer(firebaseUserId: firebaseUserId, email: email)
+            return customer.save(on: req)
             
-            do {
-                
-                try customer.validate()
-                customer.timestamp = Date()
-                
-            } catch {
-                
-                if let validationError = error as? ValidationError {
-                    
-                    let errorString = "Error creating customer:\n\n"
-                    var validationErrorReason = errorString
-                    
-                    if validationError.reason.contains("valid email") {
-                        validationErrorReason += "Invalid email address."
-                    }
-                    
-                    if validationErrorReason != errorString {
-                        throw Abort(.badRequest, reason: validationErrorReason)
-                    }
-                }
-            }
-            
-            return customer.save(on: req).catchMap { error in
-                
-                let errorDescription = error.localizedDescription.lowercased()
-                
-                switch errorDescription {
-                    
-                case let str where str.contains("duplicate"):
-                    throw Abort(.conflict, reason: "Error creating customer:\n\nA customer with this email exists.")
-                    
-                default:
-                    throw Abort(.internalServerError, reason: error.localizedDescription)
-                }
-            }
+//            do {
+//
+//                try customer.validate()
+//                customer.timestamp = Date()
+//
+//            } catch {
+//
+//                if let validationError = error as? ValidationError {
+//
+//                    let errorString = "Error creating customer:\n\n"
+//                    var validationErrorReason = errorString
+//
+//                    if validationError.reason.contains("valid email") {
+//                        validationErrorReason += "Invalid email address."
+//                    }
+//
+//                    if validationErrorReason != errorString {
+//                        throw Abort(.badRequest, reason: validationErrorReason)
+//                    }
+//                }
+//            }
+//
+//            return customer.save(on: req).catchMap { error in
+//
+//                let errorDescription = error.localizedDescription.lowercased()
+//
+//                switch errorDescription {
+//
+//                case let str where str.contains("duplicate"):
+//                    throw Abort(.conflict, reason: "Error creating customer:\n\nA customer with this email exists.")
+//
+//                default:
+//                    throw Abort(.internalServerError, reason: error.localizedDescription)
+//                }
+//            }
         }
     }
 

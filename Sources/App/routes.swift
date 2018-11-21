@@ -23,8 +23,8 @@ public func routes(_ router: Router) throws {
     let userController = SUUserController()
     try router.register(collection: userController)
     
-//    let customerController = SUCustomerController()
-//    try router.register(collection: customerController)
+    let customerController = SUCustomerController()
+    try router.register(collection: customerController)
     
     let orderController = SUOrderController()
     try router.register(collection: orderController)
