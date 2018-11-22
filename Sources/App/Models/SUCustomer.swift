@@ -70,9 +70,11 @@ extension SUCustomer: Validatable {
         try validations.add(\.lastName, .count(1...) && .ascii || .nil)
         try validations.add(\.email, .email)
         
-        let telCharacterSet = CharacterSet(charactersIn: "+ 0123456789")
-        try validations.add(\.tel, .count(1...) && .characterSet(telCharacterSet) || .nil)
-        try validations.add(\.mobile, .count(1...) && .characterSet(telCharacterSet) || .nil)
+//        let telCharacterSet = CharacterSet(charactersIn: "+ ()0123456789")
+//        try validations.add(\.tel, .count(1...) && .characterSet(telCharacterSet) || .nil)
+//        try validations.add(\.mobile, .count(1...) && .characterSet(telCharacterSet) || .nil)
+        try validations.add(\.tel, .count(1...) && .ascii || .nil)
+        try validations.add(\.mobile, .count(1...) && .ascii || .nil)
         
         try validations.add(\.addressLine1, .count(1...) && .ascii || .nil)
         try validations.add(\.addressLine2, .count(1...) && .ascii || .nil)
