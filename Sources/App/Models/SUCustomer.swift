@@ -9,8 +9,8 @@ final class SUCustomer: Codable {
     var firstName: String?
     var lastName: String?
     var email: String
-    var telNo: String?
-    var mobileNo: String?
+    var phone: String?
+    var mobile: String?
     var addressLine1: String?
     var addressLine2: String?
     var addressLine3: String?
@@ -21,8 +21,8 @@ final class SUCustomer: Codable {
          firstName: String? = nil,
          lastName: String? = nil,
          email: String,
-         telNo: String? = nil,
-         mobileNo: String? = nil,
+         phone: String? = nil,
+         mobile: String? = nil,
          addressLine1: String? = nil,
          addressLine2: String? = nil,
          addressLine3: String? = nil,
@@ -32,8 +32,8 @@ final class SUCustomer: Codable {
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
-        self.telNo = telNo
-        self.mobileNo = mobileNo
+        self.phone = phone
+        self.mobile = mobile
         self.addressLine1 = addressLine1
         self.addressLine2 = addressLine2
         self.addressLine3 = addressLine3
@@ -70,11 +70,11 @@ extension SUCustomer: Validatable {
         try validations.add(\.lastName, .count(1...) && .ascii || .nil)
         try validations.add(\.email, .email)
         
-        let telCharacterSet = CharacterSet(charactersIn: "+ ()0123456789")
-        try validations.add(\.telNo, .count(1...) && .characterSet(telCharacterSet) || .nil)
-        try validations.add(\.mobileNo, .count(1...) && .characterSet(telCharacterSet) || .nil)
-//        try validations.add(\.telNo, .count(1...) && .ascii || .nil)
-//        try validations.add(\.mobileNo, .count(1...) && .ascii || .nil)
+//        let telCharacterSet = CharacterSet(charactersIn: "+ ()0123456789")
+//        try validations.add(\.tel, .count(1...) && .characterSet(telCharacterSet) || .nil)
+//        try validations.add(\.mobile, .count(1...) && .characterSet(telCharacterSet) || .nil)
+        try validations.add(\.phone, .count(1...) && .ascii || .nil)
+        try validations.add(\.mobile, .count(1...) && .ascii || .nil)
         
         try validations.add(\.addressLine1, .count(1...) && .ascii || .nil)
         try validations.add(\.addressLine2, .count(1...) && .ascii || .nil)
