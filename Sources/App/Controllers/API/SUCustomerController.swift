@@ -24,7 +24,7 @@ struct SUCustomerController: RouteCollection {
             
 //            do {
 //
-//                try customer.validate()
+                try customer.validate()
 //                customer.timestamp = Date()
 //
 //            } catch {
