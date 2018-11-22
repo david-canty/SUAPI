@@ -22,27 +22,27 @@ struct SUCustomerController: RouteCollection {
             
             let customer = SUCustomer(firebaseUserId: firebaseUserId, email: email)
             
-//            do {
-//
+            do {
+
                 try customer.validate()
-//                customer.timestamp = Date()
-//
-//            } catch {
-//
-//                if let validationError = error as? ValidationError {
-//
-//                    let errorString = "Error creating customer:\n\n"
-//                    var validationErrorReason = errorString
-//
-//                    if validationError.reason.contains("valid email") {
-//                        validationErrorReason += "Invalid email address."
-//                    }
-//
-//                    if validationErrorReason != errorString {
-//                        throw Abort(.badRequest, reason: validationErrorReason)
-//                    }
-//                }
-//            }
+                customer.timestamp = Date()
+
+            } catch {
+
+                if let validationError = error as? ValidationError {
+
+                    let errorString = "Error creating customer:\n\n"
+                    var validationErrorReason = errorString
+
+                    if validationError.reason.contains("valid email") {
+                        validationErrorReason += "Invalid email address."
+                    }
+
+                    if validationErrorReason != errorString {
+                        throw Abort(.badRequest, reason: validationErrorReason)
+                    }
+                }
+            }
             
             return customer.save(on: req).catchMap { error in
 
