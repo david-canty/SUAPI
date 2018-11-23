@@ -11,7 +11,7 @@ struct SUOrderAdminController: RouteCollection {
         let redirectProtectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         redirectProtectedRoutes.get(use: ordersHandler)
-        //redirectProtectedRoutes.get(SUOrder.parameter, use: viewOrderHandler)
+        redirectProtectedRoutes.get(SUOrder.parameter, use: orderDetailsHandler)
     }
     
     // CRUD handlers
@@ -66,6 +66,52 @@ struct SUOrderAdminController: RouteCollection {
         }
     }
     
+    func orderDetailsHandler(_ req: Request) throws -> Future<View> {
+        
+        return try req.parameters.next(SUOrder.self).flatMap(to: View.self) { order in
+            
+            return try order.orderItems.query(on: req).all().flatMap(to: View.self) { orderItems in
+                
+                return orderItems.compactMap { orderItem in
+                    
+                    return SUShopItem.find(orderItem.itemID, on: req).flatMap(to: OrderItemDetails.self) { item in
+                        
+                        return SUSize.find(orderItem.sizeID, on: req).map(to: OrderItemDetails.self) { size in
+                            
+                            let quantity = orderItem.quantity
+                            
+                            let orderItemTotal = item!.itemPrice * Double(quantity)
+                            let formatter = NumberFormatter()
+                            formatter.numberStyle = .currency
+                            formatter.currencySymbol = "£"
+                            let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
+                            
+                            return OrderItemDetails(item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!)
+                        }
+                    }
+                }.flatten(on: req).flatMap(to: View.self) { orderItems in
+                    
+                    return try self.getTotal(forOrder: order, on: req).flatMap(to: View.self) { orderTotal in
+                        
+                        let user = try req.requireAuthenticated(SUUser.self)
+                        let customer = order.customer.get(on: req)
+                        
+                        let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                        
+                        let formatter = NumberFormatter()
+                        formatter.numberStyle = .currency
+                        formatter.currencySymbol = "£"
+                        let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                        
+                        let context = OrderDetailsContext(authenticatedUser: user, customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                        
+                        return try req.view().render("order", context)
+                    }
+                }
+            }
+        }
+    }
+    
     // Contexts
     struct OrdersContext: Encodable {
         let title = "Orders"
@@ -85,5 +131,22 @@ struct SUOrderAdminController: RouteCollection {
         let orderItems: [SUOrderItem]
         let itemCount: Int
         let formattedOrderTotal: String
+    }
+    
+    struct OrderDetailsContext: Encodable {
+        let title = "Order Details"
+        let authenticatedUser: SUUser
+        let customer:  EventLoopFuture<SUCustomer>
+        let order: SUOrder
+        let orderItems: [OrderItemDetails]
+        let itemCount: Int
+        let formattedOrderTotal: String
+    }
+    
+    struct OrderItemDetails: Encodable {
+        let item: SUShopItem
+        let size: SUSize
+        let quantity: Int
+        let formattedTotal: String
     }
 }
