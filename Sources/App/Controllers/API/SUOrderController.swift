@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import Authentication
 
 enum PaymentMethod: String {
     case bacs = "bacs"
@@ -13,6 +14,7 @@ enum OrderStatus: String {
     case readyForCollection = "Ready for Collection"
     case awaitingPayment = "Awaiting Payment"
     case complete = "Complete"
+    case cancelled = "Cancelled"
 }
 
 struct SUOrderController: RouteCollection {
@@ -23,8 +25,13 @@ struct SUOrderController: RouteCollection {
         orderRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
             jwtProtectedGroup.post(SUCustomer.parameter, "orders", use: createHandler)
-
+            
         }
+        
+        let authSessionRoutes = orderRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
+        
+        redirectProtectedGroup.patch(SUOrder.parameter, "status", use: updateOrderStatusHandler)
     }
 
     func createHandler(_ req: Request) throws -> Future<SUOrderInfo> {
@@ -65,6 +72,23 @@ struct SUOrderController: RouteCollection {
         }
     }
 
+    func updateOrderStatusHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrder.self), req.content.decode(OrderStatusData.self)) { order, orderStatusData in
+            
+            if order.orderStatus != orderStatusData.orderStatus {
+                
+                order.timestamp = Date()
+                order.orderStatus = orderStatusData.orderStatus
+                
+                return order.update(on: req).transform(to: HTTPStatus.ok)
+            }
+            
+            return req.future(HTTPStatus.ok)
+        }
+    }
+    
+    // Data structs
     struct SUOrderPostData: Content {
         let orderItems: [OrderItemInfo]
         let paymentMethod: String
@@ -81,5 +105,8 @@ struct SUOrderController: RouteCollection {
         let order: SUOrder
         let orderItems: [SUOrderItem]
     }
+    
+    struct OrderStatusData: Content {
+        let orderStatus: String
+    }
 }
-

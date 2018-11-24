@@ -25,31 +25,43 @@
         
         <div class="row">
             <div class="col">
-                <table class="table table-bordered">
+                <h2 class="pt-3">Summary</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <table data-id="#(order.id)" class="table table-bordered mt-1">
                     <thead class="thead-light">
                         <tr>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Action</th>
+                            <th class="text-center" style="width: 15%">Date</th>
+                            <th class="text-center" style="width: 5%">Items</th>
+                            <th class="text-center" style="width: 15%">Order Total</th>
+                            <th class="text-center" style="width: 20%">Payment Method</th>
+                            <th class="text-center" style="width: 25%">Status</th>
+                            <th class="text-center" style="width: 20%">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>#date(order.orderDate, "d MMM yyyy, HH:mm")</td>
-                            <td>#(order.orderStatus)</td>
-                            <td>#(itemCount)</td>
-                            <td>#(formattedOrderTotal)</td>
-                            <td>
+                            <td class="text-center">#date(order.orderDate, "d MMM yyyy")</td>
+                            <td class="text-center">#(itemCount)</td>
+                            <td class="text-center">#(formattedOrderTotal)</td>
+                            <td class="text-center">#(order.paymentMethod)</td>
+                            <td class="text-center">#(order.orderStatus)</td>
+                            <td class="text-center">
                                 <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Action
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="statusButton#(order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Status
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="actionButton#(orderDetail.order.id)">
-                                        <a class="dropdown-item" href="/orders/#(orderDetail.order.id)">View Order</a>
+                                    <div class="dropdown-menu" aria-labelledby="statusButton#(order.id)">
+                                        <a class="dropdown-item orderStatus" href="">Ordered</a>
+                                        <a class="dropdown-item orderStatus" href="">Awaiting Stock</a>
+                                        <a class="dropdown-item orderStatus" href="">Ready for Collection</a>
+                                        <a class="dropdown-item orderStatus" href="">Awaiting Payment</a>
+                                        <a class="dropdown-item orderStatus" href="">Complete</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="#(orderDetail.order.id)">Cancel Order</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="cancelOrderButton#(order.id)">Cancel Order</a>
                                     </div>
                                 </div>
                             </td>
@@ -58,29 +70,65 @@
                 </table>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col">
+                <h2 class="pt-2">Customer</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered mt-1">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#(customer.email)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <h2 class="pt-2">Items</h2>
+            </div>
+        </div>
         
         <div class="row">
             <div class="col">
                 <table class="table table-bordered">
                     <thead class="thead-light">
                         <tr>
-                            <th>Name</th>
-                            <th>Size</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                            <th>Action</th>
+                            <th class="text-center" style="width: 30%">Name</th>
+                            <th class="text-center" style="width: 25%">Size</th>
+                            <th class="text-center" style="width: 10%">Quantity</th>
+                            <th class="text-center" style="width: 15%">Item Total</th>
+                            <th class="text-center" style="width: 20%">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         #for(orderItem in orderItems) {
                         <tr>
-                            <td>#(orderItem.item.itemName)</td>
-                            <td>#(orderItem.size.sizeName)</td>
-                            <td>#(orderItem.quantity)</td>
-                            <td>#(orderItem.formattedTotal)</td>
-                            <td>
+                            <td class="text-center">#(orderItem.item.itemName)</td>
+                            <td class="text-center">#(orderItem.size.sizeName)</td>
+                            <td class="text-center">#(orderItem.quantity)</td>
+                            <td class="text-center">#(orderItem.formattedTotal)</td>
+                            <td class="text-center">
                                 <div class="dropdown">
-                                    
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderItem.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Action
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="actionButton#(orderItem.id)">
+                                        <a class="dropdown-item" href="">Returned</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-modal" data-id="cancelOrderItemButton#(orderItem.id)">Cancel Item</a>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

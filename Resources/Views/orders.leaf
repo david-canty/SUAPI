@@ -17,32 +17,32 @@
                     
                     #if(count(orderDetails) > 0) {
                     
-                    <table class="table table-bordered">
+                    <table class="table table-bordered mt-3">
                         <thead class="thead-light">
                             <tr>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Action</th>
+                                <th class="text-center" style="width: 15%">Date</th>
+                                <th class="text-center" style="width: 5%">Items</th>
+                                <th class="text-center" style="width: 15%">Total</th>
+                                <th class="text-center" style="width: 20%">Payment Method</th>
+                                <th class="text-center" style="width: 25%">Status</th>
+                                <th class="text-center" style="width: 20%">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             #for(orderDetail in orderDetails) {
                             <tr>
-                                <td>#date(orderDetail.order.orderDate, "d MMM yyyy, HH:mm")</td>
-                                <td>#(orderDetail.order.orderStatus)</td>
-                                <td>#(orderDetail.itemCount)</td>
-                                <td>#(orderDetail.formattedOrderTotal)</td>
-                                <td>
+                                <td class="text-center">#date(orderDetail.order.orderDate, "d MMM yyyy")</td>
+                                <td class="text-center">#(orderDetail.itemCount)</td>
+                                <td class="text-center">#(orderDetail.formattedOrderTotal)</td>
+                                <td class="text-center">#(orderDetail.order.paymentMethod)</td>
+                                <td class="text-center">#(orderDetail.order.orderStatus)</td>
+                                <td class="text-center">
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderDetail.order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             Action
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="actionButton#(orderDetail.order.id)">
                                             <a class="dropdown-item" href="/orders/#(orderDetail.order.id)">View Order</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="#(orderDetail.order.id)">Cancel Order</a>
                                         </div>
                                     </div>
                                 </td>

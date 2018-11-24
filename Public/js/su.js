@@ -1053,4 +1053,37 @@ $(document).ready(function() {
 //        $.ajax({ url: '/sign-out', type: 'POST'});
 //    });
 
+    // Orders
+    
+    $('#orders-container').on('click', '.orderStatus', function(e) {
+     
+        e.preventDefault();
+        
+        var table = $(this).closest('table');
+        var orderId = table.data('id');
+        var orderStatus = $(this).text();
+        
+        var json = {"orderStatus": orderStatus};
+        
+        $.ajax({
+        url: baseUrl + '/orders/' + orderId + '/status',
+        type: 'PATCH',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+                
+            location.reload(true);
+                
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
+    
 });
