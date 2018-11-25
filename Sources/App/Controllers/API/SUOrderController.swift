@@ -21,10 +21,10 @@ struct SUOrderController: RouteCollection {
 
     func boot(router: Router) throws {
 
-        let orderRoutes = router.grouped("api", "customers")
+        let orderRoutes = router.grouped("api", "orders")
         orderRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
-            jwtProtectedGroup.post(SUCustomer.parameter, "orders", use: createHandler)
+            jwtProtectedGroup.post(use: createHandler)
             
         }
         
@@ -36,36 +36,47 @@ struct SUOrderController: RouteCollection {
 
     func createHandler(_ req: Request) throws -> Future<SUOrderInfo> {
 
-        return try flatMap(to: SUOrderInfo.self, req.parameters.next(SUCustomer.self), req.content.decode(SUOrderPostData.self)) { customer, orderData in
+        return try req.content.decode(SUOrderPostData.self).flatMap(to: SUOrderInfo.self) { orderData in
             
-            return req.transaction(on: .mysql) { conn in
-             
-                let order = SUOrder(customerID: customer.id!,
-                                    orderDate: Date(),
-                                    orderStatus: OrderStatus.ordered.rawValue,
-                                    paymentMethod: orderData.paymentMethod)
+            guard let customerId = UUID(uuidString: orderData.customerId) else {
+                throw Abort(.badRequest, reason: "Customer id missing from order post data")
+            }
+            
+            return SUCustomer.find(customerId, on: req).flatMap(to: SUOrderInfo.self) { customer in
                 
-                return order.save(on: conn).flatMap(to: SUOrderInfo.self) { order in
+                guard let customer = customer else {
+                    throw Abort(.badRequest, reason: "Customer not found for order")
+                }
+                
+                return req.transaction(on: .mysql) { conn in
                     
-                    var orderItemSaveResults: [Future<SUOrderItem>] = []
+                    let order = SUOrder(customerID: customer.id!,
+                                        orderDate: Date(),
+                                        orderStatus: OrderStatus.ordered.rawValue,
+                                        paymentMethod: orderData.paymentMethod)
                     
-                    for orderItemData in orderData.orderItems {
+                    return order.save(on: conn).flatMap(to: SUOrderInfo.self) { order in
                         
-                        guard let itemID = UUID(uuidString: orderItemData.itemID),
-                            let sizeID = UUID(uuidString: orderItemData.sizeID) else {
-                                throw Abort(.badRequest, reason: "Invalid order item size id or item id")
+                        var orderItemSaveResults: [Future<SUOrderItem>] = []
+                        
+                        for orderItemData in orderData.orderItems {
+                            
+                            guard let itemID = UUID(uuidString: orderItemData.itemID),
+                                let sizeID = UUID(uuidString: orderItemData.sizeID) else {
+                                    throw Abort(.badRequest, reason: "Invalid order item size id or item id")
+                            }
+                            
+                            let quantity = orderItemData.quantity
+                            
+                            let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity)
+                            
+                            orderItemSaveResults.append(orderItem.save(on: conn))
                         }
                         
-                        let quantity = orderItemData.quantity
-                        
-                        let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity)
-                        
-                        orderItemSaveResults.append(orderItem.save(on: conn))
-                    }
-                    
-                    return orderItemSaveResults.flatten(on: conn).map(to: SUOrderInfo.self) { orderItems in
-                        
-                        return SUOrderInfo(customer: customer, order: order, orderItems: orderItems)
+                        return orderItemSaveResults.flatten(on: conn).map(to: SUOrderInfo.self) { orderItems in
+                            
+                            return SUOrderInfo(customer: customer, order: order, orderItems: orderItems)
+                        }
                     }
                 }
             }
@@ -90,6 +101,7 @@ struct SUOrderController: RouteCollection {
     
     // Data structs
     struct SUOrderPostData: Content {
+        let customerId: String
         let orderItems: [OrderItemInfo]
         let paymentMethod: String
     }
