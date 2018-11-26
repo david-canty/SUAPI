@@ -52,16 +52,18 @@
                             <td class="text-center">
                                 <div class="dropdown">
                                     <button class="btn btn-primary dropdown-toggle" type="button" id="statusButton#(order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Status
+                                        Action
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="statusButton#(order.id)">
+                                        <h6 class="dropdown-header">Set Status</h6>
                                         <a class="dropdown-item orderStatus" href="">Ordered</a>
                                         <a class="dropdown-item orderStatus" href="">Awaiting Stock</a>
                                         <a class="dropdown-item orderStatus" href="">Ready for Collection</a>
                                         <a class="dropdown-item orderStatus" href="">Awaiting Payment</a>
                                         <a class="dropdown-item orderStatus" href="">Complete</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="cancelOrderButton#(order.id)">Cancel Order</a>
+                                        <h6 class="dropdown-header">Action</h6>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-modal" data-id="cancelOrderButton#(order.id)">Cancel or Return&#8230;</a>
                                     </div>
                                 </div>
                             </td>
@@ -125,9 +127,8 @@
                                         Action
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="actionButton#(orderItem.id)">
-                                        <a class="dropdown-item" href="">Returned</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-modal" data-id="cancelOrderItemButton#(orderItem.id)">Cancel Item</a>
+                                        <h6 class="dropdown-header">Action</h6>
+                                        <a class="dropdown-item" href="">Cancel or Return&#8230;</a>
                                     </div>
                                 </div>
                             </td>
@@ -148,7 +149,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you wish to cancel this order?</p>
+                        <p>This action will cancel the whole order. If payment was made by credit card, a full refund will be issued.<br/><br/>Do you wish to cancel this order?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>

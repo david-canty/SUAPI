@@ -8,11 +8,15 @@ struct SUCustomerController: RouteCollection {
         let customerRoutes = router.grouped("api", "customers")
         customerRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
+            // CRUD
             jwtProtectedGroup.post(use: createHandler)
-
+            
+            // Orders
+            jwtProtectedGroup.get(SUCustomer.parameter, "orders", use: getOrdersHandler)
         }
     }
 
+    // CRUD
     func createHandler(_ req: Request) throws -> Future<SUCustomer> {
 
         return try req.content.decode(SUCustomerData.self).flatMap(to: SUCustomer.self) { customerData in
@@ -60,8 +64,33 @@ struct SUCustomerController: RouteCollection {
         }
     }
 
+    // Orders
+    func getOrdersHandler(_ req: Request) throws -> Future<[OrderData]> {
+        
+        return try req.parameters.next(SUCustomer.self).flatMap(to: [OrderData].self) { customer in
+            
+            return try customer.orders.query(on: req).all().flatMap(to: [OrderData].self) { orders in
+             
+                return try orders.compactMap { order in
+                    
+                    return try order.orderItems.query(on: req).all().map(to: OrderData.self) { orderItems in
+                        
+                        return OrderData(order: order, orderItems: orderItems)
+                    }
+    
+                }.flatten(on: req)
+            }
+        }
+    }
+    
+    // Data structs
     struct SUCustomerData: Content {
         let firebaseUserId: String
         let email: String
+    }
+    
+    struct OrderData: Content {
+        let order: SUOrder
+        let orderItems: [SUOrderItem]
     }
 }

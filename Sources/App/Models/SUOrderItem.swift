@@ -33,7 +33,7 @@ extension SUOrderItem: Migration {
         return Database.create(self, on: connection) { builder in
             
             try addProperties(to: builder)
-            builder.reference(from: \.orderID, to: \SUOrder.id, onUpdate: .cascade, onDelete: .restrict)
+            builder.reference(from: \.orderID, to: \SUOrder.id, onUpdate: .cascade, onDelete: .cascade)
             builder.reference(from: \.itemID, to: \SUShopItem.id, onUpdate: .cascade, onDelete: .restrict)
             builder.reference(from: \.sizeID, to: \SUSize.id, onUpdate: .cascade, onDelete: .restrict)
         }
