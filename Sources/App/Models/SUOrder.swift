@@ -4,7 +4,7 @@ import FluentMySQL
 
 final class SUOrder: Codable {
     
-    var id: UUID?
+    var id: Int?
     var customerID: SUCustomer.ID
     var orderDate: Date
     var orderStatus: String
@@ -24,7 +24,7 @@ final class SUOrder: Codable {
     }
 }
 
-extension SUOrder: MySQLUUIDModel {}
+extension SUOrder: MySQLModel {}
 extension SUOrder: Content {}
 extension SUOrder: Parameter {}
 
