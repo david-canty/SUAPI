@@ -1086,4 +1086,63 @@ $(document).ready(function() {
         });
     });
     
+    
+    $('#orderCancelReturnModal').on('show.bs.modal', function (e) {
+        
+        var button = $(e.relatedTarget);
+        var orderId = button.data('order-id');
+        var paymentMethod = button.data('payment-method');
+        var orderTotal = 
+        var modalAction = button.data('action');
+        
+        $(this).find('.orderCancelReturnSubmit').attr('data-order-id', orderId);
+        
+        var modalTitle = '';
+        var modalBody = '';
+        var paymentMethodBody = '';
+        var paddedOrderId = pad(orderId, 6);
+        
+        switch(paymentMethod) {
+            
+            case 'BACS transfer':
+            
+            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full order amount.</p>';
+            break;
+            
+            case 'School bill':
+            
+            paymentMethodBody = '';
+            break;
+            
+            default:
+            
+            paymentMethodBody = '';
+            break;
+        }
+        
+        switch(modalAction) {
+            
+            case 'cancel':
+            
+            modalTitle = 'Cancel order?';
+            modalBody = '<p>Do you wish to cancel order no ' + paddedOrderId + '?</p>' + paymentMethodBody;
+            
+            break;
+            
+            case 'return':
+            
+            modalTitle = 'Return order?';
+            break;
+        }
+        
+        var modal = $(this);
+        modal.find('.modal-title').text(modalTitle);
+        modal.find('.modal-body').html(modalBody);
+    });
+    
+    function pad (str, max) {
+        str = str.toString();
+        return str.length < max ? pad("0" + str, max) : str;
+    };
+    
 });
