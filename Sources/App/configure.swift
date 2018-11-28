@@ -7,6 +7,11 @@ import Stripe
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
+    guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_ACCESS_KEY") }
+    guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_SECRET_KEY") }
+    guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError, reason: "Failed to get AWS_S3_BUCKET") }
+    guard let stripeSecretKey = Environment.get("STRIPE_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get STRIPE_SECRET_KEY") }
+    
     try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
@@ -15,14 +20,14 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
         try container.keyedCache(for: .mysql)
     }
     
-    guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_ACCESS_KEY") }
-    guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_SECRET_KEY") }
-    guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError, reason: "Failed to get AWS_S3_BUCKET") }
+    services.register { container -> LeafTagConfig in
+        var config = LeafTagConfig.default()
+        config.use(OrderNoTag(), as: "orderNo")
+        return config
+    }
     
     let s3SignerConfig = S3Signer.Config(accessKey: awsAccessKey, secretKey: awsSecretKey, region: Region(name: .euWest2))
     try services.register(s3: s3SignerConfig, defaultBucket: awsS3Bucket)
-    
-    guard let stripeSecretKey = Environment.get("STRIPE_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get STRIPE_SECRET_KEY") }
     
     let stripeConfig = StripeConfig(apiKey: stripeSecretKey)
     services.register(stripeConfig)
@@ -42,6 +47,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(SessionsMiddleware.self)
     
     services.register(middlewares)
+    
+    
     
     var databases = DatabasesConfig()
     let databaseConfig: MySQLDatabaseConfig

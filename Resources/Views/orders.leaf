@@ -20,17 +20,19 @@
                     <table class="table table-bordered mt-3">
                         <thead class="thead-light">
                             <tr>
+                                <th class="text-center" style="width: 10%">Order No</th>
                                 <th class="text-center" style="width: 15%">Date</th>
                                 <th class="text-center" style="width: 5%">Items</th>
                                 <th class="text-center" style="width: 15%">Total</th>
                                 <th class="text-center" style="width: 20%">Payment Method</th>
                                 <th class="text-center" style="width: 25%">Status</th>
-                                <th class="text-center" style="width: 20%">Action</th>
+                                <th class="text-center" style="width: 10%">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             #for(orderDetail in orderDetails) {
                             <tr>
+                                <td class="text-center">#orderNo(orderDetail.order.id)</td>
                                 <td class="text-center">#date(orderDetail.order.orderDate, "d MMM yyyy")</td>
                                 <td class="text-center">#(orderDetail.itemCount)</td>
                                 <td class="text-center">#(orderDetail.formattedOrderTotal)</td>
