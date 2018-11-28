@@ -1092,7 +1092,7 @@ $(document).ready(function() {
         var button = $(e.relatedTarget);
         var orderId = button.data('order-id');
         var paymentMethod = button.data('payment-method');
-        var orderTotal = 
+        var orderTotal = button.data('order-total');
         var modalAction = button.data('action');
         
         $(this).find('.orderCancelReturnSubmit').attr('data-order-id', orderId);
@@ -1106,12 +1106,12 @@ $(document).ready(function() {
             
             case 'BACS transfer':
             
-            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full order amount.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full order amount of &pound;' + orderTotal + '.</p>';
             break;
             
             case 'School bill':
             
-            paymentMethodBody = '';
+            paymentMethodBody = '<br/><p>The payment method for this order was add to school bill. If the school bill has already been adjusted, please remember to refund the full order amount of &pound;' + orderTotal + '.</p>';
             break;
             
             default:

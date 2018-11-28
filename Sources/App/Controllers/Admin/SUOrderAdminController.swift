@@ -103,7 +103,7 @@ struct SUOrderAdminController: RouteCollection {
                         formatter.currencySymbol = "£"
                         let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
                         
-                        let context = OrderDetailsContext(authenticatedUser: user, customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                        let context = OrderDetailsContext(authenticatedUser: user, customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, orderTotal: orderTotal, formattedOrderTotal: formattedOrderTotal!)
                         
                         return try req.view().render("order", context)
                     }
@@ -140,6 +140,7 @@ struct SUOrderAdminController: RouteCollection {
         let order: SUOrder
         let orderItems: [OrderItemDetails]
         let itemCount: Int
+        let orderTotal: Double
         let formattedOrderTotal: String
     }
     
