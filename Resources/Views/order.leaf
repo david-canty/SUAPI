@@ -53,20 +53,20 @@
                             <td class="text-center">#(order.orderStatus)</td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="statusButton#(order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="status-button-#(order.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" #if(order.orderStatus == "Cancelled") {disabled aria-disabled="true"} else if (order.orderStatus == "Returned") {disabled aria-disabled="true"}>
                                         Action
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="statusButton#(order.id)">
+                                    <div class="dropdown-menu" aria-labelledby="status-button-#(order.id)">
                                         <h6 class="dropdown-header">Set Status</h6>
-                                        <a class="dropdown-item orderStatus" href="">Ordered</a>
-                                        <a class="dropdown-item orderStatus" href="">Awaiting Stock</a>
-                                        <a class="dropdown-item orderStatus" href="">Ready for Collection</a>
-                                        <a class="dropdown-item orderStatus" href="">Awaiting Payment</a>
-                                        <a class="dropdown-item orderStatus" href="">Complete</a>
+                                        <a class="dropdown-item order-status" href="">Ordered</a>
+                                        <a class="dropdown-item order-status" href="">Awaiting Stock</a>
+                                        <a class="dropdown-item order-status" href="">Ready for Collection</a>
+                                        <a class="dropdown-item order-status" href="">Awaiting Payment</a>
+                                        <a class="dropdown-item order-status" href="">Complete</a>
                                         <div class="dropdown-divider"></div>
                                         <h6 class="dropdown-header">Action</h6>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#orderCancelReturnModal" data-order-id="#(order.id)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel">Cancel&#8230;</a>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#orderCancelReturnModal" data-order-id="#(order.id)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return">Return&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel">Cancel&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return">Return&#8230;</a>
                                     </div>
                                 </div>
                             </td>
@@ -126,10 +126,10 @@
                             <td class="text-center">#(orderItem.formattedTotal)</td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(orderItem.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="action-button-#(orderItem.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         Action
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="actionButton#(orderItem.id)">
+                                    <div class="dropdown-menu" aria-labelledby="action-button-#(orderItem.id)">
                                         <h6 class="dropdown-header">Action</h6>
                                         <a class="dropdown-item" href="">Cancel&#8230;</a>
                                         <a class="dropdown-item" href="">Return&#8230;</a>
@@ -143,11 +143,11 @@
             </div>
         </div>
         
-        <div class="modal fade" id="orderCancelReturnModal" tabindex="-1" role="dialog" aria-labelledby="orderCancelReturnModalLabel" aria-hidden="true">
+        <div class="modal fade" id="order-cancel-return-modal" tabindex="-1" role="dialog" aria-labelledby="order-cancel-return-modal-label" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="orderCancelReturnModalLabel">Title</h4>
+                        <h4 class="modal-title" id="order-cancel-return-modal-label">Title</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -157,7 +157,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                        <button type="button" class="btn btn-danger orderCancelReturnSubmit">Yes</button>
+                        <button type="button" class="btn btn-danger order-cancel-return-submit">Yes</button>
                     </div>
                 </div>
             </div>

@@ -1055,7 +1055,7 @@ $(document).ready(function() {
 
     // Orders
     
-    $('#orders-container').on('click', '.orderStatus', function(e) {
+    $('#orders-container').on('click', '.order-status', function(e) {
      
         e.preventDefault();
         
@@ -1087,7 +1087,7 @@ $(document).ready(function() {
     });
     
     
-    $('#orderCancelReturnModal').on('show.bs.modal', function (e) {
+    $('#order-cancel-return-modal').on('show.bs.modal', function (e) {
         
         var button = $(e.relatedTarget);
         var orderId = button.data('order-id');
@@ -1095,8 +1095,7 @@ $(document).ready(function() {
         var orderTotal = button.data('order-total');
         var modalAction = button.data('action');
         
-        $(this).find('.orderCancelReturnSubmit').attr('data-order-id', orderId);
-        
+        var modal = $(this);
         var modalTitle = '';
         var modalBody = '';
         var paymentMethodBody = '';
@@ -1106,17 +1105,17 @@ $(document).ready(function() {
             
             case 'BACS transfer':
             
-            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full order amount of &pound;' + orderTotal + '.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full amount of &pound;' + orderTotal + '.</p>';
             break;
             
             case 'School bill':
             
-            paymentMethodBody = '<br/><p>The payment method for this order was add to school bill. If the school bill has already been adjusted, please remember to refund the full order amount of &pound;' + orderTotal + '.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was add to school bill. If the school bill has already been adjusted, please remember to refund the full amount of &pound;' + orderTotal + '.</p>';
             break;
             
             default:
             
-            paymentMethodBody = '';
+            paymentMethodBody = '<br/><p>The payment method for this order was credit card. A refund for the full amount of &pound;' + orderTotal + ' will be issued immediately to ' + paymentMethod.toLowerCase() + '.</p>';
             break;
         }
         
@@ -1126,16 +1125,20 @@ $(document).ready(function() {
             
             modalTitle = 'Cancel order?';
             modalBody = '<p>Do you wish to cancel order no ' + paddedOrderId + '?</p>' + paymentMethodBody;
+            modal.find('.order-cancel-return-submit').attr('data-order-status', 'Cancelled');
             
             break;
             
             case 'return':
             
             modalTitle = 'Return order?';
+            modalBody = '<p>Do you wish to return order no ' + paddedOrderId + '?</p>' + paymentMethodBody;
+            modal.find('.order-cancel-return-submit').attr('data-order-status', 'Returned');
+            
             break;
         }
         
-        var modal = $(this);
+        modal.find('.order-cancel-return-submit').attr('data-order-id', orderId);
         modal.find('.modal-title').text(modalTitle);
         modal.find('.modal-body').html(modalBody);
     });
@@ -1144,5 +1147,37 @@ $(document).ready(function() {
         str = str.toString();
         return str.length < max ? pad("0" + str, max) : str;
     };
+    
+    $('#orders-container').on('click', '.order-cancel-return-submit', function(e) {
+        
+        $('#order-cancel-return-modal').modal('hide');
+        
+        e.preventDefault();
+        
+        var orderId = $(this).data('order-id');
+        var orderStatus = $(this).data('order-status');
+        
+        var json = {"orderStatus": orderStatus};
+        
+        $.ajax({
+        url: baseUrl + '/orders/' + orderId + '/status',
+        type: 'PATCH',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+            
+            $(location).attr('href','/orders');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    });
     
 });
