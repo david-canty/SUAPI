@@ -9,6 +9,7 @@ final class SUOrder: Codable {
     var orderDate: Date
     var orderStatus: String
     var paymentMethod: String
+    var chargeId: String?
     var timestamp: Date?
     
     init(customerID: SUCustomer.ID,

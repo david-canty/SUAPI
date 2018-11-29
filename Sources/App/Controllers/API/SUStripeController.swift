@@ -84,9 +84,9 @@ struct SUStripeController: RouteCollection {
     }
     
     // MARK: - Charge
-    func chargeHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    func chargeHandler(_ req: Request) throws -> Future<SUSTPChargeResponse> {
         
-        return try req.content.decode(SUSTPChargeData.self).flatMap(to: HTTPStatus.self) { chargeData in
+        return try req.content.decode(SUSTPChargeData.self).flatMap(to: SUSTPChargeResponse.self) { chargeData in
             
             let amount = chargeData.amount
             
@@ -99,11 +99,11 @@ struct SUStripeController: RouteCollection {
             
             let stripeClient = try req.make(StripeClient.self)
             
-            return try stripeClient.charge.create(amount: amount, currency: currency, description: description, customer: customer).flatMap(to: HTTPStatus.self) { charge in
+            return try stripeClient.charge.create(amount: amount, currency: currency, description: description, customer: customer).map(to: SUSTPChargeResponse.self) { charge in
              
-                return req.future(HTTPStatus.ok)
+                return SUSTPChargeResponse(chargeId: charge.id)
                 
-                }.catchFlatMap { error in
+                }.catchMap { error in
                     
                     throw Abort(.internalServerError, reason: "Error creating charge: \(error.localizedDescription)")
                     
@@ -135,5 +135,9 @@ struct SUStripeController: RouteCollection {
         let currency: String
         let description: String
         let customerId: String
+    }
+    
+    struct SUSTPChargeResponse: Content {
+        let chargeId: String
     }
 }
