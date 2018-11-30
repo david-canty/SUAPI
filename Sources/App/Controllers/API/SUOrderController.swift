@@ -53,7 +53,8 @@ struct SUOrderController: RouteCollection {
                     let order = SUOrder(customerID: customer.id!,
                                         orderDate: Date(),
                                         orderStatus: OrderStatus.ordered.rawValue,
-                                        paymentMethod: orderData.paymentMethod)
+                                        paymentMethod: orderData.paymentMethod,
+                                        chargeId: orderData.chargeId)
                     
                     return order.save(on: conn).flatMap(to: SUOrderInfo.self) { order in
                         
@@ -104,6 +105,7 @@ struct SUOrderController: RouteCollection {
         let customerId: String
         let orderItems: [OrderItemInfo]
         let paymentMethod: String
+        let chargeId: String?
     }
     
     struct OrderItemInfo: Codable {

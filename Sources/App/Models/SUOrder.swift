@@ -15,12 +15,14 @@ final class SUOrder: Codable {
     init(customerID: SUCustomer.ID,
          orderDate: Date,
          orderStatus: String,
-         paymentMethod: String) {
+         paymentMethod: String,
+         chargeId: String? = nil) {
         
         self.customerID = customerID
         self.orderDate = orderDate
         self.orderStatus = orderStatus
         self.paymentMethod = paymentMethod
+        self.chargeId = chargeId
         self.timestamp = orderDate
     }
 }
