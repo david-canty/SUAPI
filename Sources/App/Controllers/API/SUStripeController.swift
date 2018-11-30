@@ -19,6 +19,7 @@ struct SUStripeController: RouteCollection {
             jwtProtectedGroup.patch("customer", String.parameter, "default-source", use: defaultSourceHandler)
             
             jwtProtectedGroup.post("charge", use: chargeHandler)
+            jwtProtectedGroup.post("refund", use: refundHandler)
         }
     }
     
@@ -111,6 +112,23 @@ struct SUStripeController: RouteCollection {
         }
     }
     
+    func refundHandler(_ req: Request) throws -> Future<StripeRefund> {
+        
+        return try req.content.decode(SUSTPRefundData.self).flatMap(to: StripeRefund.self) { refundData in
+            
+            let chargeId = refundData.chargeId
+            let amount = refundData.amount
+            
+            let stripeClient = try req.make(StripeClient.self)
+            
+            return try stripeClient.refund.create(charge: chargeId, amount: amount).catchMap { error in
+                
+                throw Abort(.internalServerError, reason: "Error creating refund: \(error.localizedDescription)")
+            }
+            
+        }
+    }
+    
     // MARK: - Data Structs
     
     struct SUSTPEphemeralKeyPostData: Content {
@@ -139,5 +157,10 @@ struct SUStripeController: RouteCollection {
     
     struct SUSTPChargeResponse: Content {
         let chargeId: String
+    }
+    
+    struct SUSTPRefundData: Content {
+        let chargeId: String
+        let amount: Int?
     }
 }
