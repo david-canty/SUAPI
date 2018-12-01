@@ -1063,27 +1063,7 @@ $(document).ready(function() {
         var orderId = table.data('id');
         var orderStatus = $(this).text();
         
-        var json = {"orderStatus": orderStatus};
-        
-        $.ajax({
-        url: baseUrl + '/orders/' + orderId + '/status',
-        type: 'PATCH',
-        data: JSON.stringify(json),
-        processData: false,
-        contentType: "application/json",
-        success: function(response) {
-                
-            location.reload(true);
-                
-        }}).fail(function(xhr, ajaxOptions, thrownError) {
-            
-            var statusCode = xhr.status;
-            var statusText = xhr.statusText;
-            var responseJSON = JSON.parse(xhr.responseText);
-            var validationErrorString = responseJSON.reason;
-            
-            alert(validationErrorString);
-        });
+        setOrderStatus(orderId, orderStatus);
     });
     
     
@@ -1091,6 +1071,7 @@ $(document).ready(function() {
         
         var button = $(e.relatedTarget);
         var orderId = button.data('order-id');
+        var chargeId = button.data('charge-id');
         var paymentMethod = button.data('payment-method');
         var orderTotal = button.data('order-total');
         var modalAction = button.data('action');
@@ -1116,6 +1097,7 @@ $(document).ready(function() {
             default:
             
             paymentMethodBody = '<br/><p>The payment method for this order was credit card. A refund for the full amount of &pound;' + orderTotal + ' will be issued immediately to ' + paymentMethod.toLowerCase() + '.</p>';
+            modal.find('.order-cancel-return-submit').attr('data-charge-id', chargeId);
             break;
         }
         
@@ -1155,7 +1137,20 @@ $(document).ready(function() {
         e.preventDefault();
         
         var orderId = $(this).data('order-id');
+        var chargeId = $(this).data('charge-id');
         var orderStatus = $(this).data('order-status');
+        
+        if (typeof chargeId === 'undefined') {
+            
+            setOrderStatus(orderId, orderStatus);
+            
+        } else {
+            
+            refundOrder(chargeId, orderId, orderStatus)
+        }
+    });
+    
+    function setOrderStatus(orderId, orderStatus) {
         
         var json = {"orderStatus": orderStatus};
         
@@ -1178,6 +1173,33 @@ $(document).ready(function() {
             
             alert(validationErrorString);
         });
-    });
+    };
+    
+    function refundOrder(chargeId, orderId, orderStatus) {
+        
+        var json = {
+            "chargeId": chargeId
+        };
+        
+        $.ajax({
+        url: baseUrl + '/stripe/refund',
+        type: 'POST',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+            
+            setOrderStatus(orderId, orderStatus);
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
     
 });

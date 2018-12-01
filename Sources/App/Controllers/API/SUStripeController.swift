@@ -19,8 +19,12 @@ struct SUStripeController: RouteCollection {
             jwtProtectedGroup.patch("customer", String.parameter, "default-source", use: defaultSourceHandler)
             
             jwtProtectedGroup.post("charge", use: chargeHandler)
-            jwtProtectedGroup.post("refund", use: refundHandler)
         }
+        
+        let authSessionRoutes = stripeRoutes.grouped(SUUser.authSessionsMiddleware())
+        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
+        
+        redirectProtectedGroup.post("refund", use: refundHandler)
     }
     
     // MARK: - Ephemeral Key
