@@ -1066,6 +1066,30 @@ $(document).ready(function() {
         setOrderStatus(orderId, orderStatus);
     });
     
+    function setOrderStatus(orderId, orderStatus) {
+        
+        var json = {"orderStatus": orderStatus};
+        
+        $.ajax({
+        url: baseUrl + '/orders/' + orderId + '/status',
+        type: 'PATCH',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+            
+            $(location).attr('href','/orders');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
     
     $('#order-cancel-return-modal').on('show.bs.modal', function (e) {
         
@@ -1149,31 +1173,6 @@ $(document).ready(function() {
             refundOrder(chargeId, orderId, orderStatus)
         }
     });
-    
-    function setOrderStatus(orderId, orderStatus) {
-        
-        var json = {"orderStatus": orderStatus};
-        
-        $.ajax({
-        url: baseUrl + '/orders/' + orderId + '/status',
-        type: 'PATCH',
-        data: JSON.stringify(json),
-        processData: false,
-        contentType: "application/json",
-        success: function(response) {
-            
-            $(location).attr('href','/orders');
-            
-        }}).fail(function(xhr, ajaxOptions, thrownError) {
-            
-            var statusCode = xhr.status;
-            var statusText = xhr.statusText;
-            var responseJSON = JSON.parse(xhr.responseText);
-            var validationErrorString = responseJSON.reason;
-            
-            alert(validationErrorString);
-        });
-    };
     
     function refundOrder(chargeId, orderId, orderStatus) {
         

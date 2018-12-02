@@ -86,7 +86,7 @@ struct SUOrderAdminController: RouteCollection {
                             formatter.currencySymbol = "£"
                             let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
                             
-                            return OrderItemDetails(item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!)
+                            return OrderItemDetails(id: orderItem.id!, item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!)
                         }
                     }
                 }.flatten(on: req).flatMap(to: View.self) { orderItems in
@@ -145,6 +145,7 @@ struct SUOrderAdminController: RouteCollection {
     }
     
     struct OrderItemDetails: Encodable {
+        let id: UUID
         let item: SUShopItem
         let size: SUSize
         let quantity: Int
