@@ -236,6 +236,11 @@ ol.breadcrumb {
     color: #D52422;
 }
 
+.modal-body-middle span,
+.modal-body-middle label {
+    font-weight: bold;
+}
+
 #cookie-footer {
     position: absolute;
     bottom: 0;

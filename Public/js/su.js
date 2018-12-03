@@ -1201,4 +1201,113 @@ $(document).ready(function() {
         });
     };
     
+    var orderItemCancelReturnQuantity = 0;
+    
+    $('#order-item-cancel-return-modal').on('show.bs.modal', function (e) {
+        
+        var modal = $(this);
+        
+        var button = $(e.relatedTarget);
+        var orderId = button.data('order-id');
+        var chargeId = button.data('charge-id');
+        var paymentMethod = button.data('payment-method');
+        var orderTotal = button.data('order-total');
+        var modalAction = button.data('action');
+        
+        var orderItemId = button.data('order-item-id');
+        var orderItemPrice = button.data('item-price');
+        var itemQuantity = parseInt(button.data('item-quantity'));
+        orderItemCancelReturnQuantity = parseInt(button.data('item-quantity'));
+        
+        var form = $('form[name="order-item-form"]')
+        var quantityInput = form.find('input[name="order-item-quantity"]');
+        quantityInput.val(orderItemCancelReturnQuantity);
+        quantityInput.attr({"min" : 0, "max" : orderItemCancelReturnQuantity});
+        modal.find('.modal-body-middle p').html('<span>Current Quantity: </span>' + orderItemCancelReturnQuantity);
+        
+        var modalTitle = '';
+        var modalBody = '';
+        var paymentMethodBody = '';
+        var paddedOrderId = pad(orderId, 6);
+        var cancelReturnSubmit = modal.find('.order-item-cancel-return-submit');
+        
+        switch(paymentMethod) {
+            
+            case 'BACS transfer':
+            
+            paymentMethodBody = '<br/><p>The payment method for this item was BACS transfer. If the customer has already paid, please remember to refund the value of the cancelled or returned items.</p>';
+            break;
+            
+            case 'School bill':
+            
+            paymentMethodBody = '<br/><p>The payment method for this item was add to school bill. If the school bill has already been adjusted, please remember to refund the value of the cancelled or returned items.</p>';
+            break;
+            
+            default:
+            
+            paymentMethodBody = '<br/><p>The payment method for this item was credit card. A refund for the value of the cancelled or returned items will be issued immediately to ' + paymentMethod.toLowerCase() + '.</p>';
+            cancelReturnSubmit.data('charge-id', chargeId);
+            break;
+        }
+        
+        switch(modalAction) {
+            
+            case 'cancel':
+            
+            modalTitle = 'Cancel order item?';
+            modalBody = '<p>Do you wish to cancel this order item?</p>' + paymentMethodBody;
+            cancelReturnSubmit.data('order-item-status', 'Cancelled');
+            
+            break;
+            
+            case 'return':
+            
+            modalTitle = 'Return order item?';
+            modalBody = '<p>Do you wish to return this order item?</p>' + paymentMethodBody;
+            cancelReturnSubmit.data('order-item-status', 'Returned');
+            
+            break;
+        }
+        
+        cancelReturnSubmit.data('order-id', orderId);
+        cancelReturnSubmit.data('order-item-id', orderItemId);
+        cancelReturnSubmit.data('item-quantity', itemQuantity);
+        cancelReturnSubmit.data('item-price', orderItemPrice);
+        modal.find('.modal-title').text(modalTitle);
+        modal.find('.modal-body-top').html(modalBody);
+    });
+    
+    $("#order-item-quantity").click( function() {
+        
+        orderItemCancelReturnQuantity = parseInt($(this).val());
+    });
+    
+    $('#orders-container').on('click', '.order-item-cancel-return-submit', function(e) {
+        
+        $('#order-item-cancel-return-modal').modal('hide');
+        
+        e.preventDefault();
+        
+        var orderId = $(this).data('order-id');
+        var chargeId = $(this).data('charge-id');
+        var orderStatus = $(this).data('order-status');
+        var orderItemId = $(this).data('order-item-id');
+        var itemQuantity = $(this).data('item-quantity');
+        var newItemQuantity = orderItemCancelReturnQuantity;
+        var itemPrice = $(this).data('item-price');
+        
+        var refundQuantity = itemQuantity - newItemQuantity;
+        var refundAmount = refundQuantity * itemPrice;
+        
+        
+        
+//        if (typeof chargeId === 'undefined') {
+//
+//            setOrderStatus(orderId, orderStatus);
+//
+//        } else {
+//
+//            refundOrder(chargeId, orderId, orderStatus)
+//        }
+    });
 });

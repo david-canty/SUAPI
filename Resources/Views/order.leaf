@@ -66,8 +66,8 @@
                                         <a class="dropdown-item order-status" href="">Complete</a>
                                         <div class="dropdown-divider"></div>
                                         <h6 class="dropdown-header">Action</h6>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel">Cancel&#8230;</a>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return">Return&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel">Cancel Order&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return">Return Order&#8230;</a>
                                     </div>
                                 </div>
                                 }
@@ -133,8 +133,8 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="action-button-#(orderItem.id)">
                                         <h6 class="dropdown-header">Action</h6>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel" data-order-item-id="#(orderItem.id)">Cancel&#8230;</a>
-                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return" data-order-item-id="#(orderItem.id)">Return&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="cancel" data-order-item-id="#(orderItem.id)" data-item-quantity="#(orderItem.quantity)" data-item-price="#(orderItem.item.itemPrice)">Cancel Item&#8230;</a>
+                                        <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return" data-order-item-id="#(orderItem.id)" data-item-quantity="#(orderItem.quantity)" data-item-price="#(orderItem.item.itemPrice)">Return Item&#8230;</a>
                                     </div>
                                 </div>
                             </td>
@@ -175,13 +175,17 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Body</p>
-                        <form action="" method="" id="orderItemForm">
-                            <label for="orderItemQuantity">Quantity</label>
-                            <div class="input-group">
-                                <input class="form-control" type="number" min="0" name="orderItemQuantity" id="orderItemQuantity" value="" aria-label="Quantity">
-                            </div>
-                        </form>
+                        <div class="modal-body-top">Body</div>
+                        <div class="modal-body-middle">
+                            <br/>
+                            <p>Current Quantity:</p>
+                            <form action="" method="" id="order-item-form" name="order-item-form">
+                                <label for="order-item-quantity">New Quantity:</label>
+                                <div class="input-group mt-2 mb-1">
+                                    <input class="form-control" type="number" min="0" max="0" step="1" id="order-item-quantity" name="order-item-quantity" value="0" aria-label="Quantity">
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
