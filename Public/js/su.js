@@ -1201,34 +1201,6 @@ $(document).ready(function() {
         });
     };
     
-    function refundOrderItem(chargeId, amount, orderItemId, newQuantity) {
-
-        var json = {
-            "chargeId": chargeId,
-            "amount": amount
-        };
-
-        $.ajax({
-        url: baseUrl + '/stripe/refund',
-        type: 'POST',
-        data: JSON.stringify(json),
-        processData: false,
-        contentType: "application/json",
-        success: function(response) {
-
-            updateOrderItemQuantity(orderItemId, newQuantity);
-
-        }}).fail(function(xhr, ajaxOptions, thrownError) {
-
-            var statusCode = xhr.status;
-            var statusText = xhr.statusText;
-            var responseJSON = JSON.parse(xhr.responseText);
-            var validationErrorString = responseJSON.reason;
-
-            alert(validationErrorString);
-        });
-    };
-    
     var orderItemCancelReturnQuantity = 0;
     
     $('#order-item-cancel-return-modal').on('show.bs.modal', function (e) {
@@ -1325,6 +1297,22 @@ $(document).ready(function() {
         var cancelReturnQuantity = orderItemCancelReturnQuantity;
         var itemPrice = $(this).data('order-item-price');
         
+        var refundAmount = cancelReturnQuantity * itemPrice;
+        var refundAmountCents = Math.round((refundAmount * 1000)/10);
+        
+        var orderItemRefundJson = {
+            "chargeId": chargeId,
+            "amount": refundAmountCents
+        };
+        
+        var orderItemRefundAjax = $.ajax({
+        url: baseUrl + '/stripe/refund',
+        type: 'POST',
+        data: JSON.stringify(orderItemRefundJson),
+        processData: false,
+        contentType: "application/json"
+        });
+        
         if (cancelReturnQuantity < orderItemQuantity) {
             
             var newQuantity = orderItemQuantity - cancelReturnQuantity;
@@ -1335,15 +1323,33 @@ $(document).ready(function() {
                 
             } else {
                 
-                var refundAmount = cancelReturnQuantity * itemPrice;
-                var refundAmountCents = Math.round((refundAmount * 1000)/10);
-                refundOrderItem(chargeId, refundAmountCents, orderItemId, newQuantity);
+                orderItemRefundAjax.done(function(data) {
+                    
+                    updateOrderItemQuantity(orderItemId, newQuantity);
+                    
+                }).fail(function(xhr, textStatus, errorThrown) {
+                    
+                    alert(textStatus + ': ' + errorThrown);
+                });
             }
-
             
         } else {
             
-            
+            if (typeof chargeId === 'undefined') {
+                
+                deleteOrderItem(orderItemId);
+                
+            } else {
+                
+                orderItemRefundAjax.done(function(data) {
+                    
+                    deleteOrderItem(orderItemId);
+                    
+                }).fail(function(xhr, textStatus, errorThrown) {
+                    
+                    alert(textStatus + ': ' + errorThrown);
+                });
+            }
         }
     });
     
@@ -1357,6 +1363,26 @@ $(document).ready(function() {
         data: JSON.stringify(json),
         processData: false,
         contentType: "application/json",
+        success: function(response) {
+            
+            window.location.reload(true);
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
+    
+    function deleteOrderItem(orderItemId) {
+        
+        $.ajax({
+        url: baseUrl + '/order-items/' + orderItemId,
+        type: 'DELETE',
         success: function(response) {
             
             window.location.reload(true);
