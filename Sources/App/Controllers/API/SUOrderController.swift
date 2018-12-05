@@ -33,6 +33,7 @@ struct SUOrderController: RouteCollection {
         let ordersRedirectProtectedGroup = ordersAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         ordersRedirectProtectedGroup.patch(SUOrder.parameter, "status", use: updateOrderStatusHandler)
+        ordersRedirectProtectedGroup.delete(SUOrder.parameter, use: deleteOrderHandler)
         
         // Order Items
         let orderItemsRoutes = router.grouped("api", "order-items")
@@ -40,9 +41,11 @@ struct SUOrderController: RouteCollection {
         let orderItemsRedirectProtectedGroup = orderItemsAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
         orderItemsRedirectProtectedGroup.patch(SUOrderItem.parameter, "quantity", use: updateOrderItemQuantityHandler)
+        orderItemsRedirectProtectedGroup.delete(SUOrderItem.parameter, use: deleteOrderItemHandler)
         
     }
 
+    // Orders
     func createHandler(_ req: Request) throws -> Future<SUOrderInfo> {
 
         return try req.content.decode(SUOrderPostData.self).flatMap(to: SUOrderInfo.self) { orderData in
@@ -109,6 +112,15 @@ struct SUOrderController: RouteCollection {
         }
     }
     
+    func deleteOrderHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try req.parameters.next(SUOrder.self).flatMap(to: HTTPStatus.self) { order in
+            
+            return order.delete(on: req).transform(to: HTTPStatus.noContent)
+        }
+    }
+    
+    // Order Items
     func updateOrderItemQuantityHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrderItem.self), req.content.decode(OrderItemQuantityData.self)) { orderItem, orderItemQuantityData in
@@ -116,6 +128,14 @@ struct SUOrderController: RouteCollection {
             orderItem.quantity = orderItemQuantityData.quantity
             
             return orderItem.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
+    func deleteOrderItemHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try req.parameters.next(SUOrderItem.self).flatMap(to: HTTPStatus.self) { orderItem in
+            
+            return orderItem.delete(on: req).transform(to: HTTPStatus.noContent)
         }
     }
     
