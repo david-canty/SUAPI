@@ -127,6 +127,7 @@
                             <td class="text-center">#(orderItem.quantity)</td>
                             <td class="text-center">#(orderItem.formattedTotal)</td>
                             <td class="text-center">
+                                #if(order.orderStatus == "Cancelled" || order.orderStatus == "Returned") { - } else {
                                 <div class="dropdown">
                                     <button class="btn btn-primary dropdown-toggle" type="button" id="action-button-#(orderItem.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         Action
@@ -137,6 +138,7 @@
                                         <a class="dropdown-item" href="" data-toggle="modal" data-target="#order-item-cancel-return-modal" data-order-id="#(order.id)" data-charge-id="#(order.chargeId)" data-payment-method="#(order.paymentMethod)" data-order-total="#(orderTotal)" data-action="return" data-order-item-id="#(orderItem.id)" data-item-quantity="#(orderItem.quantity)" data-item-price="#(orderItem.item.itemPrice)">Return Item&#8230;</a>
                                     </div>
                                 </div>
+                                }
                             </td>
                         </tr>
                         }
@@ -178,9 +180,9 @@
                         <div class="modal-body-top">Body</div>
                         <div class="modal-body-middle">
                             <br/>
-                            <p>Current Quantity:</p>
+                            <p>Order quantity:</p>
                             <form action="" method="" id="order-item-form" name="order-item-form">
-                                <label for="order-item-quantity">New Quantity:</label>
+                                <label for="order-item-quantity" id="order-item-quantity-label">Quantity to return:</label>
                                 <div class="input-group mt-2 mb-1">
                                     <input class="form-control" type="number" min="0" max="0" step="1" id="order-item-quantity" name="order-item-quantity" value="0" aria-label="Quantity">
                                 </div>

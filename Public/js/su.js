@@ -1063,10 +1063,10 @@ $(document).ready(function() {
         var orderId = table.data('id');
         var orderStatus = $(this).text();
         
-        setOrderStatus(orderId, orderStatus);
+        updateOrderStatus(orderId, orderStatus);
     });
     
-    function setOrderStatus(orderId, orderStatus) {
+    function updateOrderStatus(orderId, orderStatus) {
         
         var json = {"orderStatus": orderStatus};
         
@@ -1166,7 +1166,7 @@ $(document).ready(function() {
         
         if (typeof chargeId === 'undefined') {
             
-            setOrderStatus(orderId, orderStatus);
+            updateOrderStatus(orderId, orderStatus);
             
         } else {
             
@@ -1187,8 +1187,8 @@ $(document).ready(function() {
         processData: false,
         contentType: "application/json",
         success: function(response) {
-            
-            setOrderStatus(orderId, orderStatus);
+
+            updateOrderStatus(orderId, orderStatus);
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -1197,6 +1197,34 @@ $(document).ready(function() {
             var responseJSON = JSON.parse(xhr.responseText);
             var validationErrorString = responseJSON.reason;
             
+            alert(validationErrorString);
+        });
+    };
+    
+    function refundOrderItem(chargeId, amount, orderItemId, newQuantity) {
+
+        var json = {
+            "chargeId": chargeId,
+            "amount": amount
+        };
+
+        $.ajax({
+        url: baseUrl + '/stripe/refund',
+        type: 'POST',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+
+            updateOrderItemQuantity(orderItemId, newQuantity);
+
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+
             alert(validationErrorString);
         });
     };
@@ -1216,14 +1244,14 @@ $(document).ready(function() {
         
         var orderItemId = button.data('order-item-id');
         var orderItemPrice = button.data('item-price');
-        var itemQuantity = parseInt(button.data('item-quantity'));
+        var orderItemQuantity = parseInt(button.data('item-quantity'));
         orderItemCancelReturnQuantity = parseInt(button.data('item-quantity'));
         
         var form = $('form[name="order-item-form"]')
         var quantityInput = form.find('input[name="order-item-quantity"]');
         quantityInput.val(orderItemCancelReturnQuantity);
         quantityInput.attr({"min" : 0, "max" : orderItemCancelReturnQuantity});
-        modal.find('.modal-body-middle p').html('<span>Current Quantity: </span>' + orderItemCancelReturnQuantity);
+        modal.find('.modal-body-middle p').html('<span>Order quantity: </span>' + orderItemCancelReturnQuantity);
         
         var modalTitle = '';
         var modalBody = '';
@@ -1256,6 +1284,7 @@ $(document).ready(function() {
             
             modalTitle = 'Cancel order item?';
             modalBody = '<p>Do you wish to cancel this order item?</p>' + paymentMethodBody;
+            $('#order-item-quantity-label').text('Quantity to cancel:');
             cancelReturnSubmit.data('order-item-status', 'Cancelled');
             
             break;
@@ -1264,6 +1293,7 @@ $(document).ready(function() {
             
             modalTitle = 'Return order item?';
             modalBody = '<p>Do you wish to return this order item?</p>' + paymentMethodBody;
+            $('#order-item-quantity-label').text('Quantity to return:');
             cancelReturnSubmit.data('order-item-status', 'Returned');
             
             break;
@@ -1271,8 +1301,8 @@ $(document).ready(function() {
         
         cancelReturnSubmit.data('order-id', orderId);
         cancelReturnSubmit.data('order-item-id', orderItemId);
-        cancelReturnSubmit.data('item-quantity', itemQuantity);
-        cancelReturnSubmit.data('item-price', orderItemPrice);
+        cancelReturnSubmit.data('order-item-quantity', orderItemQuantity);
+        cancelReturnSubmit.data('order-item-price', orderItemPrice);
         modal.find('.modal-title').text(modalTitle);
         modal.find('.modal-body-top').html(modalBody);
     });
@@ -1290,24 +1320,55 @@ $(document).ready(function() {
         
         var orderId = $(this).data('order-id');
         var chargeId = $(this).data('charge-id');
-        var orderStatus = $(this).data('order-status');
         var orderItemId = $(this).data('order-item-id');
-        var itemQuantity = $(this).data('item-quantity');
-        var newItemQuantity = orderItemCancelReturnQuantity;
-        var itemPrice = $(this).data('item-price');
+        var orderItemQuantity = parseInt($(this).data('order-item-quantity'));
+        var cancelReturnQuantity = orderItemCancelReturnQuantity;
+        var itemPrice = $(this).data('order-item-price');
         
-        var refundQuantity = itemQuantity - newItemQuantity;
-        var refundAmount = refundQuantity * itemPrice;
-        
-        
-        
-//        if (typeof chargeId === 'undefined') {
-//
-//            setOrderStatus(orderId, orderStatus);
-//
-//        } else {
-//
-//            refundOrder(chargeId, orderId, orderStatus)
-//        }
+        if (cancelReturnQuantity < orderItemQuantity) {
+            
+            var newQuantity = orderItemQuantity - cancelReturnQuantity;
+            
+            if (typeof chargeId === 'undefined') {
+                
+                updateOrderItemQuantity(orderItemId, newQuantity);
+                
+            } else {
+                
+                var refundAmount = cancelReturnQuantity * itemPrice;
+                var refundAmountCents = Math.round((refundAmount * 1000)/10);
+                refundOrderItem(chargeId, refundAmountCents, orderItemId, newQuantity);
+            }
+
+            
+        } else {
+            
+            
+        }
     });
+    
+    function updateOrderItemQuantity(orderItemId, quantity) {
+        
+        var json = {"quantity": quantity};
+        
+        $.ajax({
+        url: baseUrl + '/order-items/' + orderItemId + '/quantity',
+        type: 'PATCH',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+            
+            window.location.reload(true);
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
 });

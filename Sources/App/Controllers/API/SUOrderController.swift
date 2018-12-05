@@ -21,17 +21,26 @@ struct SUOrderController: RouteCollection {
 
     func boot(router: Router) throws {
 
-        let orderRoutes = router.grouped("api", "orders")
-        orderRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+        // Orders
+        let ordersRoutes = router.grouped("api", "orders")
+        ordersRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
             jwtProtectedGroup.post(use: createHandler)
             
         }
         
-        let authSessionRoutes = orderRoutes.grouped(SUUser.authSessionsMiddleware())
-        let redirectProtectedGroup = authSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
+        let ordersAuthSessionRoutes = ordersRoutes.grouped(SUUser.authSessionsMiddleware())
+        let ordersRedirectProtectedGroup = ordersAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
-        redirectProtectedGroup.patch(SUOrder.parameter, "status", use: updateOrderStatusHandler)
+        ordersRedirectProtectedGroup.patch(SUOrder.parameter, "status", use: updateOrderStatusHandler)
+        
+        // Order Items
+        let orderItemsRoutes = router.grouped("api", "order-items")
+        let orderItemsAuthSessionRoutes = orderItemsRoutes.grouped(SUUser.authSessionsMiddleware())
+        let orderItemsRedirectProtectedGroup = orderItemsAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
+        
+        orderItemsRedirectProtectedGroup.patch(SUOrderItem.parameter, "quantity", use: updateOrderItemQuantityHandler)
+        
     }
 
     func createHandler(_ req: Request) throws -> Future<SUOrderInfo> {
@@ -100,6 +109,16 @@ struct SUOrderController: RouteCollection {
         }
     }
     
+    func updateOrderItemQuantityHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrderItem.self), req.content.decode(OrderItemQuantityData.self)) { orderItem, orderItemQuantityData in
+            
+            orderItem.quantity = orderItemQuantityData.quantity
+            
+            return orderItem.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
     // Data structs
     struct SUOrderPostData: Content {
         let customerId: String
@@ -122,5 +141,9 @@ struct SUOrderController: RouteCollection {
     
     struct OrderStatusData: Content {
         let orderStatus: String
+    }
+    
+    struct OrderItemQuantityData: Content {
+        let quantity: Int
     }
 }
