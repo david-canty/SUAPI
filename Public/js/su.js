@@ -1400,13 +1400,35 @@ $(document).ready(function() {
             
             if (response.length == 0) {
                 
-                alert('This order will now be deleted as there are no longer any associated order items.');
-                
+                deleteOrder(orderId);
                 
             } else {
                 
                 window.location.reload(true);
             }
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
+    
+    function deleteOrder(orderId) {
+        
+        $.ajax({
+        url: baseUrl + '/orders/' + orderId,
+        type: 'DELETE',
+        success: function(response) {
+            
+            $(location).attr('href','/orders');
+            
+            var paddedOrderId = pad(orderId, 6);
+            alert('Order no ' + paddedOrderId + ' has now been deleted as there are no longer any associated order items.');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
