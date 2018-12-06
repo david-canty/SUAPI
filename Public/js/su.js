@@ -1300,19 +1300,6 @@ $(document).ready(function() {
         var refundAmount = cancelReturnQuantity * itemPrice;
         var refundAmountCents = Math.round((refundAmount * 1000)/10);
         
-        var orderItemRefundJson = {
-            "chargeId": chargeId,
-            "amount": refundAmountCents
-        };
-        
-        var orderItemRefundAjax = $.ajax({
-        url: baseUrl + '/stripe/refund',
-        type: 'POST',
-        data: JSON.stringify(orderItemRefundJson),
-        processData: false,
-        contentType: "application/json"
-        });
-        
         if (cancelReturnQuantity < orderItemQuantity) {
             
             var newQuantity = orderItemQuantity - cancelReturnQuantity;
@@ -1322,6 +1309,19 @@ $(document).ready(function() {
                 updateOrderItemQuantity(orderItemId, newQuantity);
                 
             } else {
+                
+                var orderItemRefundJson = {
+                    "chargeId": chargeId,
+                    "amount": refundAmountCents
+                };
+                
+                var orderItemRefundAjax = $.ajax({
+                url: baseUrl + '/stripe/refund',
+                type: 'POST',
+                data: JSON.stringify(orderItemRefundJson),
+                processData: false,
+                contentType: "application/json"
+                });
                 
                 orderItemRefundAjax.done(function(data) {
                     
@@ -1337,13 +1337,26 @@ $(document).ready(function() {
             
             if (typeof chargeId === 'undefined') {
                 
-                deleteOrderItem(orderItemId);
+                deleteOrderItem(orderItemId, orderId);
                 
             } else {
                 
+                var orderItemRefundJson = {
+                    "chargeId": chargeId,
+                    "amount": refundAmountCents
+                };
+                
+                var orderItemRefundAjax = $.ajax({
+                url: baseUrl + '/stripe/refund',
+                type: 'POST',
+                data: JSON.stringify(orderItemRefundJson),
+                processData: false,
+                contentType: "application/json"
+                });
+                
                 orderItemRefundAjax.done(function(data) {
                     
-                    deleteOrderItem(orderItemId);
+                    deleteOrderItem(orderItemId, orderId);
                     
                 }).fail(function(xhr, textStatus, errorThrown) {
                     
@@ -1378,14 +1391,22 @@ $(document).ready(function() {
         });
     };
     
-    function deleteOrderItem(orderItemId) {
+    function deleteOrderItem(orderItemId, orderId) {
         
         $.ajax({
         url: baseUrl + '/order-items/' + orderItemId,
         type: 'DELETE',
         success: function(response) {
             
-            window.location.reload(true);
+            if (response.length == 0) {
+                
+                alert('This order will now be deleted as there are no longer any associated order items.');
+                
+                
+            } else {
+                
+                window.location.reload(true);
+            }
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             

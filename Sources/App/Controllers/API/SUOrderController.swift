@@ -130,12 +130,18 @@ struct SUOrderController: RouteCollection {
             return orderItem.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
-    
-    func deleteOrderItemHandler(_ req: Request) throws -> Future<HTTPStatus> {
-        
-        return try req.parameters.next(SUOrderItem.self).flatMap(to: HTTPStatus.self) { orderItem in
-            
-            return orderItem.delete(on: req).transform(to: HTTPStatus.noContent)
+
+    func deleteOrderItemHandler(_ req: Request) throws -> Future<[SUOrderItem]> {
+
+        return try req.parameters.next(SUOrderItem.self).flatMap { orderItem in
+
+            orderItem.order.get(on: req).flatMap { order in
+
+                orderItem.delete(on: req).flatMap {
+
+                    try order.orderItems.query(on: req).all()
+                }
+            }
         }
     }
     
