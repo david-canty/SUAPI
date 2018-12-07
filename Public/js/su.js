@@ -1110,17 +1110,17 @@ $(document).ready(function() {
             
             case 'BACS transfer':
             
-            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full amount of &pound;' + orderTotal + '.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was BACS transfer. If the customer has already paid, please remember to refund the full amount of &pound;' + orderTotal.toFixed(2) + '.</p>';
             break;
             
             case 'School bill':
             
-            paymentMethodBody = '<br/><p>The payment method for this order was add to school bill. If the school bill has already been adjusted, please remember to refund the full amount of &pound;' + orderTotal + '.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was add to school bill. If the school bill has already been adjusted, please remember to refund the full amount of &pound;' + orderTotal.toFixed(2) + '.</p>';
             break;
             
             default:
             
-            paymentMethodBody = '<br/><p>The payment method for this order was credit card. A refund for the full amount of &pound;' + orderTotal + ' will be issued immediately to ' + paymentMethod.toLowerCase() + '.</p>';
+            paymentMethodBody = '<br/><p>The payment method for this order was credit card. A refund for the full amount of &pound;' + orderTotal.toFixed(2) + ' will be issued immediately to ' + paymentMethod.toLowerCase() + '.</p>';
             modal.find('.order-cancel-return-submit').attr('data-charge-id', chargeId);
             break;
         }
