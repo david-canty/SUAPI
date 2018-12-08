@@ -1425,10 +1425,19 @@ $(document).ready(function() {
         type: 'DELETE',
         success: function(response) {
             
-            $(location).attr('href','/orders');
+            var confirmationModal = $('#confirmation-modal');
+            
+            var modalTitle = 'Delete Order';
             
             var paddedOrderId = pad(orderId, 6);
-            alert('Order no ' + paddedOrderId + ' has now been deleted as there are no longer any associated order items.');
+            var modalBody = 'Order no ' + paddedOrderId + ' will now be deleted as there are no longer any associated order items.';
+            
+            confirmationModal.find('.modal-title').text(modalTitle);
+            confirmationModal.find('.modal-body p').html(modalBody);
+            
+            confirmationModal.data('return-page', '/orders');
+            
+            confirmationModal.modal('show');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -1440,4 +1449,19 @@ $(document).ready(function() {
             alert(validationErrorString);
         });
     };
+
+    $('#confirmation-modal').on('hidden.bs.modal', function (e) {
+        
+        var returnPage = $(this).data('return-page');
+        
+        if (typeof returnPage === 'undefined') {
+            
+            window.location.reload(true);
+            
+        } else {
+            
+            $(location).attr('href', returnPage);
+        }
+    });
+    
 });
