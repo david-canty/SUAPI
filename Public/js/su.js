@@ -1078,7 +1078,38 @@ $(document).ready(function() {
         contentType: "application/json",
         success: function(response) {
             
-            $(location).attr('href','/orders');
+            if (orderStatus == 'Cancelled' || orderStatus == 'Returned') {
+                
+                var confirmationModal = $('#confirmation-modal');
+                
+                var paymentMethod = confirmationModal.data('payment-method');
+                var orderTotal = confirmationModal.data('order-total');
+                
+                var modalTitle = 'Order Status';
+                
+                var paddedOrderId = pad(orderId, 6);
+                var modalBody = 'The status of order no ' + paddedOrderId + ' has been changed to ' + orderStatus + '.';
+                
+                confirmationModal.find('.modal-title').text(modalTitle);
+                confirmationModal.find('.modal-body p').html(modalBody);
+                
+                if ((paymentMethod.toLowerCase().indexOf("bacs transfer") >= 0) || (paymentMethod.toLowerCase().indexOf("school bill") >= 0)) {
+                    
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod + '. Please remember to refund the full order amount of &pound;' + orderTotal + '.</p>');
+                    
+                } else if (paymentMethod.toLowerCase().indexOf("credit card") >= 0) {
+                    
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod.toLowerCase() + '. The full order amount of &pound;' + orderTotal + ' has been automatically refunded.</p>');
+                }
+                
+                confirmationModal.data('return-page', '/orders');
+                
+                confirmationModal.modal('show');
+                
+            } else {
+
+                window.location.reload(true);
+            }
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
@@ -1147,6 +1178,10 @@ $(document).ready(function() {
         modal.find('.order-cancel-return-submit').attr('data-order-id', orderId);
         modal.find('.modal-title').text(modalTitle);
         modal.find('.modal-body').html(modalBody);
+        
+        var confirmationModal = $('#confirmation-modal');
+        confirmationModal.data('payment-method', paymentMethod);
+        confirmationModal.data('order-total', orderTotal);
     });
     
     function pad (str, max) {
