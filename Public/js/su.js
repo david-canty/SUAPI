@@ -1425,7 +1425,7 @@ $(document).ready(function() {
             
             var modalTitle = 'Order Item Quantity';
             
-            var modalBody = 'The quantity for this order item has been changed to ' + quantity + '.';
+            var modalBody = 'The quantity for this order item has changed to ' + quantity + '.';
             
             confirmationModal.find('.modal-title').text(modalTitle);
             confirmationModal.find('.modal-body p').html(modalBody);
@@ -1465,7 +1465,29 @@ $(document).ready(function() {
                 
             } else {
                 
-                window.location.reload(true);
+                var confirmationModal = $('#confirmation-modal');
+                
+                var paymentMethod = confirmationModal.data('payment-method');
+                var itemPrice = confirmationModal.data('item-price');
+                var itemRefundAmount = orderItemCancelReturnQuantity * itemPrice;
+                
+                var modalTitle = 'Order Item Quantity';
+                
+                var modalBody = 'The quantity for this order item has changed to 0 and has been deleted from the order.';
+                
+                confirmationModal.find('.modal-title').text(modalTitle);
+                confirmationModal.find('.modal-body p').html(modalBody);
+                
+                if ((paymentMethod.toLowerCase().indexOf("bacs transfer") >= 0) || (paymentMethod.toLowerCase().indexOf("school bill") >= 0)) {
+                    
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod + '. Please remember to refund &pound;' + itemRefundAmount.toFixed(2) + '.</p>');
+                    
+                } else if (paymentMethod.toLowerCase().indexOf("credit card") >= 0) {
+                    
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod.toLowerCase() + '. The amount of &pound;' + itemRefundAmount.toFixed(2) + ' has been automatically refunded.</p>');
+                }
+                
+                confirmationModal.modal('show');
             }
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
@@ -1491,7 +1513,7 @@ $(document).ready(function() {
             var modalTitle = 'Delete Order';
             
             var paddedOrderId = pad(orderId, 6);
-            var modalBody = 'Order no ' + paddedOrderId + ' will now be deleted as there are no longer any associated order items.';
+            var modalBody = 'Order no ' + paddedOrderId + ' has been deleted as there are no longer any associated order items.';
             
             confirmationModal.find('.modal-title').text(modalTitle);
             confirmationModal.find('.modal-body p').html(modalBody);
