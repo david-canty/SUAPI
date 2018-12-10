@@ -46,7 +46,7 @@
                     <tbody>
                         <tr>
                             <td class="text-center">#orderNo(order.id)</td>
-                            <td class="text-center">#date(order.orderDate, "d MMM yyyy")</td>
+                            <td class="text-center">#date(order.orderDate, "d MMM yyyy 'at' HH:mm")</td>
                             <td class="text-center">#(itemCount)</td>
                             <td class="text-center">#(formattedOrderTotal)</td>
                             <td class="text-center">#(order.paymentMethod)</td>

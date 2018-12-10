@@ -1095,11 +1095,11 @@ $(document).ready(function() {
                 
                 if ((paymentMethod.toLowerCase().indexOf("bacs transfer") >= 0) || (paymentMethod.toLowerCase().indexOf("school bill") >= 0)) {
                     
-                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod + '. Please remember to refund the full order amount of &pound;' + orderTotal + '.</p>');
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod + '. Please remember to refund the full order amount of &pound;' + orderTotal.toFixed(2) + '.</p>');
                     
                 } else if (paymentMethod.toLowerCase().indexOf("credit card") >= 0) {
                     
-                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod.toLowerCase() + '. The full order amount of &pound;' + orderTotal + ' has been automatically refunded.</p>');
+                    confirmationModal.find('.modal-body').append('<br/><p>This order was paid via ' + paymentMethod.toLowerCase() + '. The full order amount of &pound;' + orderTotal.toFixed(2) + ' has been automatically refunded.</p>');
                 }
                 
                 confirmationModal.data('return-page', '/orders');

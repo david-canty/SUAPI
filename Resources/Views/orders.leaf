@@ -33,7 +33,7 @@
                             #for(orderDetail in orderDetails) {
                             <tr>
                                 <td class="text-center">#orderNo(orderDetail.order.id)</td>
-                                <td class="text-center">#date(orderDetail.order.orderDate, "d MMM yyyy")</td>
+                                <td class="text-center">#date(orderDetail.order.orderDate, "d MMM yyyy 'at' HH:mm")</td>
                                 <td class="text-center">#(orderDetail.itemCount)</td>
                                 <td class="text-center">#(orderDetail.formattedOrderTotal)</td>
                                 <td class="text-center">#(orderDetail.order.paymentMethod)</td>
