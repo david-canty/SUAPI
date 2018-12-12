@@ -1,6 +1,12 @@
 import Vapor
 import FluentMySQL
 
+enum ShopItemStatus: String {
+    case active = "Active"
+    case inactive = "Inactive"
+    case noLongerAvailable = "No Longer Available"
+}
+
 final class SUShopItem: Codable {
     
     var id: UUID?
@@ -9,6 +15,7 @@ final class SUShopItem: Codable {
     var itemColor: String
     var itemGender: String
     var itemPrice: Double
+    var itemStatus: String
     var categoryID: SUCategory.ID
     var timestamp: Date?
     
@@ -17,6 +24,7 @@ final class SUShopItem: Codable {
          color: String,
          gender: String,
          price: Double,
+         status: ShopItemStatus,
          categoryID: SUCategory.ID) {
         
         self.itemName = name
@@ -24,6 +32,7 @@ final class SUShopItem: Codable {
         self.itemColor = color
         self.itemGender = gender
         self.itemPrice = price
+        self.itemStatus = status.rawValue
         self.categoryID = categoryID
         self.timestamp = Date()
     }

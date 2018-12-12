@@ -45,6 +45,9 @@ struct SUShopItemController: RouteCollection {
         // Stock
         redirectProtectedGroup.patch(SUShopItem.parameter, "stock", use: updateStockHandler)
         
+        // Status
+        redirectProtectedGroup.patch(SUShopItem.parameter, "status", use: updateStatusHandler)
+        
         // Images
         redirectProtectedGroup.post(SUShopItem.parameter, "images", use: uploadImagesHandler)
         redirectProtectedGroup.patch(SUShopItem.parameter, "images", SUImage.parameter, "sort-order", use: updateImageSortOrderHandler)
@@ -58,7 +61,7 @@ struct SUShopItemController: RouteCollection {
     // CRUD
     func createHandler(_ req: Request, itemData: SUShopItemData) throws -> Future<SUShopItem> {
         
-        let item = SUShopItem(name: itemData.itemName, description: itemData.itemDescription, color: itemData.itemColor, gender: itemData.itemGender, price: itemData.itemPrice, categoryID: itemData.categoryId)
+        let item = SUShopItem(name: itemData.itemName, description: itemData.itemDescription, color: itemData.itemColor, gender: itemData.itemGender, price: itemData.itemPrice, status: ShopItemStatus.active, categoryID: itemData.categoryId)
         
         do {
             
@@ -350,6 +353,22 @@ struct SUShopItemController: RouteCollection {
         }
     }
     
+    // Status
+    func updateStatusHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.content.decode(SUShopItemStatusData.self)) { item, itemStatusData in
+            
+            guard let itemStatus = ShopItemStatus.init(rawValue: itemStatusData.itemStatus) else {
+                throw Abort(.badRequest, reason: "Invalid item status")
+            }
+            
+            item.timestamp = Date()
+            item.itemStatus = itemStatus.rawValue
+            
+            return item.update(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
     // Images
     func uploadImagesHandler(_ req: Request) throws -> Future<[SUImage]> {
         
@@ -489,6 +508,10 @@ struct SUShopItemController: RouteCollection {
     struct SUShopItemStockData: Content {
         let itemSizeIds: [UUID]
         let itemSizeStocks: [Int]
+    }
+    
+    struct SUShopItemStatusData: Content {
+        let itemStatus: String
     }
     
     struct SUShopItemImageData: Content {

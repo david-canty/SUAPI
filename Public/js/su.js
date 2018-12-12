@@ -798,6 +798,72 @@ $(document).ready(function() {
         });
     });
     
+    // Item status
+    $('#items-container').on('click', '.item-status', function(e) {
+        
+        e.preventDefault();
+        
+        var tr = $(this).closest('tr');
+        var itemId = tr.data('item-id');
+        var itemStatus = $(this).text();
+        
+        updateItemStatus(itemId, itemStatus);
+    });
+    
+    function updateItemStatus(itemId, itemStatus) {
+        
+        var json = {"itemStatus": itemStatus};
+        
+        $.ajax({
+        url: baseUrl + '/items/' + itemId + '/status',
+        type: 'PATCH',
+        data: JSON.stringify(json),
+        processData: false,
+        contentType: "application/json",
+        success: function(response) {
+            
+            var modalTitle = ""
+            
+            switch(itemStatus) {
+                
+                case "Active":
+                
+                    modalTitle = "Item Active"
+                    modalBody = "This item is active."
+                    break;
+                
+                case "Inactive":
+                
+                modalTitle = "Item Inactive"
+                modalBody = "This item is inactive."
+                    break;
+                
+                case "No Longer Available":
+                
+                modalTitle = "Item Active"
+                modalBody = "This item is no longer available."
+                    break;
+                
+                default:
+                    break;
+            }
+                
+            var confirmationModal = $('#confirmation-modal');
+            confirmationModal.find('.modal-title').text(modalTitle);
+            confirmationModal.find('.modal-body p').html(modalBody);
+            confirmationModal.modal('show');
+            
+        }}).fail(function(xhr, ajaxOptions, thrownError) {
+            
+            var statusCode = xhr.status;
+            var statusText = xhr.statusText;
+            var responseJSON = JSON.parse(xhr.responseText);
+            var validationErrorString = responseJSON.reason;
+            
+            alert(validationErrorString);
+        });
+    };
+                  
     // Item delete submit
     $('#items-container').on('click', '.item-delete-submit', function(e) {
         
