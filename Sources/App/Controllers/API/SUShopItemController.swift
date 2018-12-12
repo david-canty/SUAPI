@@ -272,7 +272,21 @@ struct SUShopItemController: RouteCollection {
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.parameters.next(SUShopItem.self).delete(on: req).transform(to: HTTPStatus.noContent)
+        return try req.parameters.next(SUShopItem.self).delete(on: req).transform(to: HTTPStatus.noContent).catchMap() { error in
+            
+            let reason = error.localizedDescription
+            
+            switch reason {
+                
+            case let x where x.contains("SUOrderItem"):
+                
+                throw Abort(.conflict, reason: "Error deleting item:\n\nCannot delete this item because it is associated with one or more orders.")
+                
+            default:
+                
+                throw Abort(.conflict, reason: "Error deleting item:\n\n\(reason)")
+            }
+        }
     }
     
     // Category

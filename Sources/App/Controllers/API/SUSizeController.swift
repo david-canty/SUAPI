@@ -166,7 +166,22 @@ struct SUSizeController: RouteCollection {
                         
                         size.delete(on: conn).transform(to: HTTPStatus.noContent).catchMap() { error in
                             
-                            throw Abort(.conflict, reason: "Error deleting size:\n\nCannot delete this size because it contains uniform items. If you wish to delete this size, assign the related uniform items to another size.")
+                            let reason = error.localizedDescription
+                            
+                            switch reason {
+                                
+                            case let x where x.contains("SUOrderItem"):
+                                
+                                throw Abort(.conflict, reason: "Error deleting size:\n\nCannot delete this size because it is associated with one or more orders.")
+                                
+                            case let x where x.contains("SUShopItem"):
+                                
+                                throw Abort(.conflict, reason: "Error deleting size:\n\nCannot delete this size because it is associated with one or more items.")
+                                
+                            default:
+                                
+                                throw Abort(.conflict, reason: "Error deleting size:\n\n\(reason)")
+                            }
                         }
                     }
                 }
