@@ -1,0 +1,30 @@
+<html>
+    <body>
+        <p>I would like to cancel order no #orderNo(order.id) made on #date(order.orderDate, "d MMM yyyy 'at' HH:mm").</p>
+        <p>Order details:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                #for(orderItem in orderItemDetails) {
+                <tr data-item-id="#(item.id)">
+                    <td>#(orderItem.item.itemName)</td>
+                    <td>#(orderItem.size.sizeName)</td>
+                    <td>#(orderItem.item.itemPrice)</td>
+                    <td>#(orderItem.quantity)</td>
+                    <td>#(orderItem.formattedTotal)</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        <p>Order total: #(formattedOrderTotal)</p>
+        <p>Payment method: #(order.paymentMethod)<p>
+    </body>
+</html>

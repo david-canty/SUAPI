@@ -263,6 +263,15 @@
         }
       },
       {
+        "package": "Mailgun",
+        "repositoryURL": "https://github.com/twof/VaporMailgunService.git",
+        "state": {
+          "branch": null,
+          "revision": "353706a5c73f4aa79494a9bc681113bd5400017f",
+          "version": "1.5.0"
+        }
+      },
+      {
         "package": "VaporTestTools",
         "repositoryURL": "https://github.com/LiveUI/VaporTestTools.git",
         "state": {

@@ -1,6 +1,7 @@
 import Vapor
 import Fluent
 import Authentication
+import Mailgun
 
 enum PaymentMethod: String {
     case bacs = "bacs"
@@ -26,7 +27,7 @@ struct SUOrderController: RouteCollection {
         ordersRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
             jwtProtectedGroup.post(use: createHandler)
-            
+            jwtProtectedGroup.post(SUOrder.parameter, "cancel", use: cancelOrderHandler)
         }
         
         let ordersAuthSessionRoutes = ordersRoutes.grouped(SUUser.authSessionsMiddleware())
@@ -95,7 +96,85 @@ struct SUOrderController: RouteCollection {
             }
         }
     }
+    
+    func cancelOrderHandler(_ req: Request) throws -> Future<Response> {
+        
+        return try req.parameters.next(SUOrder.self).flatMap { order in
 
+            try flatMap(order.customer.get(on: req), order.orderItems.query(on: req).all()) { customer, orderItems in
+
+                self.getOrderItemDetails(for: orderItems, on: req).flatMap { orderItemDetails in
+                    
+                    try self.getTotal(forOrder: order, on: req).flatMap { orderTotal in
+                        
+                        let formatter = NumberFormatter()
+                        formatter.numberStyle = .currency
+                        formatter.currencySymbol = "£"
+                        let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                        
+                        let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                        
+                        let context = CancelOrderEmailContext(order: order, customer: customer, orderItemDetails: orderItemDetails, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                        
+                        return try req.view().render("Emails/cancelOrderEmail", context).flatMap { view in
+                            
+                            let content = String(data: view.data, encoding: .utf8)
+                            
+                            let message = Mailgun.Message(from: customer.email,
+                                                          to: "david.canty@icloud.com",
+                                                          subject: "RHS Uniform - Cancel Order",
+                                                          text: "",
+                                                          html: content)
+                            
+                            let mailgun = try req.make(Mailgun.self)
+                            return try mailgun.send(message, on: req)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func getOrderItemDetails(for orderItems: [SUOrderItem], on req: Request) -> EventLoopFuture<[CancelOrderItemDetails]> {
+        
+        return orderItems.compactMap { orderItem in
+            
+            return SUShopItem.find(orderItem.itemID, on: req).flatMap(to: CancelOrderItemDetails.self) { item in
+                
+                return SUSize.find(orderItem.sizeID, on: req).map(to: CancelOrderItemDetails.self) { size in
+                    
+                    let quantity = orderItem.quantity
+                    
+                    let orderItemTotal = item!.itemPrice * Double(quantity)
+                    let formatter = NumberFormatter()
+                    formatter.numberStyle = .currency
+                    formatter.currencySymbol = "£"
+                    let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
+                    
+                    return CancelOrderItemDetails(item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!)
+                }
+            }
+        }.flatten(on: req)
+    }
+
+    func getTotal(forOrder order: SUOrder, on req: Request) throws -> EventLoopFuture<Double> {
+        
+        return try order.orderItems.query(on: req).all().flatMap(to: Double.self) { orderItems in
+            
+            return orderItems.compactMap { orderItem in
+                
+                return SUShopItem.find(orderItem.itemID, on: req).map(to: Double.self) { item in
+                    
+                    return item!.itemPrice * Double(orderItem.quantity)
+                }
+                
+                }.map(to: Double.self, on: req) { orderItemTotals in
+                    
+                    return orderItemTotals.reduce(0.0, +)
+            }
+        }
+    }
+                
     func updateOrderStatusHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrder.self), req.content.decode(OrderStatusData.self)) { order, orderStatusData in
@@ -163,6 +242,21 @@ struct SUOrderController: RouteCollection {
         let customer:  SUCustomer
         let order: SUOrder
         let orderItems: [SUOrderItem]
+    }
+    
+    struct CancelOrderEmailContext: Encodable {
+        let order: SUOrder
+        let customer:  SUCustomer
+        let orderItemDetails: [CancelOrderItemDetails]
+        let itemCount: Int
+        let formattedOrderTotal: String
+    }
+    
+    struct CancelOrderItemDetails: Encodable {
+        let item: SUShopItem
+        let size: SUSize
+        let quantity: Int
+        let formattedTotal: String
     }
     
     struct OrderStatusData: Content {

@@ -4,6 +4,7 @@ import Leaf
 import Authentication
 import S3
 import Stripe
+import Mailgun
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
@@ -11,6 +12,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_SECRET_KEY") }
     guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError, reason: "Failed to get AWS_S3_BUCKET") }
     guard let stripeSecretKey = Environment.get("STRIPE_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get STRIPE_SECRET_KEY") }
+    guard let mailgunAPIKey = Environment.get("MAILGUN_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_API_KEY") }
+    guard let mailgunDomain = Environment.get("MAILGUN_DOMAIN") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_DOMAIN") }
     
     try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
@@ -32,6 +35,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let stripeConfig = StripeConfig(apiKey: stripeSecretKey)
     services.register(stripeConfig)
     try services.register(StripeProvider())
+    
+    let mailgun = Mailgun(apiKey: mailgunAPIKey, domain: mailgunDomain)
+    services.register(mailgun, as: Mailgun.self)
 
     let router = EngineRouter.default()
     try routes(router)
