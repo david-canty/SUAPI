@@ -15,6 +15,7 @@ enum OrderStatus: String {
     case readyForCollection = "Ready for Collection"
     case awaitingPayment = "Awaiting Payment"
     case complete = "Complete"
+    case cancellationRequested = "Cancellation Requested"
     case cancelled = "Cancelled"
 }
 
@@ -97,40 +98,15 @@ struct SUOrderController: RouteCollection {
         }
     }
     
-    func cancelOrderHandler(_ req: Request) throws -> Future<Response> {
+    func cancelOrderHandler(_ req: Request) throws -> Future<SUOrder> {
         
         return try req.parameters.next(SUOrder.self).flatMap { order in
-
-            try flatMap(order.customer.get(on: req), order.orderItems.query(on: req).all()) { customer, orderItems in
-
-                self.getOrderItemDetails(for: orderItems, on: req).flatMap { orderItemDetails in
-                    
-                    try self.getTotal(forOrder: order, on: req).flatMap { orderTotal in
-                        
-                        let formatter = NumberFormatter()
-                        formatter.numberStyle = .currency
-                        formatter.currencySymbol = "£"
-                        let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
-                        
-                        let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
-                        
-                        let context = CancelOrderEmailContext(order: order, customer: customer, orderItemDetails: orderItemDetails, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
-                        
-                        return try req.view().render("Emails/cancelOrderEmail", context).flatMap { view in
-                            
-                            let content = String(data: view.data, encoding: .utf8)
-                            
-                            let message = Mailgun.Message(from: customer.email,
-                                                          to: "david.canty@icloud.com",
-                                                          subject: "RHS Uniform - Cancel Order",
-                                                          text: "",
-                                                          html: content)
-                            
-                            let mailgun = try req.make(Mailgun.self)
-                            return try mailgun.send(message, on: req)
-                        }
-                    }
-                }
+            
+            return try self.sendCancelOrderAdminEmail(forOrder: order, on: req).flatMap { response in
+            
+                order.orderStatus = OrderStatus.cancellationRequested.rawValue
+                order.timestamp = Date()
+                return order.update(on: req)
             }
         }
     }
@@ -171,6 +147,41 @@ struct SUOrderController: RouteCollection {
                 }.map(to: Double.self, on: req) { orderItemTotals in
                     
                     return orderItemTotals.reduce(0.0, +)
+            }
+        }
+    }
+    
+    func sendCancelOrderAdminEmail(forOrder order: SUOrder, on req: Request) throws -> Future<Response> {
+        
+        return try flatMap(order.customer.get(on: req), order.orderItems.query(on: req).all()) { customer, orderItems in
+            
+            self.getOrderItemDetails(for: orderItems, on: req).flatMap { orderItemDetails in
+                
+                try self.getTotal(forOrder: order, on: req).flatMap { orderTotal in
+                    
+                    let formatter = NumberFormatter()
+                    formatter.numberStyle = .currency
+                    formatter.currencySymbol = "£"
+                    let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                    
+                    let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                    
+                    let context = CancelOrderEmailContext(order: order, customer: customer, orderItemDetails: orderItemDetails, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                    
+                    return try req.view().render("Emails/cancelOrderEmail", context).flatMap { view in
+                        
+                        let content = String(data: view.data, encoding: .utf8)
+                        
+                        let message = Mailgun.Message(from: customer.email,
+                                                      to: "david.canty@icloud.com",
+                                                      subject: "RHS Uniform - Cancel Order",
+                                                      text: "",
+                                                      html: content)
+                        
+                        let mailgun = try req.make(Mailgun.self)
+                        return try mailgun.send(message, on: req)
+                    }
+                }
             }
         }
     }

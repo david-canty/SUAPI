@@ -1,7 +1,8 @@
 <html>
     <body>
+        <p>Hi,</p>
         <p>I would like to cancel order no #orderNo(order.id) made on #date(order.orderDate, "d MMM yyyy 'at' HH:mm").</p>
-        <p>Order details:</p>
+        <p><b>Order details:</b></p>
         <table>
             <thead>
                 <tr>
@@ -24,7 +25,8 @@
                 }
             </tbody>
         </table>
-        <p>Order total: #(formattedOrderTotal)</p>
-        <p>Payment method: #(order.paymentMethod)<p>
+        <p><b>Order total: </b>#(formattedOrderTotal)</p>
+        <p><b>Payment method: </b>#(order.paymentMethod)<p>
+        <p>Thank you.</p>
     </body>
 </html>
