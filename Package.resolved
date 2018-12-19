@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "OneSignal",
+        "repositoryURL": "https://github.com/vapor-community/onesignal.git",
+        "state": {
+          "branch": null,
+          "revision": "b4169eea60ab6c311b737d09eb6d0065855c8efb",
+          "version": "1.0.0-alpha.6"
+        }
+      },
+      {
         "package": "Routing",
         "repositoryURL": "https://github.com/vapor/routing.git",
         "state": {

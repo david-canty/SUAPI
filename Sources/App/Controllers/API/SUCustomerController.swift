@@ -10,6 +10,7 @@ struct SUCustomerController: RouteCollection {
 
             // CRUD
             jwtProtectedGroup.post(use: createHandler)
+            jwtProtectedGroup.patch(APNSToken.self, at: SUCustomer.parameter, "apns-token", use: apnsTokenHandler)
             
             // Orders
             jwtProtectedGroup.get(SUCustomer.parameter, "orders", use: getOrdersHandler)
@@ -64,6 +65,16 @@ struct SUCustomerController: RouteCollection {
         }
     }
 
+    func apnsTokenHandler(_ req: Request, content: APNSToken) throws -> Future<SUCustomer> {
+        
+        return try req.parameters.next(SUCustomer.self).flatMap { customer in
+            
+            customer.apnsDeviceToken = content.token
+            customer.timestamp = Date()
+            return customer.update(on: req)
+        }
+    }
+    
     // Orders
     func getOrdersHandler(_ req: Request) throws -> Future<[OrderData]> {
         
@@ -92,5 +103,9 @@ struct SUCustomerController: RouteCollection {
     struct OrderData: Content {
         let order: SUOrder
         let orderItems: [SUOrderItem]
+    }
+    
+    struct APNSToken: Content {
+        let token: String
     }
 }
