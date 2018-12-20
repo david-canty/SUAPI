@@ -2,6 +2,7 @@ import Vapor
 import Fluent
 import Authentication
 import Mailgun
+import OneSignal
 
 enum PaymentMethod: String {
     case bacs = "bacs"
@@ -195,10 +196,43 @@ struct SUOrderController: RouteCollection {
                 order.timestamp = Date()
                 order.orderStatus = orderStatusData.orderStatus
                 
-                return order.update(on: req).transform(to: HTTPStatus.ok)
-            }
+                return order.update(on: req).flatMap { order in
+                    
+                    if order.orderStatus == OrderStatus.cancelled.rawValue {
+                        
+                        return order.customer.get(on: req).flatMap { customer in
+                            
+                            if let apnsToken = customer.apnsDeviceToken {
+                                
+                                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
+                                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+                                
+                                let message = OneSignalMessage("Order cancelled")
+
+                                var notifaction = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+                                
+                                //notifaction.setContentAvailable(true)
+                                
+                                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
+                                
+                                return try OneSignal.makeService(for: req).send(notification: notifaction, toApp: app).transform(to: HTTPStatus.ok)
+                                
+                            } else {
+                                
+                                throw Abort(.badRequest, reason: "Failed to get APNS device token from customer")
+                            }
+                        }
+                        
+                    } else  {
+                    
+                        return req.future(HTTPStatus.ok)
+                    }
+                }
+                
+            } else {
             
-            return req.future(HTTPStatus.ok)
+                return req.future(HTTPStatus.ok)
+            }
         }
     }
     
