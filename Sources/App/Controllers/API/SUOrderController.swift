@@ -207,19 +207,23 @@ struct SUOrderController: RouteCollection {
                                 guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
                                 guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
                                 
-                                let message = OneSignalMessage("Order cancelled")
-
-                                var notifaction = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+                                guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
                                 
-                                //notifaction.setContentAvailable(true)
+                                let paddedOrderId = String(format: "%06d", orderId)
+                                var message = OneSignalMessage("order no \(paddedOrderId) has been cancelled.")
+                                message["orderId"] = String(orderId)
+
+                                let notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+                                
+                                //notification.setContentAvailable(true)
                                 
                                 let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
                                 
-                                return try OneSignal.makeService(for: req).send(notification: notifaction, toApp: app).transform(to: HTTPStatus.ok)
+                                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
                                 
                             } else {
                                 
-                                throw Abort(.badRequest, reason: "Failed to get APNS device token from customer")
+                                return req.future(HTTPStatus.ok)
                             }
                         }
                         
