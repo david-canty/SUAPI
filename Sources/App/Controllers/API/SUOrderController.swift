@@ -211,7 +211,7 @@ struct SUOrderController: RouteCollection {
                                 
                                 let paddedOrderId = String(format: "%06d", orderId)
                                 var message = OneSignalMessage("order no \(paddedOrderId) has been cancelled.")
-                                message["orderId"] = String(orderId)
+                                //message["orderId"] = String(orderId)
 
                                 let notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
                                 
