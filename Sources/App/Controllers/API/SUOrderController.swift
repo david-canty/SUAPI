@@ -223,8 +223,15 @@ struct SUOrderController: RouteCollection {
                                 return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
                                 
                             } else {
+                                let message = Mailgun.Message(from: customer.email,
+                                                              to: "david.canty@icloud.com",
+                                                              subject: "RHS Uniform - Cancel Order",
+                                                              text: "Test",
+                                                              html: "")
                                 
-                                return req.future(HTTPStatus.ok)
+                                let mailgun = try req.make(Mailgun.self)
+                                return try mailgun.send(message, on: req).transform(to: HTTPStatus.ok)
+                                //return req.future(HTTPStatus.ok)
                             }
                         }
                         
