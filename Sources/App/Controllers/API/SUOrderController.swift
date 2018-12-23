@@ -214,9 +214,9 @@ struct SUOrderController: RouteCollection {
                                 
                                 message["orderId"] = String(orderId)
 
-                                var notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+                                let notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
                                 
-                                notification.setContentAvailable(true)
+                                //notification.setContentAvailable(true)
                                 
                                 let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
                                 
