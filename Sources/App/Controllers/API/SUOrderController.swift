@@ -207,12 +207,12 @@ struct SUOrderController: RouteCollection {
                                 guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
                                 guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
                                 
-                                //guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
+                                guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
                                 
-//                                let paddedOrderId = String(format: "%06d", orderId)
-//                                var message = OneSignalMessage("order no \(paddedOrderId) has been cancelled.")
-                                //message["orderId"] = String(orderId)
-                                let message = OneSignalMessage("Order cancelled...")
+                                let paddedOrderId = String(format: "%06d", orderId)
+                                var message = OneSignalMessage("Order no \(paddedOrderId) has been cancelled.")
+                                
+                                message["orderId"] = String(orderId)
 
                                 let notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
                                 
@@ -223,15 +223,8 @@ struct SUOrderController: RouteCollection {
                                 return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
                                 
                             } else {
-                                let message = Mailgun.Message(from: customer.email,
-                                                              to: "david.canty@icloud.com",
-                                                              subject: "RHS Uniform - Cancel Order",
-                                                              text: "Test",
-                                                              html: "")
                                 
-                                let mailgun = try req.make(Mailgun.self)
-                                return try mailgun.send(message, on: req).transform(to: HTTPStatus.ok)
-                                //return req.future(HTTPStatus.ok)
+                                return req.future(HTTPStatus.ok)
                             }
                         }
                         
