@@ -210,13 +210,15 @@ struct SUOrderController: RouteCollection {
                                 guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
                                 
                                 let paddedOrderId = String(format: "%06d", orderId)
-                                var message = OneSignalMessage("Order no \(paddedOrderId) has been cancelled.")
+                                let message = OneSignalMessage("Order no \(paddedOrderId) has been cancelled.")
                                 
-                                message["orderId"] = String(orderId)
+                                //message["orderId"] = String(orderId)
 
-                                let notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+                                var notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
+
+                                notification.addMessage(String(orderId))
                                 
-                                //notification.setContentAvailable(true)
+                                notification.setContentAvailable(true)
                                 
                                 let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
                                 
