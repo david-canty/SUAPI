@@ -15,6 +15,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     guard let mailgunAPIKey = Environment.get("MAILGUN_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_API_KEY") }
     guard let mailgunDomain = Environment.get("MAILGUN_DOMAIN") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_DOMAIN") }
     
+    services.register(NIOServerConfig.default(hostname: "0.0.0.0", port: 8080))
+    
     try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
@@ -53,8 +55,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(SessionsMiddleware.self)
     
     services.register(middlewares)
-    
-    
     
     var databases = DatabasesConfig()
     let databaseConfig: MySQLDatabaseConfig
