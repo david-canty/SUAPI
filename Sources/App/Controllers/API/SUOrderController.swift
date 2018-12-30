@@ -18,6 +18,7 @@ enum OrderStatus: String {
     case complete = "Complete"
     case cancellationRequested = "Cancellation Requested"
     case cancelled = "Cancelled"
+    case returned = "Returned"
 }
 
 struct SUOrderController: RouteCollection {
@@ -191,46 +192,60 @@ struct SUOrderController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrder.self), req.content.decode(OrderStatusData.self)) { order, orderStatusData in
             
-            if order.orderStatus != orderStatusData.orderStatus {
+            guard let newOrderStatus = OrderStatus(rawValue: orderStatusData.orderStatus) else {
+                throw Abort(.badRequest, reason: "Invalid order status")
+            }
+            
+            if order.orderStatus != newOrderStatus.rawValue {
                 
                 order.timestamp = Date()
-                order.orderStatus = orderStatusData.orderStatus
+                order.orderStatus = newOrderStatus.rawValue
                 
                 return order.update(on: req).flatMap { order in
                     
-                    if order.orderStatus == OrderStatus.cancelled.rawValue {
-                        
-                        return order.customer.get(on: req).flatMap { customer in
-                            
-                            if let apnsToken = customer.apnsDeviceToken {
-                                
-                                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
-                                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
-                                
-                                guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
-                                
-                                let paddedOrderId = String(format: "%06d", orderId)
-                                var message = OneSignalMessage("Order no \(paddedOrderId) has been cancelled.")
-                                
-                                message["orderId"] = "123456"
-
-                                var notification = OneSignalNotification(message: message, iosDeviceTokens: [apnsToken])
-                                
-                                notification.setContentAvailable(true)
-                                
-                                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
-                                
-                                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
-                                
-                            } else {
-                                
-                                return req.future(HTTPStatus.ok)
-                            }
-                        }
-                        
-                    } else  {
+                    let paddedOrderId = String(format: "%06d", try order.requireID())
                     
+                    switch newOrderStatus {
+                        
+                    case OrderStatus.ordered:
+                        
                         return req.future(HTTPStatus.ok)
+                        
+                    case OrderStatus.awaitingStock:
+                        
+                        let messageTitle = "Order Awaiting Stock"
+                        let messageBody = "Order no \(paddedOrderId) has been received and is awaiting stock."
+                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        
+                    case OrderStatus.readyForCollection:
+                        
+                        let messageTitle = "Order Ready for Collection"
+                        let messageBody = "Order no \(paddedOrderId) is ready for collection."
+                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        
+                    case OrderStatus.awaitingPayment:
+                        
+                        break
+                        
+                    case OrderStatus.complete:
+                        
+                        break
+                        
+                    case OrderStatus.cancellationRequested:
+                        
+                        break
+                        
+                    case OrderStatus.cancelled:
+                        
+                        let messageTitle = "Order Cancelled"
+                        let messageBody = "Order no \(paddedOrderId) has been cancelled."
+                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        
+                    case OrderStatus.returned:
+                        
+                        let messageTitle = "Order Returned"
+                        let messageBody = "Order no \(paddedOrderId) has been returned."
+                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                     }
                 }
                 
@@ -238,6 +253,36 @@ struct SUOrderController: RouteCollection {
             
                 return req.future(HTTPStatus.ok)
             }
+        }
+    }
+    
+    func sendAPNS(withTitle title: String, body: String, forOrder order: SUOrder, on req: Request) -> Future<HTTPStatus> {
+        
+        return order.customer.get(on: req).flatMap { customer in
+            
+            if let apnsToken = customer.apnsDeviceToken {
+                
+                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
+                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+                
+                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
+                
+                notification.setContentAvailable(true)
+//                guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
+//                message["orderId"] = String(orderId)
+                
+                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
+                
+                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
+                
+            } else {
+                
+                return req.future(HTTPStatus.badRequest)
+            }
+            
+        }.catchFlatMap { error in
+                
+            throw Abort(.internalServerError, reason: "Failed to get customer for order: \(error.localizedDescription)")
         }
     }
     
