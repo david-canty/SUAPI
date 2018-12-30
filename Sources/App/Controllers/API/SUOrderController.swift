@@ -213,39 +213,43 @@ struct SUOrderController: RouteCollection {
                         
                     case OrderStatus.awaitingStock:
                         
-                        let messageTitle = "Order Awaiting Stock"
+                        let messageTitle = "Order - Awaiting Stock"
                         let messageBody = "Order no \(paddedOrderId) has been received and is awaiting stock."
-                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                         
                     case OrderStatus.readyForCollection:
                         
-                        let messageTitle = "Order Ready for Collection"
+                        let messageTitle = "Order - Ready for Collection"
                         let messageBody = "Order no \(paddedOrderId) is ready for collection."
-                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                         
                     case OrderStatus.awaitingPayment:
                         
-                        break
+                        let messageTitle = "Order - Awaiting Payment"
+                        let messageBody = "Order no \(paddedOrderId) is awaiting payment."
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                         
                     case OrderStatus.complete:
                         
-                        break
+                        let messageTitle = "Order - Complete"
+                        let messageBody = "Order no \(paddedOrderId) is complete."
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                         
                     case OrderStatus.cancellationRequested:
                         
-                        break
+                        return req.future(HTTPStatus.ok)
                         
                     case OrderStatus.cancelled:
                         
                         let messageTitle = "Order Cancelled"
                         let messageBody = "Order no \(paddedOrderId) has been cancelled."
-                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                         
                     case OrderStatus.returned:
                         
                         let messageTitle = "Order Returned"
                         let messageBody = "Order no \(paddedOrderId) has been returned."
-                        return self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
                     }
                 }
                 
@@ -256,7 +260,7 @@ struct SUOrderController: RouteCollection {
         }
     }
     
-    func sendAPNS(withTitle title: String, body: String, forOrder order: SUOrder, on req: Request) -> Future<HTTPStatus> {
+    func sendAPNS(withTitle title: String, body: String, forOrder order: SUOrder, on req: Request) throws -> Future<HTTPStatus> {
         
         return order.customer.get(on: req).flatMap { customer in
             
@@ -268,8 +272,7 @@ struct SUOrderController: RouteCollection {
                 var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
                 
                 notification.setContentAvailable(true)
-//                guard let orderId = order.id else { throw Abort(.internalServerError, reason: "Failed to get order id") }
-//                message["orderId"] = String(orderId)
+                //message["orderId"] = String(order.requireID())
                 
                 let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
                 
