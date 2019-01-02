@@ -42,6 +42,9 @@ struct SUOrderController: RouteCollection {
         
         // Order Items
         let orderItemsRoutes = router.grouped("api", "order-items")
+        
+        
+        
         let orderItemsAuthSessionRoutes = orderItemsRoutes.grouped(SUUser.authSessionsMiddleware())
         let orderItemsRedirectProtectedGroup = orderItemsAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
