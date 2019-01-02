@@ -18,6 +18,7 @@ enum OrderStatus: String {
     case complete = "Complete"
     case cancellationRequested = "Cancellation Requested"
     case cancelled = "Cancelled"
+    case returnRequested = "Return Requested"
     case returned = "Returned"
 }
 
@@ -244,6 +245,10 @@ struct SUOrderController: RouteCollection {
                         let messageTitle = "Order Cancelled"
                         let messageBody = "Order no \(paddedOrderId) has been cancelled."
                         return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        
+                    case OrderStatus.returnRequested:
+                        
+                        return req.future(HTTPStatus.ok)
                         
                     case OrderStatus.returned:
                         
