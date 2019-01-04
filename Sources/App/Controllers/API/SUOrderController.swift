@@ -42,8 +42,10 @@ struct SUOrderController: RouteCollection {
         
         // Order Items
         let orderItemsRoutes = router.grouped("api", "order-items")
-        
-        
+        orderItemsRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
+            
+            jwtProtectedGroup.post(OrderItemCancelReturnData.self, at: SUOrderItem.parameter, "cancel-return", use: cancelReturnOrderItemHandler)
+        }
         
         let orderItemsAuthSessionRoutes = orderItemsRoutes.grouped(SUUser.authSessionsMiddleware())
         let orderItemsRedirectProtectedGroup = orderItemsAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
@@ -315,6 +317,51 @@ struct SUOrderController: RouteCollection {
             return orderItem.update(on: req).transform(to: HTTPStatus.ok)
         }
     }
+    
+    func cancelReturnOrderItemHandler(_ req: Request, content: OrderItemCancelReturnData) throws -> Future<SUOrderItem> {
+        
+        return try req.parameters.next(SUOrderItem.self).flatMap { orderItem in
+            
+            let action = content.action
+            let quantity = content.quantity
+            
+            return orderItem.order.get(on: req).flatMap { order in
+                
+                return try self.sendOrderItemCancelReturnAdminEmail(forOrder: order, andOrderItem: orderItem, action: action, quantity: quantity, on: req).flatMap { response in
+                    
+                    orderItem.orderItemStatus = OrderStatus.cancellationRequested.rawValue
+                    return orderItem.update(on: req)
+                }
+            }
+        }
+    }
+    
+    func sendOrderItemCancelReturnAdminEmail(forOrder order: SUOrder, andOrderItem orderItem: SUOrderItem, action: String, quantity: Int, on req: Request) throws -> Future<Response> {
+        
+        return order.customer.get(on: req).flatMap { customer in
+            
+            self.getOrderItemDetails(for: [orderItem], on: req).flatMap { orderItemDetails in
+                
+                let context = OrderItemCancelReturnEmailContext(action: action, order: order, customer: customer, orderItemDetails: orderItemDetails)
+                
+                return try req.view().render("Emails/cancelReturnOrderItemEmail", context).flatMap { view in
+                    
+                    let content = String(data: view.data, encoding: .utf8)
+                    
+                    let subject = "RHS Uniform - " + action.capitalized + " Order Item"
+                    
+                    let message = Mailgun.Message(from: customer.email,
+                                                  to: "david.canty@icloud.com",
+                                                  subject: subject,
+                                                  text: "",
+                                                  html: content)
+                    
+                    let mailgun = try req.make(Mailgun.self)
+                    return try mailgun.send(message, on: req)
+                }
+            }
+        }
+    }
 
     func deleteOrderItemHandler(_ req: Request) throws -> Future<[SUOrderItem]> {
 
@@ -371,5 +418,17 @@ struct SUOrderController: RouteCollection {
     
     struct OrderItemQuantityData: Content {
         let quantity: Int
+    }
+    
+    struct OrderItemCancelReturnData: Content {
+        let action: String
+        let quantity: Int
+    }
+    
+    struct OrderItemCancelReturnEmailContext: Encodable {
+        let action: String
+        let order: SUOrder
+        let customer:  SUCustomer
+        let orderItemDetails: [CancelOrderItemDetails]
     }
 }
