@@ -362,6 +362,24 @@ struct SUOrderController: RouteCollection {
             }
         }
     }
+    
+    func getCancelReturnDetails(for orderItem: SUOrderItem, qty: Int, on req: Request) -> EventLoopFuture<CancelReturnOrderItemDetails> {
+        
+        return map(SUShopItem.find(orderItem.itemID, on: req), SUSize.find(orderItem.sizeID, on: req)) { item, size in
+            
+            guard let itemPrice = item?.itemPrice else { throw Abort(.internalServerError, reason: "Failed to get item price") }
+            
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .currency
+            formatter.currencySymbol = "£"
+         
+            let formattedItemPrice = formatter.string(from: itemPrice as NSNumber)
+            let itemTotal = itemPrice * Double(qty)
+            let formattedItemTotal = formatter.string(from: itemTotal as NSNumber)
+            
+            return CancelReturnOrderItemDetails(name: item!.itemName, size: size!.sizeName, price: formattedItemPrice!, quantity: qty, total: formattedItemTotal!)
+        }
+    }
 
     func deleteOrderItemHandler(_ req: Request) throws -> Future<[SUOrderItem]> {
 
@@ -429,6 +447,14 @@ struct SUOrderController: RouteCollection {
         let action: String
         let order: SUOrder
         let customer:  SUCustomer
-        let orderItemDetails: [CancelOrderItemDetails]
+        let orderItemDetails: CancelOrderItemDetails
+    }
+    
+    struct CancelReturnOrderItemDetails: Encodable {
+        let name: String
+        let size: String
+        let price: String
+        let quantity: Int
+        let total: String
     }
 }

@@ -2,14 +2,14 @@
     <body>
         <p>Hi,</p>
         <p>I would like to #(action) the following #if(count(orderItemDetails) == 1) { item } else { items } from order no #orderNo(order.id) made on #date(order.orderDate, "d MMM yyyy 'at' HH:mm").</p>
-        <p><b>Item details:</b></p>
+        <p><b>#if(count(orderItemDetails) == 1) { Item } else { Items } to #(action):</b></p>
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
+                    <th>Name</th>
                     <th>Size</th>
                     <th>Price</th>
-                    <th>Quantity to #(action)</th>
+                    <th>Qty</th>
                     <th>Total</th>
                 </tr>
             </thead>
@@ -25,7 +25,7 @@
                 }
             </tbody>
         </table>
-        <p><b>Item total: </b>#(formattedItemTotal)</p>
+        <p><b>Total to #(action): </b>#(formattedItemTotal)</p>
         <p><b>Payment method: </b>#(order.paymentMethod)<p>
         <p>Thank you.</p>
     </body>
