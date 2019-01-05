@@ -340,7 +340,7 @@ struct SUOrderController: RouteCollection {
         
         return order.customer.get(on: req).flatMap { customer in
             
-            self.getOrderItemDetails(for: [orderItem], on: req).flatMap { orderItemDetails in
+            self.getCancelReturnDetails(for: orderItem, qty: quantity, on: req).flatMap { orderItemDetails in
                 
                 let context = OrderItemCancelReturnEmailContext(action: action, order: order, customer: customer, orderItemDetails: orderItemDetails)
                 
@@ -367,17 +367,18 @@ struct SUOrderController: RouteCollection {
         
         return map(SUShopItem.find(orderItem.itemID, on: req), SUSize.find(orderItem.sizeID, on: req)) { item, size in
             
-            guard let itemPrice = item?.itemPrice else { throw Abort(.internalServerError, reason: "Failed to get item price") }
+            guard let item = item else { throw Abort(.internalServerError, reason: "Failed to get item") }
+            guard let size = size else { throw Abort(.internalServerError, reason: "Failed to get size") }
             
             let formatter = NumberFormatter()
             formatter.numberStyle = .currency
             formatter.currencySymbol = "£"
          
-            let formattedItemPrice = formatter.string(from: itemPrice as NSNumber)
-            let itemTotal = itemPrice * Double(qty)
+            let formattedItemPrice = formatter.string(from: item.itemPrice as NSNumber)
+            let itemTotal = item.itemPrice * Double(qty)
             let formattedItemTotal = formatter.string(from: itemTotal as NSNumber)
             
-            return CancelReturnOrderItemDetails(name: item!.itemName, size: size!.sizeName, price: formattedItemPrice!, quantity: qty, total: formattedItemTotal!)
+            return CancelReturnOrderItemDetails(name: item.itemName, size: size.sizeName, price: formattedItemPrice!, quantity: qty, total: formattedItemTotal!)
         }
     }
 
@@ -447,7 +448,7 @@ struct SUOrderController: RouteCollection {
         let action: String
         let order: SUOrder
         let customer:  SUCustomer
-        let orderItemDetails: CancelOrderItemDetails
+        let orderItemDetails: CancelReturnOrderItemDetails
     }
     
     struct CancelReturnOrderItemDetails: Encodable {
