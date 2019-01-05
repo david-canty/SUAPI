@@ -22,6 +22,11 @@ enum OrderStatus: String {
     case returned = "Returned"
 }
 
+enum CancelReturnItem: String {
+    case cancelItem = "cancel"
+    case returnItem = "return"
+}
+
 struct SUOrderController: RouteCollection {
 
     func boot(router: Router) throws {
@@ -322,14 +327,21 @@ struct SUOrderController: RouteCollection {
         
         return try req.parameters.next(SUOrderItem.self).flatMap { orderItem in
             
-            let action = content.action
+            guard let cancelReturnItem = CancelReturnItem(rawValue: content.action) else { throw Abort(.badRequest, reason: "Invalid cancel return item type") }
+            
             let quantity = content.quantity
             
             return orderItem.order.get(on: req).flatMap { order in
                 
-                return try self.sendOrderItemCancelReturnAdminEmail(forOrder: order, andOrderItem: orderItem, action: action, quantity: quantity, on: req).flatMap { response in
+                return try self.sendOrderItemCancelReturnAdminEmail(forOrder: order, andOrderItem: orderItem, action: cancelReturnItem.rawValue, quantity: quantity, on: req).flatMap { response in
                     
-                    orderItem.orderItemStatus = OrderStatus.cancellationRequested.rawValue
+                    switch cancelReturnItem {
+                    case .cancelItem:
+                        orderItem.orderItemStatus = OrderStatus.cancellationRequested.rawValue
+                    case .returnItem:
+                        orderItem.orderItemStatus = OrderStatus.returnRequested.rawValue
+                    }
+                    
                     return orderItem.update(on: req)
                 }
             }
