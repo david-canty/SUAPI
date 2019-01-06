@@ -96,7 +96,7 @@ struct SUOrderController: RouteCollection {
                             
                             let quantity = orderItemData.quantity
                             
-                            let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity)
+                            let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity, orderItemStatus: OrderStatus.ordered.rawValue)
                             
                             orderItemSaveResults.append(orderItem.save(on: conn))
                         }
@@ -323,7 +323,7 @@ struct SUOrderController: RouteCollection {
         }
     }
     
-    func cancelReturnOrderItemHandler(_ req: Request, content: OrderItemCancelReturnData) throws -> Future<SUOrderItem> {
+    func cancelReturnOrderItemHandler(_ req: Request, content: OrderItemCancelReturnData) throws -> Future<OrderItemCancelReturnResponse> {
         
         return try req.parameters.next(SUOrderItem.self).flatMap { orderItem in
             
@@ -342,7 +342,18 @@ struct SUOrderController: RouteCollection {
                         orderItem.orderItemStatus = OrderStatus.returnRequested.rawValue
                     }
                     
-                    return orderItem.update(on: req)
+                    let orderItemAction = try SUOrderItemAction(orderItemID: orderItem.requireID(), action: cancelReturnItem.rawValue, quantity: quantity)
+                    
+                    return req.transaction(on: .mysql) { conn in
+                     
+                        return orderItemAction.save(on: conn).flatMap { orderItemAction in
+                            
+                            return orderItem.update(on: conn).map(to: OrderItemCancelReturnResponse.self) { orderItem in
+                                
+                                return OrderItemCancelReturnResponse(orderItem: orderItem, orderItemAction: orderItemAction)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -454,6 +465,11 @@ struct SUOrderController: RouteCollection {
     struct OrderItemCancelReturnData: Content {
         let action: String
         let quantity: Int
+    }
+    
+    struct OrderItemCancelReturnResponse: Content {
+        let orderItem: SUOrderItem
+        let orderItemAction: SUOrderItemAction
     }
     
     struct OrderItemCancelReturnEmailContext: Encodable {

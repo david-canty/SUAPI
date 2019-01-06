@@ -102,6 +102,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: SUCustomer.self, database: .mysql)
     migrations.add(model: SUOrder.self, database: .mysql)
     migrations.add(model: SUOrderItem.self, database: .mysql)
+    migrations.add(model: SUOrderItemAction.self, database: .mysql)
     migrations.add(migration: AdminUser.self, database: .mysql)
     migrations.prepareCache(for: .mysql)
     services.register(migrations)

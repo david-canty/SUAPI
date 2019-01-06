@@ -9,13 +9,13 @@ final class SUOrderItem: Codable {
     var itemID: SUShopItem.ID
     var sizeID: SUSize.ID
     var quantity: Int
-    var orderItemStatus: String?
+    var orderItemStatus: String
     
     init(orderID: SUOrder.ID,
          itemID: SUShopItem.ID,
          sizeID: SUSize.ID,
          quantity: Int,
-         orderItemStatus: String? = nil) {
+         orderItemStatus: String) {
         
         self.orderID = orderID
         self.itemID = itemID
