@@ -78,19 +78,33 @@ struct SUCustomerController: RouteCollection {
     // Orders
     func getOrdersHandler(_ req: Request) throws -> Future<[OrderData]> {
         
-        return try req.parameters.next(SUCustomer.self).flatMap(to: [OrderData].self) { customer in
+        return try req.parameters.next(SUCustomer.self).flatMap { customer in
             
-            return try customer.orders.query(on: req).all().flatMap(to: [OrderData].self) { orders in
+            try customer.orders.query(on: req).all().flatMap { orders in
              
-                return try orders.compactMap { order in
-                    
-                    return try order.orderItems.query(on: req).all().map(to: OrderData.self) { orderItems in
+                try orders.compactMap { order in
                         
-                        return OrderData(order: order, orderItems: orderItems)
+                    try self.getOrderItemsAndActionsFor(order: order, on: req).map { orderItemsWithActions in
+                        
+                        return OrderData(order: order, orderItemsWithActions: orderItemsWithActions)
                     }
     
                 }.flatten(on: req)
             }
+        }
+    }
+    
+    func getOrderItemsAndActionsFor(order: SUOrder, on req: Request) throws -> Future<[OrderItemWithAction]> {
+        
+        return try order.orderItems.query(on: req).all().flatMap { orderItems in
+            
+            return try orderItems.compactMap { orderItem in
+                
+                try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().map { action in
+                    
+                    return OrderItemWithAction(orderItem: orderItem, orderItemAction: action)
+                }
+            }.flatten(on: req)
         }
     }
     
@@ -102,7 +116,12 @@ struct SUCustomerController: RouteCollection {
     
     struct OrderData: Content {
         let order: SUOrder
-        let orderItems: [SUOrderItem]
+        let orderItemsWithActions: [OrderItemWithAction]
+    }
+    
+    struct OrderItemWithAction: Content {
+        let orderItem: SUOrderItem
+        let orderItemAction: SUOrderItemAction?
     }
     
     struct APNSToken: Content {

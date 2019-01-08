@@ -348,9 +348,9 @@ struct SUOrderController: RouteCollection {
                      
                         return orderItemAction.save(on: conn).flatMap { orderItemAction in
                             
-                            return orderItem.update(on: conn).map(to: OrderItemCancelReturnResponse.self) { orderItem in
+                            return orderItem.update(on: conn).map(to: OrderItemCancelReturnResponse.self) { updatedOrderItem in
                                 
-                                return OrderItemCancelReturnResponse(orderItem: orderItem, orderItemAction: orderItemAction)
+                                return OrderItemCancelReturnResponse(orderItem: updatedOrderItem, orderItemAction: orderItemAction)
                             }
                         }
                     }
