@@ -341,8 +341,23 @@ struct SUOrderController: RouteCollection {
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrderItem.self), req.content.decode(OrderItemQuantityData.self)) { orderItem, orderItemQuantityData in
             
             orderItem.quantity = orderItemQuantityData.quantity
+            return orderItem.update(on: req).flatMap { orderItem in
+                
+                return try self.deleteAction(forOrderItem: orderItem, on: req)
+            }
+        }
+    }
+    
+    func deleteAction(forOrderItem orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
+        
+        return try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().flatMap { action in
             
-            return orderItem.update(on: req).transform(to: HTTPStatus.ok)
+            if let action = action {
+                
+                return action.delete(on: req).transform(to: HTTPStatus.ok)
+            }
+            
+            return req.future(HTTPStatus.ok)
         }
     }
     
