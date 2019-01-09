@@ -252,9 +252,12 @@ struct SUOrderController: RouteCollection {
                         
                     case OrderStatus.cancelled:
                         
-                        let messageTitle = "Order Cancelled"
-                        let messageBody = "Order no \(paddedOrderId) has been cancelled."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
+                            
+                            let messageTitle = "Order Cancelled"
+                            let messageBody = "Order no \(paddedOrderId) has been cancelled."
+                            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        }
                         
                     case OrderStatus.returnRequested:
                         
@@ -262,9 +265,12 @@ struct SUOrderController: RouteCollection {
                         
                     case OrderStatus.returned:
                         
-                        let messageTitle = "Order Returned"
-                        let messageBody = "Order no \(paddedOrderId) has been returned."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
+                            
+                            let messageTitle = "Order Returned"
+                            let messageBody = "Order no \(paddedOrderId) has been returned."
+                            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+                        }
                     }
                 }
                 
@@ -309,6 +315,23 @@ struct SUOrderController: RouteCollection {
         return try req.parameters.next(SUOrder.self).flatMap(to: HTTPStatus.self) { order in
             
             return order.delete(on: req).transform(to: HTTPStatus.noContent)
+        }
+    }
+    
+    func deleteOrderItemActions(forOrder order: SUOrder, on req: Request) throws -> Future<HTTPStatus> {
+        
+        return try order.orderItems.query(on: req).all().flatMap { orderItems in
+            
+            try orderItems.map { orderItem in
+                
+                try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).all().map { actions in
+                    
+                    actions.map { action in
+                        
+                        return action.delete(on: req)
+                    }
+                }
+            }.flatten(on: req).transform(to: HTTPStatus.ok)
         }
     }
     
