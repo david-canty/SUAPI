@@ -214,69 +214,115 @@ struct SUOrderController: RouteCollection {
                 
                 return order.update(on: req).flatMap { order in
                     
-                    let paddedOrderId = String(format: "%06d", try order.requireID())
                     
-                    switch newOrderStatus {
-                        
-                    case OrderStatus.ordered:
-                        
-                        return req.future(HTTPStatus.ok)
-                        
-                    case OrderStatus.awaitingStock:
-                        
-                        let messageTitle = "Order - Awaiting Stock"
-                        let messageBody = "Order no \(paddedOrderId) has been received and is awaiting stock."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        
-                    case OrderStatus.readyForCollection:
-                        
-                        let messageTitle = "Order - Ready for Collection"
-                        let messageBody = "Order no \(paddedOrderId) is ready for collection."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        
-                    case OrderStatus.awaitingPayment:
-                        
-                        let messageTitle = "Order - Awaiting Payment"
-                        let messageBody = "Order no \(paddedOrderId) is awaiting payment."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        
-                    case OrderStatus.complete:
-                        
-                        let messageTitle = "Order - Complete"
-                        let messageBody = "Order no \(paddedOrderId) is complete."
-                        return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        
-                    case OrderStatus.cancellationRequested:
-                        
-                        return req.future(HTTPStatus.ok)
-                        
-                    case OrderStatus.cancelled:
-                        
-                        return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
-                            
-                            let messageTitle = "Order Cancelled"
-                            let messageBody = "Order no \(paddedOrderId) has been cancelled."
-                            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        }
-                        
-                    case OrderStatus.returnRequested:
-                        
-                        return req.future(HTTPStatus.ok)
-                        
-                    case OrderStatus.returned:
-                        
-                        return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
-                            
-                            let messageTitle = "Order Returned"
-                            let messageBody = "Order no \(paddedOrderId) has been returned."
-                            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
-                        }
-                    }
+                    
+                    return try self.sendAPNSFor(order: order, on: req)
                 }
                 
             } else {
             
                 return req.future(HTTPStatus.ok)
+            }
+        }
+    }
+    
+    func updateOrderItems(forOrder order: SUOrder, withStatus status: String, on req: Request) throws -> Future<HTTPStatus> {
+    
+        guard let orderItemStatus = OrderStatus(rawValue: status) else {
+            throw Abort(.badRequest, reason: "Invalid order status")
+        }
+        
+        return order.orderItems.query(on: req).all().flatMap { orderItems in
+            
+            
+        }
+    }
+    
+    func update(orderItems: [SUOrderItem], withStatus status: String, on req: Request) throws -> Future<HTTPStatus> {
+        
+        guard let orderItemStatus = OrderStatus(rawValue: status) else {
+            throw Abort(.badRequest, reason: "Invalid order status")
+        }
+        
+        return try orderItems.map { orderItem in
+            
+            return try self.update(orderItem: orderItem, withStatus: orderItemStatus.rawValue, on: req)
+            
+        }.flatten(on: req).transform(to: HTTPStatus.ok)
+    }
+    
+    func update(orderItem: SUOrderItem, withStatus status: String, on req: Request) throws -> Future<HTTPStatus> {
+    
+        guard let orderItemStatus = OrderStatus(rawValue: status) else {
+            throw Abort(.badRequest, reason: "Invalid order status")
+        }
+        
+        orderItem.orderItemStatus =  orderItemStatus.rawValue
+        return orderItem.update(on: req).transform(to: HTTPStatus.ok)
+    }
+    
+    func sendAPNSFor(order: SUOrder, on req: Request) throws -> Future<HTTPStatus> {
+        
+        guard let orderStatus = OrderStatus(rawValue: order.orderStatus) else {
+            throw Abort(.badRequest, reason: "Invalid order status")
+        }
+        
+        let paddedOrderId = String(format: "%06d", try order.requireID())
+        
+        switch orderStatus {
+            
+        case OrderStatus.ordered:
+            
+            return req.future(HTTPStatus.ok)
+            
+        case OrderStatus.awaitingStock:
+            
+            let messageTitle = "Order - Awaiting Stock"
+            let messageBody = "Order no \(paddedOrderId) has been received and is awaiting stock."
+            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+            
+        case OrderStatus.readyForCollection:
+            
+            let messageTitle = "Order - Ready for Collection"
+            let messageBody = "Order no \(paddedOrderId) is ready for collection."
+            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+            
+        case OrderStatus.awaitingPayment:
+            
+            let messageTitle = "Order - Awaiting Payment"
+            let messageBody = "Order no \(paddedOrderId) is awaiting payment."
+            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+            
+        case OrderStatus.complete:
+            
+            let messageTitle = "Order - Complete"
+            let messageBody = "Order no \(paddedOrderId) is complete."
+            return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+            
+        case OrderStatus.cancellationRequested:
+            
+            return req.future(HTTPStatus.ok)
+            
+        case OrderStatus.cancelled:
+            
+            return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
+                
+                let messageTitle = "Order Cancelled"
+                let messageBody = "Order no \(paddedOrderId) has been cancelled."
+                return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
+            }
+            
+        case OrderStatus.returnRequested:
+            
+            return req.future(HTTPStatus.ok)
+            
+        case OrderStatus.returned:
+            
+            return try self.deleteOrderItemActions(forOrder: order, on: req).flatMap { _ in
+                
+                let messageTitle = "Order Returned"
+                let messageBody = "Order no \(paddedOrderId) has been returned."
+                return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, on: req)
             }
         }
     }
@@ -324,13 +370,20 @@ struct SUOrderController: RouteCollection {
             
             try orderItems.map { orderItem in
                 
-                try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).all().map { actions in
-                    
-                    actions.map { action in
-                        
-                        return action.delete(on: req)
-                    }
-                }
+                return try self.deleteAction(forOrderItem: orderItem, on: req)
+                
+            }.flatten(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
+    
+    func deleteAction(forOrderItem orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
+        
+        return try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).all().flatMap { actions in
+            
+            actions.map { action in
+                
+                return action.delete(on: req)
+                
             }.flatten(on: req).transform(to: HTTPStatus.ok)
         }
     }
@@ -345,19 +398,6 @@ struct SUOrderController: RouteCollection {
                 
                 return try self.deleteAction(forOrderItem: orderItem, on: req)
             }
-        }
-    }
-    
-    func deleteAction(forOrderItem orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
-        
-        return try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().flatMap { action in
-            
-            if let action = action {
-                
-                return action.delete(on: req).transform(to: HTTPStatus.ok)
-            }
-            
-            return req.future(HTTPStatus.ok)
         }
     }
     
