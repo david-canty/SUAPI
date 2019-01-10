@@ -834,14 +834,14 @@ $(document).ready(function() {
                 
                 case "Inactive":
                 
-                modalTitle = "Item Inactive"
-                modalBody = "This item is inactive."
+                    modalTitle = "Item Inactive"
+                    modalBody = "This item is inactive."
                     break;
                 
                 case "No Longer Available":
                 
-                modalTitle = "Item Active"
-                modalBody = "This item is no longer available."
+                    modalTitle = "Item No Longer Available"
+                    modalBody = "This item is no longer available."
                     break;
                 
                 default:

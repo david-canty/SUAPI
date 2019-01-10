@@ -46,7 +46,7 @@ struct SUShopItemController: RouteCollection {
         redirectProtectedGroup.patch(SUShopItem.parameter, "stock", use: updateStockHandler)
         
         // Status
-        redirectProtectedGroup.patch(SUShopItem.parameter, "status", use: updateStatusHandler)
+        redirectProtectedGroup.patch(SUShopItemStatusData.self, at: SUShopItem.parameter, "status", use: updateStatusHandler)
         
         // Images
         redirectProtectedGroup.post(SUShopItem.parameter, "images", use: uploadImagesHandler)
@@ -368,9 +368,9 @@ struct SUShopItemController: RouteCollection {
     }
     
     // Status
-    func updateStatusHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    func updateStatusHandler(_ req: Request, itemStatusData: SUShopItemStatusData) throws -> Future<HTTPStatus> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.content.decode(SUShopItemStatusData.self)) { item, itemStatusData in
+        return try req.parameters.next(SUShopItem.self).flatMap { item in
             
             guard let itemStatus = ShopItemStatus.init(rawValue: itemStatusData.itemStatus) else {
                 throw Abort(.badRequest, reason: "Invalid item status")
