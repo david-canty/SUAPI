@@ -79,6 +79,7 @@ struct SUOrderAdminController: RouteCollection {
                         return SUSize.find(orderItem.sizeID, on: req).map(to: OrderItemDetails.self) { size in
                             
                             let quantity = orderItem.quantity
+                            let status = orderItem.orderItemStatus
                             
                             let orderItemTotal = item!.itemPrice * Double(quantity)
                             let formatter = NumberFormatter()
@@ -86,7 +87,7 @@ struct SUOrderAdminController: RouteCollection {
                             formatter.currencySymbol = "£"
                             let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
                             
-                            return OrderItemDetails(id: orderItem.id!, item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!)
+                            return OrderItemDetails(id: orderItem.id!, item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!, status: status)
                         }
                     }
                 }.flatten(on: req).flatMap(to: View.self) { orderItems in
@@ -150,5 +151,6 @@ struct SUOrderAdminController: RouteCollection {
         let size: SUSize
         let quantity: Int
         let formattedTotal: String
+        let status: String
     }
 }

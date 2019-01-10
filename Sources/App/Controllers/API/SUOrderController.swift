@@ -42,7 +42,7 @@ struct SUOrderController: RouteCollection {
         let ordersAuthSessionRoutes = ordersRoutes.grouped(SUUser.authSessionsMiddleware())
         let ordersRedirectProtectedGroup = ordersAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
-        ordersRedirectProtectedGroup.patch(SUOrder.parameter, "status", use: updateOrderStatusHandler)
+        ordersRedirectProtectedGroup.patch(OrderStatusData.self, at: SUOrder.parameter, "status", use: updateOrderStatusHandler)
         ordersRedirectProtectedGroup.delete(SUOrder.parameter, use: deleteOrderHandler)
         
         // Order Items
@@ -199,24 +199,30 @@ struct SUOrderController: RouteCollection {
         }
     }
                 
-    func updateOrderStatusHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    func updateOrderStatusHandler(_ req: Request, orderStatusData: OrderStatusData) throws -> Future<HTTPStatus> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrder.self), req.content.decode(OrderStatusData.self)) { order, orderStatusData in
+        return try req.parameters.next(SUOrder.self).flatMap { order in
             
             guard let newOrderStatus = OrderStatus(rawValue: orderStatusData.orderStatus) else {
                 throw Abort(.badRequest, reason: "Invalid order status")
             }
             
-            if order.orderStatus != newOrderStatus.rawValue {
+            let orderStatus = newOrderStatus.rawValue
+            
+            if order.orderStatus != orderStatus {
                 
                 order.timestamp = Date()
-                order.orderStatus = newOrderStatus.rawValue
+                order.orderStatus = orderStatus
                 
-                return order.update(on: req).flatMap { order in
+                return order.update(on: req).flatMap { updatedOrder in
                     
+                    try self.updateOrderItems(forOrder: updatedOrder, withStatus: orderStatus, on: req).flatMap { _ in
+                     
+                        try self.deleteOrderItemActions(forOrder: updatedOrder, on: req).flatMap { _ in
                     
-                    
-                    return try self.sendAPNSFor(order: order, on: req)
+                            return try self.sendAPNSFor(order: updatedOrder, on: req)
+                        }
+                    }
                 }
                 
             } else {
@@ -232,33 +238,15 @@ struct SUOrderController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid order status")
         }
         
-        return order.orderItems.query(on: req).all().flatMap { orderItems in
+        return try order.orderItems.query(on: req).all().flatMap { orderItems in
             
-            
+            return orderItems.map { orderItem -> EventLoopFuture<SUOrderItem> in
+                
+                orderItem.orderItemStatus =  orderItemStatus.rawValue
+                return orderItem.update(on: req)
+                
+            }.flatten(on: req).transform(to: HTTPStatus.ok)
         }
-    }
-    
-    func update(orderItems: [SUOrderItem], withStatus status: String, on req: Request) throws -> Future<HTTPStatus> {
-        
-        guard let orderItemStatus = OrderStatus(rawValue: status) else {
-            throw Abort(.badRequest, reason: "Invalid order status")
-        }
-        
-        return try orderItems.map { orderItem in
-            
-            return try self.update(orderItem: orderItem, withStatus: orderItemStatus.rawValue, on: req)
-            
-        }.flatten(on: req).transform(to: HTTPStatus.ok)
-    }
-    
-    func update(orderItem: SUOrderItem, withStatus status: String, on req: Request) throws -> Future<HTTPStatus> {
-    
-        guard let orderItemStatus = OrderStatus(rawValue: status) else {
-            throw Abort(.badRequest, reason: "Invalid order status")
-        }
-        
-        orderItem.orderItemStatus =  orderItemStatus.rawValue
-        return orderItem.update(on: req).transform(to: HTTPStatus.ok)
     }
     
     func sendAPNSFor(order: SUOrder, on req: Request) throws -> Future<HTTPStatus> {
