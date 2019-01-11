@@ -822,36 +822,36 @@ $(document).ready(function() {
         contentType: "application/json",
         success: function(response) {
             
-            var modalTitle = ""
-            
-            switch(itemStatus) {
-                
-                case "Active":
-                
-                    modalTitle = "Item Active"
-                    modalBody = "This item is active."
-                    break;
-                
-                case "Inactive":
-                
-                    modalTitle = "Item Inactive"
-                    modalBody = "This item is inactive."
-                    break;
-                
-                case "No Longer Available":
-                
-                    modalTitle = "Item No Longer Available"
-                    modalBody = "This item is no longer available."
-                    break;
-                
-                default:
-                    break;
-            }
-                
-            var confirmationModal = $('#confirmation-modal');
-            confirmationModal.find('.modal-title').text(modalTitle);
-            confirmationModal.find('.modal-body p').html(modalBody);
-            confirmationModal.modal('show');
+//            var modalTitle = ""
+//
+//            switch(itemStatus) {
+//
+//                case "Active":
+//                
+//                    modalTitle = "Item Active"
+//                    modalBody = "This item is active."
+//                    break;
+//
+//                case "Inactive":
+//
+//                    modalTitle = "Item Inactive"
+//                    modalBody = "This item is inactive."
+//                    break;
+//
+//                case "No Longer Available":
+//
+//                    modalTitle = "Item No Longer Available"
+//                    modalBody = "This item is no longer available."
+//                    break;
+//
+//                default:
+//                    break;
+//            }
+//
+//            var confirmationModal = $('#confirmation-modal');
+//            confirmationModal.find('.modal-title').text(modalTitle);
+//            confirmationModal.find('.modal-body p').html(modalBody);
+//            confirmationModal.modal('show');
             
         }}).fail(function(xhr, ajaxOptions, thrownError) {
             
