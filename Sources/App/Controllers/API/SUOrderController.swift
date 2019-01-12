@@ -324,10 +324,12 @@ struct SUOrderController: RouteCollection {
                 guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
                 guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
                 
+                let orderId = try order.requireID()
+            
                 var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
                 
+                notification.additionalData(key: "orderId", value: String(orderId))
                 notification.setContentAvailable(true)
-                //message["orderId"] = String(order.requireID())
                 
                 let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
                 
