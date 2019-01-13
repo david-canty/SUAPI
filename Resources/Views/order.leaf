@@ -127,7 +127,7 @@
                             <td class="text-center">#(orderItem.size.sizeName)</td>
                             <td class="text-center">#(orderItem.quantity)</td>
                             <td class="text-center">#(orderItem.formattedTotal)</td>
-                            <td class="text-center">#(orderItem.status)</td>
+                            <td class="text-center">#if(orderItem.status == "Cancellation Requested") { Cancel requested: #(orderItem.action.quantity) } else if (orderItem.status == "Return Requested") { Return requested: #(orderItem.action.quantity) } else { #(orderItem.status) }</td>
                             <td class="text-center">
                                 #if(order.orderStatus == "Cancelled" || order.orderStatus == "Returned") { - } else {
                                 <div class="dropdown">

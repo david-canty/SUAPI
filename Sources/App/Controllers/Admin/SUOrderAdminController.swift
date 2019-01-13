@@ -68,31 +68,34 @@ struct SUOrderAdminController: RouteCollection {
     
     func orderDetailsHandler(_ req: Request) throws -> Future<View> {
         
-        return try req.parameters.next(SUOrder.self).flatMap(to: View.self) { order in
+        return try req.parameters.next(SUOrder.self).flatMap { order in
             
-            return try order.orderItems.query(on: req).all().flatMap(to: View.self) { orderItems in
+            try order.orderItems.query(on: req).all().flatMap { orderItems in
                 
-                return orderItems.compactMap { orderItem in
+                orderItems.compactMap { orderItem in
                     
-                    return SUShopItem.find(orderItem.itemID, on: req).flatMap(to: OrderItemDetails.self) { item in
+                    SUShopItem.find(orderItem.itemID, on: req).flatMap { item in
                         
-                        return SUSize.find(orderItem.sizeID, on: req).map(to: OrderItemDetails.self) { size in
+                        SUSize.find(orderItem.sizeID, on: req).flatMap(to: OrderItemDetails.self) { size in
                             
-                            let quantity = orderItem.quantity
-                            let status = orderItem.orderItemStatus
-                            
-                            let orderItemTotal = item!.itemPrice * Double(quantity)
-                            let formatter = NumberFormatter()
-                            formatter.numberStyle = .currency
-                            formatter.currencySymbol = "£"
-                            let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
-                            
-                            return OrderItemDetails(id: orderItem.id!, item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!, status: status)
+                            try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().map { action in
+                                
+                                let quantity = orderItem.quantity
+                                let status = orderItem.orderItemStatus
+                                
+                                let orderItemTotal = item!.itemPrice * Double(quantity)
+                                let formatter = NumberFormatter()
+                                formatter.numberStyle = .currency
+                                formatter.currencySymbol = "£"
+                                let formattedTotal = formatter.string(from: orderItemTotal as NSNumber)
+                                
+                                return OrderItemDetails(id: orderItem.id!, item: item!, size: size!, quantity: quantity, formattedTotal: formattedTotal!, status: status, action: action)
+                            }
                         }
                     }
-                }.flatten(on: req).flatMap(to: View.self) { orderItems in
+                }.flatten(on: req).flatMap { orderItems in
                     
-                    return try self.getTotal(forOrder: order, on: req).flatMap(to: View.self) { orderTotal in
+                    return try self.getTotal(forOrder: order, on: req).flatMap { orderTotal in
                         
                         let user = try req.requireAuthenticated(SUUser.self)
                         let customer = order.customer.get(on: req)
@@ -152,5 +155,6 @@ struct SUOrderAdminController: RouteCollection {
         let quantity: Int
         let formattedTotal: String
         let status: String
+        let action: SUOrderItemAction?
     }
 }

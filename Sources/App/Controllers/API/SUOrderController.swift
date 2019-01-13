@@ -404,11 +404,87 @@ struct SUOrderController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrderItem.self), req.content.decode(OrderItemQuantityData.self)) { orderItem, orderItemQuantityData in
             
-            orderItem.quantity = orderItemQuantityData.quantity
-            return orderItem.update(on: req).flatMap { orderItem in
+            orderItem.order.get(on: req).flatMap { order in
                 
-                return try self.deleteAction(forOrderItem: orderItem, on: req)
+                orderItem.quantity = orderItemQuantityData.quantity
+                orderItem.orderItemStatus = order.orderStatus
+                
+                return orderItem.update(on: req).flatMap { orderItem in
+                    
+                    return try self.deleteAction(forOrderItem: orderItem, on: req)
+                }
             }
+        }
+    }
+    
+    func sendAPNSFor(orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
+        
+        guard let orderItemStatus = OrderStatus(rawValue: orderItem.orderItemStatus) else {
+            throw Abort(.badRequest, reason: "Invalid order item status")
+        }
+        
+        return orderItem.order.get(on: req).flatMap { order in
+            
+            try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().flatMap { action in
+                
+                guard let actionQuantity = action?.quantity else {
+                    throw Abort(.badRequest, reason: "Missing or invalid order item action quantity")
+                }
+                
+                let paddedOrderId = String(format: "%06d", try order.requireID())
+                
+                switch orderItemStatus {
+                    
+                case OrderStatus.cancellationRequested:
+                    
+                    let messageTitle = actionQuantity == 1 ? "Order - Cancel Item" : "Order - Cancel Items"
+                    let messageItems = actionQuantity == 1 ? "item has" : "items have"
+                    let messageBody = "\(actionQuantity) \(messageItems) been cancelled from order no \(paddedOrderId) and a refund issued."
+                    return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
+                    
+                case OrderStatus.returnRequested:
+                    
+                    let messageTitle = actionQuantity == 1 ? "Order - Return Item" : "Order - Return Items"
+                    let messageItems = actionQuantity == 1 ? "item has" : "items have"
+                    let messageBody = "\(actionQuantity) \(messageItems) been returned from order no \(paddedOrderId) and a refund issued."
+                    return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
+                    
+                default:
+                    
+                    return req.future(HTTPStatus.ok)
+                }
+            }
+        }
+    }
+    
+    func sendAPNS(withTitle title: String, body: String, forOrder order: SUOrder, orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
+        
+        return order.customer.get(on: req).flatMap { customer in
+            
+            if let apnsToken = customer.apnsDeviceToken {
+                
+                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
+                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+                
+                let orderItemId = try orderItem.requireID()
+                
+                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
+                
+                notification.additionalData(key: "orderItemId", value: String(orderItemId))
+                notification.setContentAvailable(true)
+                
+                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
+                
+                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
+                
+            } else {
+                
+                return req.future(HTTPStatus.badRequest)
+            }
+            
+            }.catchFlatMap { error in
+                
+                throw Abort(.internalServerError, reason: "Failed to get customer for order: \(error.localizedDescription)")
         }
     }
     
