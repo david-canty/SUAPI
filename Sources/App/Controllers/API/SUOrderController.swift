@@ -36,6 +36,7 @@ struct SUOrderController: RouteCollection {
         ordersRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
             jwtProtectedGroup.post(use: createHandler)
+            jwtProtectedGroup.get(SUOrder.parameter, use: getOrderHandler)
             jwtProtectedGroup.post(SUOrder.parameter, "cancel", use: cancelOrderHandler)
         }
         
@@ -106,6 +107,26 @@ struct SUOrderController: RouteCollection {
                             return SUOrderInfo(customer: customer, order: order, orderItems: orderItems)
                         }
                     }
+                }
+            }
+        }
+    }
+    
+    func getOrderHandler(_ req: Request) throws -> Future<OrderData> {
+     
+        return try req.parameters.next(SUOrder.self).flatMap { order in
+            
+            try order.orderItems.query(on: req).all().flatMap { orderItems in
+                
+                try orderItems.compactMap { orderItem in
+                    
+                    try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().map { action in
+                        
+                        return OrderItemWithAction(orderItem: orderItem, orderItemAction: action)
+                    }
+                    }.flatten(on: req).map { orderItemsWithActions in
+                        
+                        return OrderData(order: order, orderItemsWithActions: orderItemsWithActions)
                 }
             }
         }
@@ -505,6 +526,16 @@ struct SUOrderController: RouteCollection {
         let customer:  SUCustomer
         let order: SUOrder
         let orderItems: [SUOrderItem]
+    }
+    
+    struct OrderData: Content {
+        let order: SUOrder
+        let orderItemsWithActions: [OrderItemWithAction]
+    }
+    
+    struct OrderItemWithAction: Content {
+        let orderItem: SUOrderItem
+        let orderItemAction: SUOrderItemAction?
     }
     
     struct CancelOrderEmailContext: Encodable {
