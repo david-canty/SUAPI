@@ -50,13 +50,14 @@ struct SUOrderController: RouteCollection {
         let orderItemsRoutes = router.grouped("api", "order-items")
         orderItemsRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
             
+            jwtProtectedGroup.get(SUOrderItem.parameter, use: getOrderItemHandler)
             jwtProtectedGroup.post(OrderItemCancelReturnData.self, at: SUOrderItem.parameter, "cancel-return", use: cancelReturnOrderItemHandler)
         }
         
         let orderItemsAuthSessionRoutes = orderItemsRoutes.grouped(SUUser.authSessionsMiddleware())
         let orderItemsRedirectProtectedGroup = orderItemsAuthSessionRoutes.grouped(RedirectMiddleware<SUUser>(path: "/sign-in"))
         
-        orderItemsRedirectProtectedGroup.patch(SUOrderItem.parameter, "quantity", use: updateOrderItemQuantityHandler)
+        orderItemsRedirectProtectedGroup.patch(OrderItemQuantityData.self, at: SUOrderItem.parameter, "quantity", use: updateOrderItemQuantityHandler)
         orderItemsRedirectProtectedGroup.delete(SUOrderItem.parameter, use: deleteOrderItemHandler)
         
     }
@@ -400,59 +401,64 @@ struct SUOrderController: RouteCollection {
     }
     
     // Order Items
-    func updateOrderItemQuantityHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    func getOrderItemHandler(_ req: Request) throws -> Future<SUOrderItem> {
         
-        return try flatMap(to: HTTPStatus.self, req.parameters.next(SUOrderItem.self), req.content.decode(OrderItemQuantityData.self)) { orderItem, orderItemQuantityData in
+        return try req.parameters.next(SUOrderItem.self)
+    }
+    
+    func updateOrderItemQuantityHandler(_ req: Request,  quantityData: OrderItemQuantityData) throws -> Future<HTTPStatus> {
+        
+        return try req.parameters.next(SUOrderItem.self).flatMap { orderItem in
             
             orderItem.order.get(on: req).flatMap { order in
                 
-                orderItem.quantity = orderItemQuantityData.quantity
-                orderItem.orderItemStatus = order.orderStatus
-                
-                return orderItem.update(on: req).flatMap { orderItem in
+                try self.sendAPNSFor(forOrder: order, orderItem: orderItem, on: req).flatMap { _ in
                     
-                    return try self.deleteAction(forOrderItem: orderItem, on: req)
+                    orderItem.quantity = quantityData.quantity
+                    orderItem.orderItemStatus = order.orderStatus
+                    
+                    return orderItem.update(on: req).flatMap { orderItem in
+                        
+                        return try self.deleteAction(forOrderItem: orderItem, on: req)
+                    }
                 }
             }
         }
     }
     
-    func sendAPNSFor(orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
+    func sendAPNSFor(forOrder order: SUOrder, orderItem: SUOrderItem, on req: Request) throws -> Future<HTTPStatus> {
         
         guard let orderItemStatus = OrderStatus(rawValue: orderItem.orderItemStatus) else {
             throw Abort(.badRequest, reason: "Invalid order item status")
         }
-        
-        return orderItem.order.get(on: req).flatMap { order in
             
-            try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().flatMap { action in
+        return try SUOrderItemAction.query(on: req).filter(\.orderItemID == orderItem.requireID()).first().flatMap { action in
+            
+            guard let actionQuantity = action?.quantity else {
+                throw Abort(.badRequest, reason: "Missing or invalid order item action quantity")
+            }
+            
+            let paddedOrderId = String(format: "%06d", try order.requireID())
+            
+            switch orderItemStatus {
                 
-                guard let actionQuantity = action?.quantity else {
-                    throw Abort(.badRequest, reason: "Missing or invalid order item action quantity")
-                }
+            case OrderStatus.cancellationRequested:
                 
-                let paddedOrderId = String(format: "%06d", try order.requireID())
+                let messageTitle = actionQuantity == 1 ? "Order - Cancel Item" : "Order - Cancel Items"
+                let messageItems = actionQuantity == 1 ? "item has" : "items have"
+                let messageBody = "\(actionQuantity) \(messageItems) been cancelled from order no \(paddedOrderId) and a refund issued."
+                return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
                 
-                switch orderItemStatus {
-                    
-                case OrderStatus.cancellationRequested:
-                    
-                    let messageTitle = actionQuantity == 1 ? "Order - Cancel Item" : "Order - Cancel Items"
-                    let messageItems = actionQuantity == 1 ? "item has" : "items have"
-                    let messageBody = "\(actionQuantity) \(messageItems) been cancelled from order no \(paddedOrderId) and a refund issued."
-                    return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
-                    
-                case OrderStatus.returnRequested:
-                    
-                    let messageTitle = actionQuantity == 1 ? "Order - Return Item" : "Order - Return Items"
-                    let messageItems = actionQuantity == 1 ? "item has" : "items have"
-                    let messageBody = "\(actionQuantity) \(messageItems) been returned from order no \(paddedOrderId) and a refund issued."
-                    return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
-                    
-                default:
-                    
-                    return req.future(HTTPStatus.ok)
-                }
+            case OrderStatus.returnRequested:
+                
+                let messageTitle = actionQuantity == 1 ? "Order - Return Item" : "Order - Return Items"
+                let messageItems = actionQuantity == 1 ? "item has" : "items have"
+                let messageBody = "\(actionQuantity) \(messageItems) been returned from order no \(paddedOrderId) and a refund issued."
+                return try self.sendAPNS(withTitle: messageTitle, body: messageBody, forOrder: order, orderItem: orderItem, on: req)
+                
+            default:
+                
+                return req.future(HTTPStatus.ok)
             }
         }
     }
