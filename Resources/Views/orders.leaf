@@ -58,6 +58,8 @@
                     <h2>No Orders</h2>
                     
                     }
+                    
+                    #offsetPaginator()
                 </div>
             </div>
             

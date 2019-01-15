@@ -5,6 +5,7 @@ import Authentication
 import S3
 import Stripe
 import Mailgun
+import Paginator
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
@@ -27,9 +28,17 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     services.register { container -> LeafTagConfig in
         var config = LeafTagConfig.default()
-        config.use(OrderNoTag(), as: "orderNo")
+        config.use([
+            "orderNo": OrderNoTag(),
+            "offsetPaginator": OffsetPaginatorTag(templatePath: "Paginator/offsetpaginator")
+            ])
         return config
     }
+    
+    services.register(OffsetPaginatorConfig(
+        perPage: 1,
+        defaultPage: 1
+    ))
     
     let s3SignerConfig = S3Signer.Config(accessKey: awsAccessKey, secretKey: awsSecretKey, region: Region(name: .euWest2))
     try services.register(s3: s3SignerConfig, defaultBucket: awsS3Bucket)

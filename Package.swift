@@ -12,10 +12,11 @@ let package = Package(
         .package(url: "https://github.com/LiveUI/S3.git", from: "3.0.0-rc2"),
         .package(url: "https://github.com/vapor-community/stripe-provider.git", from: "2.2.0"),
         .package(url: "https://github.com/twof/VaporMailgunService.git", from: "1.5.0"),
-        .package(url: "https://github.com/vapor-community/onesignal.git", from: "1.0.0-alpha.6")
+        .package(url: "https://github.com/vapor-community/onesignal.git", from: "1.0.0-alpha.6"),
+        .package(url: "https://github.com/nodes-vapor/paginator.git", from: "3.0.0-rc")
     ],
     targets: [
-    .target(name: "App", dependencies: ["Vapor", "FluentMySQL", "Leaf", "SwiftJWT", "Authentication", "S3", "Stripe", "Mailgun", "OneSignal"]),
+    .target(name: "App", dependencies: ["Vapor", "FluentMySQL", "Leaf", "SwiftJWT", "Authentication", "S3", "Stripe", "Mailgun", "OneSignal", "Paginator"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]

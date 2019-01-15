@@ -2,6 +2,7 @@ import Vapor
 import Leaf
 import Fluent
 import Authentication
+import Paginator
 
 struct SUOrderAdminController: RouteCollection {
     
@@ -35,33 +36,39 @@ struct SUOrderAdminController: RouteCollection {
     }
     
     func ordersHandler(_ req: Request) throws -> Future<View> {
-
-        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap(to: View.self) { orders in
-
-            return try orders.compactMap { order in
-
-                return try order.orderItems.query(on: req).all().flatMap(to: OrderDetail.self) { orderItems in
-
-                    let customer = order.customer.get(on: req)
-                    let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+        
+        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap { orders in
+            
+            try orders.compactMap { order in
+                
+                try order.orderItems.query(on: req).all().flatMap(to: OrderDetail.self) { orderItems in
                     
-                    return try self.getTotal(forOrder: order, on: req).map(to: OrderDetail.self) { orderTotal in
+                    order.customer.get(on: req).flatMap { customer in
                         
-                        let formatter = NumberFormatter()
-                        formatter.numberStyle = .currency
-                        formatter.currencySymbol = "£"
-                        let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                        let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
                         
-                        return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                        return try self.getTotal(forOrder: order, on: req).map { orderTotal in
+                            
+                            let formatter = NumberFormatter()
+                            formatter.numberStyle = .currency
+                            formatter.currencySymbol = "£"
+                            let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                            
+                            return OrderDetail(customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                        }
                     }
                 }
+                
+                }.flatten(on: req).flatMap { orderDetails in
+                
+                    let paginator: Future<OffsetPaginator<OrderDetail>> = try orderDetails.paginate(for: req)
+                    
+                    return paginator.flatMap { paginator in
 
-                }.flatMap(to: View.self, on: req) { orderDetails in
-
-                    let user = try req.requireAuthenticated(SUUser.self)
-                    let context = OrdersContext(authenticatedUser: user, orderDetails: orderDetails)
-
-                    return try req.view().render("orders", context)
+                        let user = try req.requireAuthenticated(SUUser.self)
+                        let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [])
+                        return try req.view().render("orders", context, userInfo: try paginator.userInfo())
+                    }
             }
         }
     }
@@ -129,8 +136,8 @@ struct SUOrderAdminController: RouteCollection {
         let order: OrderDetail
     }
     
-    struct OrderDetail: Encodable {
-        let customer:  EventLoopFuture<SUCustomer>
+    struct OrderDetail: Content {
+        let customer:  SUCustomer
         let order: SUOrder
         let orderItems: [SUOrderItem]
         let itemCount: Int

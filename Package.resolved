@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "JWT",
+        "repositoryURL": "https://github.com/vapor/jwt.git",
+        "state": {
+          "branch": null,
+          "revision": "2e225c722bf26407c1c4bd11d341e48759f46095",
+          "version": "3.0.0"
+        }
+      },
+      {
         "package": "Leaf",
         "repositoryURL": "https://github.com/vapor/leaf.git",
         "state": {
@@ -146,6 +155,24 @@
         }
       },
       {
+        "package": "Paginator",
+        "repositoryURL": "https://github.com/nodes-vapor/paginator.git",
+        "state": {
+          "branch": null,
+          "revision": "7502384d9369b8180df93f52148d0b5bd8ff8e9a",
+          "version": "3.0.0"
+        }
+      },
+      {
+        "package": "Redis",
+        "repositoryURL": "https://github.com/vapor/redis.git",
+        "state": {
+          "branch": null,
+          "revision": "2fb20632db3ad86e2b3596cd34605f694a92c177",
+          "version": "3.0.2"
+        }
+      },
+      {
         "package": "Routing",
         "repositoryURL": "https://github.com/vapor/routing.git",
         "state": {
@@ -188,6 +215,15 @@
           "branch": null,
           "revision": "f153cfe204ef92265d94eb66f2fcf6cf2b0ced13",
           "version": "2.2.4"
+        }
+      },
+      {
+        "package": "Sugar",
+        "repositoryURL": "https://github.com/nodes-vapor/sugar.git",
+        "state": {
+          "branch": null,
+          "revision": "4071e699febf84b5254766d7ffd57db0483ce873",
+          "version": "3.0.0"
         }
       },
       {
