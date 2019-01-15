@@ -1,6 +1,7 @@
 import Vapor
 import Leaf
 import Fluent
+import FluentMySQL
 import Authentication
 import Paginator
 
@@ -37,6 +38,17 @@ struct SUOrderAdminController: RouteCollection {
     
     func ordersHandler(_ req: Request) throws -> Future<View> {
         
+//        var query: QueryBuilder<MySQLDatabase, SUOrder>
+//        
+//        if let statusFilterString = req.query[String.self, at: "filter"] {
+//            
+//            query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
+//            
+//        } else {
+//            
+//            query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
+//        }
+        
         return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap { orders in
             
             try orders.compactMap { order in
@@ -66,7 +78,10 @@ struct SUOrderAdminController: RouteCollection {
                     return paginator.flatMap { paginator in
 
                         let user = try req.requireAuthenticated(SUUser.self)
-                        let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [])
+                        var statusStrings = OrderStatus.allCases.map { $0.rawValue }
+                        statusStrings.insert("All", at: 0)
+                        
+                        let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [], filterStrings: statusStrings, selectedFilter: statusStrings[0])
                         return try req.view().render("orders", context, userInfo: try paginator.userInfo())
                     }
             }
@@ -128,6 +143,8 @@ struct SUOrderAdminController: RouteCollection {
         let title = "Orders"
         let authenticatedUser: SUUser
         let orderDetails: [OrderDetail]
+        let filterStrings: [String]
+        let selectedFilter: String
     }
     
     struct ViewOrderContext: Encodable {

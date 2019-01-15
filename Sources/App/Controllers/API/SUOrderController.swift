@@ -10,7 +10,7 @@ enum PaymentMethod: String {
     case card = "card"
 }
 
-enum OrderStatus: String {
+enum OrderStatus: String, CaseIterable {
     case ordered = "Ordered"
     case awaitingStock = "Awaiting Stock"
     case readyForCollection = "Ready for Collection"
