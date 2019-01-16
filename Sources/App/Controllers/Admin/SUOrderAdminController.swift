@@ -1,7 +1,6 @@
 import Vapor
 import Leaf
 import Fluent
-import FluentMySQL
 import Authentication
 import Paginator
 
@@ -38,18 +37,18 @@ struct SUOrderAdminController: RouteCollection {
     
     func ordersHandler(_ req: Request) throws -> Future<View> {
         
-//        var query: QueryBuilder<MySQLDatabase, SUOrder>
-//        
-//        if let statusFilterString = req.query[String.self, at: "filter"] {
-//            
-//            query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
-//            
-//        } else {
-//            
-//            query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
-//        }
+        var query: EventLoopFuture<Array<SUOrder>>
+
+        if let statusFilter = req.query[String.self, at: "filter"] {
+
+            query = SUOrder.query(on: req).sort(\.orderDate, .descending).filter(\.orderStatus == statusFilter).all()
+
+        } else {
+
+            query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
+        }
         
-        return SUOrder.query(on: req).sort(\.orderDate, .descending).all().flatMap { orders in
+        return query.flatMap { orders in
             
             try orders.compactMap { order in
                 
