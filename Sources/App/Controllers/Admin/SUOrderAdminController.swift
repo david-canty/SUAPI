@@ -1,6 +1,7 @@
 import Vapor
 import Leaf
 import Fluent
+import FluentMySQL
 import Authentication
 import Paginator
 
@@ -37,15 +38,22 @@ struct SUOrderAdminController: RouteCollection {
     
     func ordersHandler(_ req: Request) throws -> Future<View> {
         
-        var query: EventLoopFuture<Array<SUOrder>>
-
-        if let statusFilter = req.query[String.self, at: "filter"] {
-
-            query = SUOrder.query(on: req).sort(\.orderDate, .descending).filter(\.orderStatus == statusFilter).all()
-
+        let query: EventLoopFuture<Array<SUOrder>>
+        let selectedFilter: String
+        
+        if let statusFilter = req.query[String.self, at: "filter"], statusFilter != "All" {
+            
+            guard let orderStatusFilter = OrderStatus(rawValue: statusFilter) else {
+                throw Abort(.badRequest, reason: "Invalid order status")
+            }
+            
+            query = SUOrder.query(on: req).sort(\.orderDate, .descending).filter(\.orderStatus == orderStatusFilter.rawValue).all()
+            selectedFilter = orderStatusFilter.rawValue
+            
         } else {
-
+            
             query = SUOrder.query(on: req).sort(\.orderDate, .descending).all()
+            selectedFilter = "All"
         }
         
         return query.flatMap { orders in
@@ -80,7 +88,7 @@ struct SUOrderAdminController: RouteCollection {
                         var statusStrings = OrderStatus.allCases.map { $0.rawValue }
                         statusStrings.insert("All", at: 0)
                         
-                        let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [], filterStrings: statusStrings, selectedFilter: statusStrings[0])
+                        let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [], filterStrings: statusStrings, selectedFilter: selectedFilter)
                         return try req.view().render("orders", context, userInfo: try paginator.userInfo())
                     }
             }

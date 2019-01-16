@@ -1120,7 +1120,6 @@ $(document).ready(function() {
 //    });
 
     // Orders
-    
     $('#orders-container').on('click', '.order-status', function(e) {
      
         e.preventDefault();

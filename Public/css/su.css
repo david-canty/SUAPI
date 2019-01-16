@@ -186,6 +186,10 @@ a.dropdown-item:hover,
     cursor: pointer;
 }
 
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #5054A1;
+}
+
 nav.breadcrumb {
     background-color: #FFF;
     margin: 0;

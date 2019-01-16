@@ -15,8 +15,6 @@
             <div class="row">
                 <div class="col">
                     
-                    #if(count(orderDetails) > 0) {
-                    
                     <div class="dropdown">
                         <a class="btn btn-secondary dropdown-toggle" href="" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             #(selectedFilter)
@@ -24,10 +22,12 @@
                         
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                             #for(status in filterStrings) {
-                            <a class="dropdown-item" href="">#(status)</a>
+                            <a class="dropdown-item #if(status == selectedFilter) { active }" href="/orders?filter=#(status)">#(status)</a>
                             }
                         </div>
                     </div>
+                    
+                    #if(count(orderDetails) > 0) {
                     
                     <table class="table table-bordered mt-3">
                         <thead class="thead-light">
@@ -71,7 +71,10 @@
                     
                     }
                     
-                    #offsetPaginator()
+                    #if(count(orderDetails) > 0) {
+                        #offsetPaginator()
+                    }
+                    
                 </div>
             </div>
             
