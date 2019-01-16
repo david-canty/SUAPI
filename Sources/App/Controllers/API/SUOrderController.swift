@@ -35,7 +35,7 @@ struct SUOrderController: RouteCollection {
         let ordersRoutes = router.grouped("api", "orders")
         ordersRoutes.group(SUJWTMiddleware.self) { jwtProtectedGroup in
 
-            jwtProtectedGroup.post(use: createHandler)
+            jwtProtectedGroup.post(SUOrderPostData.self, use: createHandler)
             jwtProtectedGroup.get(SUOrder.parameter, use: getOrderHandler)
             jwtProtectedGroup.post(SUOrder.parameter, "cancel", use: cancelOrderHandler)
         }
@@ -63,51 +63,89 @@ struct SUOrderController: RouteCollection {
     }
 
     // Orders
-    func createHandler(_ req: Request) throws -> Future<SUOrderInfo> {
-
-        return try req.content.decode(SUOrderPostData.self).flatMap(to: SUOrderInfo.self) { orderData in
+    func createHandler(_ req: Request, orderData: SUOrderPostData) throws -> Future<SUOrderInfo> {
             
-            guard let customerId = UUID(uuidString: orderData.customerId) else {
-                throw Abort(.badRequest, reason: "Customer id missing from order post data")
+        guard let customerId = UUID(uuidString: orderData.customerId) else {
+            throw Abort(.badRequest, reason: "Customer id missing from order post data")
+        }
+        
+        return SUCustomer.find(customerId, on: req).flatMap { customer in
+            
+            guard let customer = customer else {
+                throw Abort(.badRequest, reason: "Customer not found for order")
             }
             
-            return SUCustomer.find(customerId, on: req).flatMap(to: SUOrderInfo.self) { customer in
+            return req.transaction(on: .mysql) { conn in
                 
-                guard let customer = customer else {
-                    throw Abort(.badRequest, reason: "Customer not found for order")
-                }
+                let order = SUOrder(customerID: customer.id!,
+                                    orderDate: Date(),
+                                    orderStatus: OrderStatus.ordered.rawValue,
+                                    paymentMethod: orderData.paymentMethod,
+                                    chargeId: orderData.chargeId)
                 
-                return req.transaction(on: .mysql) { conn in
+                return order.save(on: conn).flatMap { order in
                     
-                    let order = SUOrder(customerID: customer.id!,
-                                        orderDate: Date(),
-                                        orderStatus: OrderStatus.ordered.rawValue,
-                                        paymentMethod: orderData.paymentMethod,
-                                        chargeId: orderData.chargeId)
+                    var orderItemSaveResults: [Future<SUOrderItem>] = []
                     
-                    return order.save(on: conn).flatMap(to: SUOrderInfo.self) { order in
+                    for orderItemData in orderData.orderItems {
                         
-                        var orderItemSaveResults: [Future<SUOrderItem>] = []
-                        
-                        for orderItemData in orderData.orderItems {
-                            
-                            guard let itemID = UUID(uuidString: orderItemData.itemID),
-                                let sizeID = UUID(uuidString: orderItemData.sizeID) else {
-                                    throw Abort(.badRequest, reason: "Invalid order item size id or item id")
-                            }
-                            
-                            let quantity = orderItemData.quantity
-                            
-                            let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity, orderItemStatus: OrderStatus.ordered.rawValue)
-                            
-                            orderItemSaveResults.append(orderItem.save(on: conn))
+                        guard let itemID = UUID(uuidString: orderItemData.itemID),
+                            let sizeID = UUID(uuidString: orderItemData.sizeID) else {
+                                throw Abort(.badRequest, reason: "Invalid order item size id or item id")
                         }
                         
-                        return orderItemSaveResults.flatten(on: conn).map(to: SUOrderInfo.self) { orderItems in
+                        let quantity = orderItemData.quantity
+                        
+                        let orderItem = SUOrderItem(orderID: order.id!, itemID: itemID, sizeID: sizeID, quantity: quantity, orderItemStatus: OrderStatus.ordered.rawValue)
+                        
+                        orderItemSaveResults.append(orderItem.save(on: conn))
+                    }
+                    
+                    return orderItemSaveResults.flatten(on: conn).flatMap(to: SUOrderInfo.self) { orderItems in
+                        
+                        let orderInfo = SUOrderInfo(customer: customer, order: order, orderItems: orderItems)
+                        
+                        return try self.sendOrderReceivedAdminEmail(forOrderInfo: orderInfo, on: req).map { _ in
                             
-                            return SUOrderInfo(customer: customer, order: order, orderItems: orderItems)
+                            return orderInfo
                         }
                     }
+                }
+            }
+        }
+    }
+    
+    func sendOrderReceivedAdminEmail(forOrderInfo orderInfo: SUOrderInfo, on req: Request) throws -> Future<Response> {
+        
+        let customer = orderInfo.customer
+        let order = orderInfo.order
+        let orderItems = orderInfo.orderItems
+            
+        return self.getOrderItemDetails(for: orderItems, on: req).flatMap { orderItemDetails in
+            
+            try self.getTotal(forOrder: order, on: req).flatMap { orderTotal in
+                
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .currency
+                formatter.currencySymbol = "£"
+                let formattedOrderTotal = formatter.string(from: orderTotal as NSNumber)
+                
+                let itemCount = orderItems.reduce(0) { return $0 + Int($1.quantity) }
+                
+                let context = OrderEmailContext(order: order, customer: customer, orderItemDetails: orderItemDetails, itemCount: itemCount, formattedOrderTotal: formattedOrderTotal!)
+                
+                return try req.view().render("Emails/orderReceivedEmail", context).flatMap { view in
+                    
+                    let content = String(data: view.data, encoding: .utf8)
+                    
+                    let message = Mailgun.Message(from: customer.email,
+                                                  to: "david.canty@icloud.com",
+                                                  subject: "RHS Uniform - Order Received",
+                                                  text: "",
+                                                  html: content)
+                    
+                    let mailgun = try req.make(Mailgun.self)
+                    return try mailgun.send(message, on: req)
                 }
             }
         }
@@ -618,6 +656,14 @@ struct SUOrderController: RouteCollection {
     struct OrderItemWithAction: Content {
         let orderItem: SUOrderItem
         let orderItemAction: SUOrderItemAction?
+    }
+    
+    struct OrderEmailContext: Encodable {
+        let order: SUOrder
+        let customer:  SUCustomer
+        let orderItemDetails: [CancelOrderItemDetails]
+        let itemCount: Int
+        let formattedOrderTotal: String
     }
     
     struct CancelOrderEmailContext: Encodable {

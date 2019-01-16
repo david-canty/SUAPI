@@ -1,0 +1,35 @@
+<html>
+    <body>
+        <p>Hi,</p>
+        <p>I would like to order the items below.</p>
+        <p><b>Order details:</b></p>
+        <p>Received: #date(order.orderDate, "d MMM yyyy 'at' HH:mm")</p>
+        <br/>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                #for(orderItem in orderItemDetails) {
+                <tr data-item-id="#(item.id)">
+                    <td>#(orderItem.item.itemName)</td>
+                    <td>#(orderItem.size.sizeName)</td>
+                    <td>#(orderItem.item.itemPrice)</td>
+                    <td>#(orderItem.quantity)</td>
+                    <td>#(orderItem.formattedTotal)</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        <br/>
+        <p><b>Order total: </b>#(formattedOrderTotal)</p>
+        <p><b>Payment method: </b>#(order.paymentMethod)<p>
+        <p>Thank you.</p>
+    </body>
+</html>

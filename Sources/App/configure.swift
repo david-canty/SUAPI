@@ -36,7 +36,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     }
     
     services.register(OffsetPaginatorConfig(
-        perPage: 1,
+        perPage: 15,
         defaultPage: 1
     ))
     
