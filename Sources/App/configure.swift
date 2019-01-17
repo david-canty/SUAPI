@@ -53,50 +53,19 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
-    
+
+    // Register middlewares
     //services.register(SULogMiddleware.self)
     services.register(SUJWTMiddleware.self)
-
-    var middlewares = MiddlewareConfig()
-    //middlewares.use(SULogMiddleware.self)
-    middlewares.use(FileMiddleware.self)
-    middlewares.use(ErrorMiddleware.self)
-    middlewares.use(SessionsMiddleware.self)
     
-    services.register(middlewares)
+    var middlewaresConfig = MiddlewareConfig()
+    try middlewares(config: &middlewaresConfig)
+    services.register(middlewaresConfig)
     
-    var databases = DatabasesConfig()
-    let databaseConfig: MySQLDatabaseConfig
-    
-    let url = Environment.get("DB_MYSQL")
-    
-    if let url = url {
-        
-        guard let urlConfig = try MySQLDatabaseConfig(url: url) else {
-            fatalError("Failed to create MySQLDatabaseConfig")
-        }
-        
-        databaseConfig = urlConfig
-        
-    } else {
-        
-        let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
-        let databasePort = 3306
-        let username = Environment.get("DATABASE_USER") ?? "suapi"
-        let password = Environment.get("DATABASE_PASSWORD") ?? "password"
-        let databaseName = Environment.get("DATABASE_DB") ?? "suapi"
-        
-        databaseConfig = MySQLDatabaseConfig(
-            hostname: hostname,
-            port: databasePort,
-            username: username,
-            password: password,
-            database: databaseName)
-    }
-    
-    let database = MySQLDatabase(config: databaseConfig)
-    databases.add(database: database, as: .mysql)
-    services.register(databases)
+    // Database config
+    var databasesConfig = DatabasesConfig()
+    try databases(config: &databasesConfig)
+    services.register(databasesConfig)
     
     var migrations = MigrationConfig()
     migrations.add(model: SUCategory.self, database: .mysql)
@@ -119,7 +88,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
     config.prefer(DatabaseKeyedCache<ConfiguredDatabase<MySQLDatabase>>.self, for: KeyedCache.self)
     
-    var commandConfig = CommandConfig.default()
-    commandConfig.useFluentCommands()
-    services.register(commandConfig)
+    // Command config
+    var commandsConfig = CommandConfig.default()
+    commands(config: &commandsConfig)
+    services.register(commandsConfig)
 }
