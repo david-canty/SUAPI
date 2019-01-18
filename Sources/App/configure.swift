@@ -21,6 +21,7 @@ struct APIKeyStorage: Service {
 
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
+    // Key storage
     guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_ACCESS_KEY") }
     guard let awsSecretKey = Environment.get("AWS_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_SECRET_KEY") }
     guard let awsS3Bucket = Environment.get("AWS_S3_BUCKET") else { throw Abort(.internalServerError, reason: "Failed to get AWS_S3_BUCKET") }
@@ -34,6 +35,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
         return APIKeyStorage(awsAccessKey: awsAccessKey, awsSecretKey: awsSecretKey, awsS3Bucket: awsS3Bucket, awsRegion: "eu-west-2", stripeSecretKey: stripeSecretKey, mailgunAPIKey: mailgunAPIKey, mailgunDomain: mailgunDomain, oneSignalAPIKey: oneSignalAPIKey, oneSignalAppId: oneSignalAppId)
     }
     
+    // Services
     services.register(NIOServerConfig.default(hostname: "0.0.0.0", port: 8080))
     
     try services.register(FluentMySQLProvider())
@@ -44,6 +46,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
         try container.keyedCache(for: .mysql)
     }
     
+    // Tags
     services.register { container -> LeafTagConfig in
         var config = LeafTagConfig.default()
         config.use([
@@ -58,16 +61,20 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
         defaultPage: 1
     ))
     
+    // S3 config
     let s3SignerConfig = S3Signer.Config(accessKey: awsAccessKey, secretKey: awsSecretKey, region: Region(name: .euWest2))
     try services.register(s3: s3SignerConfig, defaultBucket: awsS3Bucket)
     
+    // Stripe config
     let stripeConfig = StripeConfig(apiKey: stripeSecretKey)
     services.register(stripeConfig)
     try services.register(StripeProvider())
     
+    // Mailgun config
     let mailgun = Mailgun(apiKey: mailgunAPIKey, domain: mailgunDomain)
     services.register(mailgun, as: Mailgun.self)
 
+    // Routes
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
