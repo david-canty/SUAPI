@@ -381,8 +381,9 @@ struct SUOrderController: RouteCollection {
             
             if let apnsToken = customer.apnsDeviceToken {
                 
-                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
-                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+                let apiKeyStorage = try req.make(APIKeyStorage.self)
+                let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
+                let oneSignalAppId = apiKeyStorage.oneSignalAppId
                 
                 let orderId = try order.requireID()
             
@@ -507,8 +508,9 @@ struct SUOrderController: RouteCollection {
             
             if let apnsToken = customer.apnsDeviceToken {
                 
-                guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
-                guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+                let apiKeyStorage = try req.make(APIKeyStorage.self)
+                let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
+                let oneSignalAppId = apiKeyStorage.oneSignalAppId
                 
                 let orderItemId = try orderItem.requireID()
                 

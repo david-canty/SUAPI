@@ -106,14 +106,12 @@ struct SUShopItemAdminController: RouteCollection {
             
             return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { images in
                 
+                let apiKeyStorage = try req.make(APIKeyStorage.self)
+                let awsRegion = apiKeyStorage.awsRegion
+                let awsS3Bucket = apiKeyStorage.awsS3Bucket
+                let s3ImagesPath = "https://s3." + awsRegion + ".amazonaws.com/" + awsS3Bucket
+                
                 let user = try req.requireAuthenticated(SUUser.self)
-                
-                let awsRegion = "eu-west-2"
-                guard let s3Bucket = Environment.get("AWS_S3_BUCKET") else {
-                    throw Abort(.internalServerError, reason: "Error getting S3 bucket name")
-                }
-                
-                let s3ImagesPath = "https://s3." + awsRegion + ".amazonaws.com/" + s3Bucket
                 
                 let context = ItemImagesContext(authenticatedUser: user, item: item, images: images, s3ImagesPath: s3ImagesPath)
                 return try req.view().render("itemImages", context)

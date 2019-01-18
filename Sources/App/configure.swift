@@ -7,6 +7,18 @@ import Stripe
 import Mailgun
 import Paginator
 
+struct APIKeyStorage: Service {
+    let awsAccessKey: String
+    let awsSecretKey: String
+    let awsS3Bucket: String
+    let awsRegion: String
+    let stripeSecretKey: String
+    let mailgunAPIKey: String
+    let mailgunDomain: String
+    let oneSignalAPIKey: String
+    let oneSignalAppId: String
+}
+
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     
     guard let awsAccessKey = Environment.get("AWS_ACCESS_KEY") else { throw Abort(.internalServerError, reason: "Failed to get AWS_ACCESS_KEY") }
@@ -15,6 +27,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     guard let stripeSecretKey = Environment.get("STRIPE_SECRET_KEY") else { throw Abort(.internalServerError, reason: "Failed to get STRIPE_SECRET_KEY") }
     guard let mailgunAPIKey = Environment.get("MAILGUN_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_API_KEY") }
     guard let mailgunDomain = Environment.get("MAILGUN_DOMAIN") else { throw Abort(.internalServerError, reason: "Failed to get MAILGUN_DOMAIN") }
+    guard let oneSignalAPIKey = Environment.get("ONESIGNAL_API_KEY") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_API_KEY") }
+    guard let oneSignalAppId = Environment.get("ONESIGNAL_APP_ID") else { throw Abort(.internalServerError, reason: "Failed to get ONESIGNAL_APP_ID") }
+    
+    services.register { container -> APIKeyStorage in
+        return APIKeyStorage(awsAccessKey: awsAccessKey, awsSecretKey: awsSecretKey, awsS3Bucket: awsS3Bucket, awsRegion: "eu-west-2", stripeSecretKey: stripeSecretKey, mailgunAPIKey: mailgunAPIKey, mailgunDomain: mailgunDomain, oneSignalAPIKey: oneSignalAPIKey, oneSignalAppId: oneSignalAppId)
+    }
     
     services.register(NIOServerConfig.default(hostname: "0.0.0.0", port: 8080))
     
@@ -55,11 +73,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(router, as: Router.self)
 
     // Register middlewares
-    //services.register(SULogMiddleware.self)
-    services.register(SUJWTMiddleware.self)
-    
     var middlewaresConfig = MiddlewareConfig()
-    try middlewares(config: &middlewaresConfig)
+    try middlewares(config: &middlewaresConfig, services: &services)
     services.register(middlewaresConfig)
     
     // Database config
@@ -67,24 +82,14 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try databases(config: &databasesConfig)
     services.register(databasesConfig)
     
-    var migrations = MigrationConfig()
-    migrations.add(model: SUCategory.self, database: .mysql)
-    migrations.add(model: SUShopItem.self, database: .mysql)
-    migrations.add(model: SUImage.self, database: .mysql)
-    migrations.add(model: SUSize.self, database: .mysql)
-    migrations.add(model: SUItemSize.self, database: .mysql)
-    migrations.add(model: SUSchool.self, database: .mysql)
-    migrations.add(model: SUYear.self, database: .mysql)
-    migrations.add(model: SUItemYear.self, database: .mysql)
-    migrations.add(model: SUUser.self, database: .mysql)
-    migrations.add(model: SUCustomer.self, database: .mysql)
-    migrations.add(model: SUOrder.self, database: .mysql)
-    migrations.add(model: SUOrderItem.self, database: .mysql)
-    migrations.add(model: SUOrderItemAction.self, database: .mysql)
-    migrations.add(migration: AdminUser.self, database: .mysql)
-    migrations.prepareCache(for: .mysql)
-    services.register(migrations)
+    // Migrations
+    services.register { container -> MigrationConfig in
+        var migrationConfig = MigrationConfig()
+        try migrate(migrations: &migrationConfig)
+        return migrationConfig
+    }
     
+    // Config prefers
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
     config.prefer(DatabaseKeyedCache<ConfiguredDatabase<MySQLDatabase>>.self, for: KeyedCache.self)
     
