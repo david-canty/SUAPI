@@ -5,6 +5,12 @@ import Stripe
 
 struct SUStripeController: RouteCollection {
     
+    private let stripeClient: StripeClient
+    
+    init(stripeClient: StripeClient) {
+        self.stripeClient = stripeClient
+    }
+    
     func boot(router: Router) throws {
         
         let stripeRoutes = router.grouped("api", "stripe")
@@ -35,9 +41,7 @@ struct SUStripeController: RouteCollection {
             let customerId = keyPostData.customerId
             let apiVersion = keyPostData.apiVersion
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.ephemeralKey.create(customer: customerId, apiVersion: apiVersion)
+            return try self.stripeClient.ephemeralKey.create(customer: customerId, apiVersion: apiVersion)
         }
     }
     
@@ -48,18 +52,15 @@ struct SUStripeController: RouteCollection {
          
             let email = customerPostData.email
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.customer.create(email: email)
+            return try self.stripeClient.customer.create(email: email)
         }
     }
     
     func getCustomerHandler(_ req: Request) throws -> Future<StripeCustomer> {
         
         let customerId = try req.parameters.next(String.self)
-        let stripeClient = try req.make(StripeClient.self)
         
-        return try stripeClient.customer.retrieve(customer: customerId)
+        return try self.stripeClient.customer.retrieve(customer: customerId)
     }
     
     func createSourceHandler(_ req: Request) throws -> Future<StripeCard> {
@@ -69,9 +70,7 @@ struct SUStripeController: RouteCollection {
             let customerId = try req.parameters.next(String.self)
             let source = sourcePostData.source
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.customer.addNewCardSource(customer: customerId, source: source)
+            return try self.stripeClient.customer.addNewCardSource(customer: customerId, source: source)
         }
     }
     
@@ -82,9 +81,7 @@ struct SUStripeController: RouteCollection {
             let customerId = try req.parameters.next(String.self)
             let source = defaultSourceData.source
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.customer.update(customer: customerId, defaultSource: source)
+            return try self.stripeClient.customer.update(customer: customerId, defaultSource: source)
         }
     }
     
@@ -102,9 +99,7 @@ struct SUStripeController: RouteCollection {
             let description = chargeData.description
             let customer = chargeData.customerId
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.charge.create(amount: amount, currency: currency, description: description, customer: customer).map(to: SUSTPChargeResponse.self) { charge in
+            return try self.stripeClient.charge.create(amount: amount, currency: currency, description: description, customer: customer).map(to: SUSTPChargeResponse.self) { charge in
              
                 return SUSTPChargeResponse(chargeId: charge.id)
                 
@@ -123,9 +118,7 @@ struct SUStripeController: RouteCollection {
             let chargeId = refundData.chargeId
             let amount = refundData.amount
             
-            let stripeClient = try req.make(StripeClient.self)
-            
-            return try stripeClient.refund.create(charge: chargeId, amount: amount).catchMap { error in
+            return try self.stripeClient.refund.create(charge: chargeId, amount: amount).catchMap { error in
                 
                 throw Abort(.internalServerError, reason: "Error creating refund: \(error.localizedDescription)")
             }

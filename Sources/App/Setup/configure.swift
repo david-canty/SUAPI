@@ -37,14 +37,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     // Services
     services.register(NIOServerConfig.default(hostname: "0.0.0.0", port: 8080))
-    
     try services.register(FluentMySQLProvider())
-    try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
     
-    services.register(KeyedCache.self) { container in
-        try container.keyedCache(for: .mysql)
-    }
+    // Leaf
+    try services.register(LeafProvider())
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
     
     // Tags
     services.register { container -> LeafTagConfig in
@@ -75,9 +73,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(mailgun, as: Mailgun.self)
 
     // Routes
-    let router = EngineRouter.default()
-    try routes(router)
-    services.register(router, as: Router.self)
+    services.register(Router.self) { container -> EngineRouter in
+        let router = EngineRouter.default()
+        try routes(router, container)
+        return router
+    }
 
     // Register middlewares
     var middlewaresConfig = MiddlewareConfig()
@@ -89,16 +89,18 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try databases(config: &databasesConfig)
     services.register(databasesConfig)
     
+    services.register(KeyedCache.self) { container in
+        try container.keyedCache(for: .mysql)
+    }
+    
+    config.prefer(DatabaseKeyedCache<ConfiguredDatabase<MySQLDatabase>>.self, for: KeyedCache.self)
+    
     // Migrations
     services.register { container -> MigrationConfig in
         var migrationConfig = MigrationConfig()
         try migrate(migrations: &migrationConfig)
         return migrationConfig
     }
-    
-    // Config prefers
-    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
-    config.prefer(DatabaseKeyedCache<ConfiguredDatabase<MySQLDatabase>>.self, for: KeyedCache.self)
     
     // Command config
     var commandsConfig = CommandConfig.default()

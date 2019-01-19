@@ -29,6 +29,23 @@ enum CancelReturnItem: String {
 
 struct SUOrderController: RouteCollection {
 
+    private let mailgun: Mailgun
+    private let apiKeyStorage: APIKeyStorage
+    private let oneSignal: OneSignal
+    private let oneSignalApp: OneSignalApp
+    
+    init(apiKeyStorage: APIKeyStorage, mailgun: Mailgun, oneSignal: OneSignal) {
+        
+        self.apiKeyStorage = apiKeyStorage
+        
+        let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
+        let oneSignalAppId = apiKeyStorage.oneSignalAppId
+        self.oneSignalApp = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
+        
+        self.mailgun = mailgun
+        self.oneSignal = oneSignal
+    }
+    
     func boot(router: Router) throws {
 
         // Orders
@@ -144,8 +161,7 @@ struct SUOrderController: RouteCollection {
                                                   text: "",
                                                   html: content)
                     
-                    let mailgun = try req.make(Mailgun.self)
-                    return try mailgun.send(message, on: req)
+                    return try self.mailgun.send(message, on: req)
                 }
             }
         }
@@ -251,8 +267,7 @@ struct SUOrderController: RouteCollection {
                                                       text: "",
                                                       html: content)
                         
-                        let mailgun = try req.make(Mailgun.self)
-                        return try mailgun.send(message, on: req)
+                        return try self.mailgun.send(message, on: req)
                     }
                 }
             }
@@ -381,10 +396,6 @@ struct SUOrderController: RouteCollection {
             
             if let apnsToken = customer.apnsDeviceToken {
                 
-                let apiKeyStorage = try req.make(APIKeyStorage.self)
-                let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
-                let oneSignalAppId = apiKeyStorage.oneSignalAppId
-                
                 let orderId = try order.requireID()
             
                 var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
@@ -392,9 +403,7 @@ struct SUOrderController: RouteCollection {
                 notification.additionalData(key: "orderId", value: String(orderId))
                 notification.setContentAvailable(true)
                 
-                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
-                
-                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
+                return try self.oneSignal.send(notification: notification, toApp: self.oneSignalApp).transform(to: HTTPStatus.ok)
                 
             } else {
                 
@@ -508,10 +517,6 @@ struct SUOrderController: RouteCollection {
             
             if let apnsToken = customer.apnsDeviceToken {
                 
-                let apiKeyStorage = try req.make(APIKeyStorage.self)
-                let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
-                let oneSignalAppId = apiKeyStorage.oneSignalAppId
-                
                 let orderItemId = try orderItem.requireID()
                 
                 var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
@@ -519,9 +524,7 @@ struct SUOrderController: RouteCollection {
                 notification.additionalData(key: "orderItemId", value: String(orderItemId))
                 notification.setContentAvailable(true)
                 
-                let app = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
-                
-                return try OneSignal.makeService(for: req).send(notification: notification, toApp: app).transform(to: HTTPStatus.ok)
+                return try self.oneSignal.send(notification: notification, toApp: self.oneSignalApp).transform(to: HTTPStatus.ok)
                 
             } else {
                 
@@ -590,8 +593,7 @@ struct SUOrderController: RouteCollection {
                                                   text: "",
                                                   html: content)
                     
-                    let mailgun = try req.make(Mailgun.self)
-                    return try mailgun.send(message, on: req)
+                    return try self.mailgun.send(message, on: req)
                 }
             }
         }

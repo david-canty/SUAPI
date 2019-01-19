@@ -5,6 +5,12 @@ import S3
 
 struct SUShopItemController: RouteCollection {
     
+    private let s3Client: S3Client
+    
+    init(s3Client: S3Client) {
+        self.s3Client = s3Client
+    }
+    
     func boot(router: Router) throws {
         
         // CRUD
@@ -391,7 +397,6 @@ struct SUShopItemController: RouteCollection {
             return try item.images.query(on: req).count().flatMap(to: [SUImage].self) { itemImageCount in
                 
                 var imageSaveCount = 0
-                let s3Client = try req.makeS3Client()
                 
                 return try uploadedImageFiles.itemImages.compactMap { file -> EventLoopFuture<SUImage> in
                     
@@ -399,7 +404,7 @@ struct SUShopItemController: RouteCollection {
                     let filename = String.randomString() + "_" + file.filename
                     let file = File.Upload(data: imageData, destination: filename, access: .publicRead)
                     
-                    return try s3Client.put(file: file, on: req).flatMap(to: SUImage.self) { putResponse in
+                    return try self.s3Client.put(file: file, on: req).flatMap(to: SUImage.self) { putResponse in
                         
                         let image = SUImage(itemID: item.id!, filename: filename)
                         image.sortOrder = itemImageCount + imageSaveCount
@@ -447,9 +452,7 @@ struct SUShopItemController: RouteCollection {
         
         return try flatMap(to: HTTPStatus.self, req.parameters.next(SUShopItem.self), req.parameters.next(SUImage.self)) { item, image in
             
-            let s3Client = try req.makeS3Client()
-            
-            return try s3Client.delete(file: image, on: req).flatMap(to: HTTPStatus.self) {
+            return try self.s3Client.delete(file: image, on: req).flatMap(to: HTTPStatus.self) {
                 
                 return req.transaction(on: .mysql) { conn in
                     

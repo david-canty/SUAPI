@@ -5,6 +5,12 @@ import Authentication
 
 struct SUShopItemAdminController: RouteCollection {
     
+    private let apiKeyStorage: APIKeyStorage
+    
+    init(apiKeyStorage: APIKeyStorage) {
+        self.apiKeyStorage = apiKeyStorage
+    }
+    
     func boot(router: Router) throws {
         
         let authSessionRoutes = router.grouped("items").grouped(SUUser.authSessionsMiddleware())
@@ -106,9 +112,8 @@ struct SUShopItemAdminController: RouteCollection {
             
             return try item.images.query(on: req).sort(\.sortOrder, .ascending).all().flatMap(to: View.self) { images in
                 
-                let apiKeyStorage = try req.make(APIKeyStorage.self)
-                let awsRegion = apiKeyStorage.awsRegion
-                let awsS3Bucket = apiKeyStorage.awsS3Bucket
+                let awsRegion = self.apiKeyStorage.awsRegion
+                let awsS3Bucket = self.apiKeyStorage.awsS3Bucket
                 let s3ImagesPath = "https://s3." + awsRegion + ".amazonaws.com/" + awsS3Bucket
                 
                 let user = try req.requireAuthenticated(SUUser.self)

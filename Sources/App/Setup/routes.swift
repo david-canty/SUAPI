@@ -1,14 +1,25 @@
 import Vapor
+import Mailgun
+import OneSignal
+import Stripe
 
-public func routes(_ router: Router) throws {
+public func routes(_ router: Router, _ container: Container) throws {
 
+    // Route services
+    let mailgun = try container.make(Mailgun.self)
+    let apiKeyStorage = try container.make(APIKeyStorage.self)
+    let s3Client = try container.makeS3Client()
+    let oneSignal = try OneSignal.makeService(for: container)
+    let stripeClient = try container.make(StripeClient.self)
+    
+    // Routes
     let allController = SUAllController()
     try router.register(collection: allController)
     
     let categoryController = SUCategoryController()
     try router.register(collection: categoryController)
     
-    let itemController = SUShopItemController()
+    let itemController = SUShopItemController(s3Client: s3Client)
     try router.register(collection: itemController)
     
     let sizeController = SUSizeController()
@@ -26,7 +37,9 @@ public func routes(_ router: Router) throws {
     let customerController = SUCustomerController()
     try router.register(collection: customerController)
     
-    let orderController = SUOrderController()
+    let orderController = SUOrderController(apiKeyStorage: apiKeyStorage,
+                                            mailgun: mailgun,
+                                            oneSignal: oneSignal)
     try router.register(collection: orderController)
     
     let adminController = SUAdminController()
@@ -41,7 +54,7 @@ public func routes(_ router: Router) throws {
     let sizeAdminController = SUSizeAdminController()
     try router.register(collection: sizeAdminController)
     
-    let itemAdminController = SUShopItemAdminController()
+    let itemAdminController = SUShopItemAdminController(apiKeyStorage: apiKeyStorage)
     try router.register(collection: itemAdminController)
     
     let orderAdminController = SUOrderAdminController()
@@ -53,6 +66,6 @@ public func routes(_ router: Router) throws {
 //    let customerAdminController = SUCustomerAdminController()
 //    try router.register(collection: customerAdminController)
     
-    let stripeController = SUStripeController()
+    let stripeController = SUStripeController(stripeClient: stripeClient)
     try router.register(collection: stripeController)
 }
