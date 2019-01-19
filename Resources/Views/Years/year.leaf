@@ -1,7 +1,5 @@
 #set("content") {
 
-    #embed("navigation")
-
     <div class="container mt-3">
         
         <div id="years-container">

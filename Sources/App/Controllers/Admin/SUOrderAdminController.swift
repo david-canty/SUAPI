@@ -89,7 +89,7 @@ struct SUOrderAdminController: RouteCollection {
                         statusStrings.insert("All", at: 0)
                         
                         let context = OrdersContext(authenticatedUser: user, orderDetails: paginator.data ?? [], filterStrings: statusStrings, selectedFilter: selectedFilter)
-                        return try req.view().render("orders", context, userInfo: try paginator.userInfo())
+                        return try req.view().render("Orders/orders", context, userInfo: try paginator.userInfo())
                     }
             }
         }
@@ -138,7 +138,7 @@ struct SUOrderAdminController: RouteCollection {
                         
                         let context = OrderDetailsContext(authenticatedUser: user, customer: customer, order: order, orderItems: orderItems, itemCount: itemCount, orderTotal: orderTotal, formattedOrderTotal: formattedOrderTotal!)
                         
-                        return try req.view().render("order", context)
+                        return try req.view().render("Orders/order", context)
                     }
                 }
             }

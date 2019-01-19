@@ -25,7 +25,7 @@ struct SUSchoolAdminController: RouteCollection {
         let user = try req.requireAuthenticated(SUUser.self)
         let context = CreateSchoolContext(authenticatedUser: user)
         
-        return try req.view().render("school", context)
+        return try req.view().render("Schools/school", context)
     }
     
     func schoolsHandler(_ req: Request) throws -> Future<View> {
@@ -35,7 +35,7 @@ struct SUSchoolAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = SchoolsContext(authenticatedUser: user, schools: schools)
             
-            return try req.view().render("schools", context)
+            return try req.view().render("Schools/schools", context)
         }
     }
     
@@ -46,7 +46,7 @@ struct SUSchoolAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = EditSchoolContext(authenticatedUser: user, school: school)
             
-            return try req.view().render("school", context)
+            return try req.view().render("Schools/school", context)
         }
     }
 
@@ -58,7 +58,7 @@ struct SUSchoolAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = CreateYearContext(authenticatedUser: user, school: school)
             
-            return try req.view().render("year", context)
+            return try req.view().render("Years/year", context)
         }
     }
     
@@ -70,7 +70,7 @@ struct SUSchoolAdminController: RouteCollection {
             let years = try school.years.query(on: req).sort(\.sortOrder, .ascending).all()
             let context = YearsContext(authenticatedUser: user, school: school, years: years)
             
-            return try req.view().render("years", context)
+            return try req.view().render("Years/years", context)
         }
     }
     
@@ -83,7 +83,7 @@ struct SUSchoolAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = EditYearContext(authenticatedUser: user, year: year, school: school)
             
-            return try req.view().render("year", context)
+            return try req.view().render("Years/year", context)
         }
     }
     

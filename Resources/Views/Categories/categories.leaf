@@ -1,33 +1,20 @@
 #set("content") {
 
-    #embed("navigation")
-
     <div class="container mt-3">
         
-        <div id="years-container">
-            
-            <div class="row">
-                <div class="col">
-                    <nav class="breadcrumb" aria-label="breadcrumb">
-                        <ol class="breadcrumb m-0 mt-1 mb-3 p-0">
-                            <li class="breadcrumb-item"><a href="/schools">Schools</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">#(school.schoolName)</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+        <div id="categories-container">
             
             <div class="row">
                 <div class="col">
                     <h1>#(title)</h1>
-                    <a class="btn btn-primary mt-3 mb-3" href="years/create" role="button">&#43;</a>
+                    <a class="btn btn-primary mt-3 mb-3" href="categories/create" role="button">&#43;</a>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col">
                     
-                    #if(count(years) > 0) {
+                    #if(count(categories) > 0) {
                     
                     <table class="table table-bordered">
                         <thead class="thead-light">
@@ -38,19 +25,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            #for(year in years) {
-                            <tr id="#(year.id)">
-                                <td>#(year.yearName)</td>
-                                <td>#(year.sortOrder)</td>
+                            #for(category in categories) {
+                            <tr id="#(category.id)">
+                                <td>#(category.categoryName)</td>
+                                <td>#(category.sortOrder)</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(year.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" id="actionButton#(category.id)" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             Action
                                         </button>
-                                        <div class="dropdown-menu" aria-labelledby="actionButton#(year.id)">
-                                            <a class="dropdown-item" href="years/#(year.id)/edit">Edit Year</a>
+                                        <div class="dropdown-menu" aria-labelledby="actionButton#(category.id)">
+                                            <a class="dropdown-item" href="/categories/#(category.id)/edit">Edit Category</a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="" data-toggle="modal" data-target="#year-delete-modal" data-id="#(year.id)">Delete Year</a>
+                                            <a class="dropdown-item" href="" data-toggle="modal" data-target="#category-delete-modal" data-id="#(category.id)">Delete Category</a>
                                         </div>
                                     </div>
                                 </td>
@@ -61,13 +48,13 @@
                     
                     } else {
                     
-                    <h2>No Years</h2>
+                    <h2>No Categories</h2>
                     
                     }
                 </div>
             </div>
             
-            <div class="modal fade" id="year-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal fade" id="category-delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -77,11 +64,11 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <p>Are you sure you wish to delete this year?</p>
+                            <p>Are you sure you wish to delete this category?</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-danger year-delete-submit">Delete</button>
+                            <button type="button" class="btn btn-danger category-delete-submit">Delete</button>
                         </div>
                     </div>
                 </div>

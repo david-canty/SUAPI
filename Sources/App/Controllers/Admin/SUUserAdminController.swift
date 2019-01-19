@@ -22,7 +22,7 @@ struct SUUserAdminController: RouteCollection {
         let user = try req.requireAuthenticated(SUUser.self)
         let context = CreateUserContext(authenticatedUser: user)
         
-        return try req.view().render("user", context)
+        return try req.view().render("Users/user", context)
     }
     
     func usersHandler(_ req: Request) throws -> Future<View> {
@@ -32,7 +32,7 @@ struct SUUserAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = UsersContext(authenticatedUser: user, users: users)
             
-            return try req.view().render("users", context)
+            return try req.view().render("Users/users", context)
         }
     }
     
@@ -43,7 +43,7 @@ struct SUUserAdminController: RouteCollection {
             let authenticatedUser = try req.requireAuthenticated(SUUser.self)
             let context = EditUserContext(authenticatedUser: authenticatedUser, editingUser: user)
             
-            return try req.view().render("user", context)
+            return try req.view().render("Users/user", context)
         }
     }
     
@@ -54,7 +54,7 @@ struct SUUserAdminController: RouteCollection {
             let authenticatedUser = try req.requireAuthenticated(SUUser.self)
             let context = ChangePasswordContext(authenticatedUser: authenticatedUser, editingUser: user)
             
-            return try req.view().render("password", context)
+            return try req.view().render("Users/password", context)
         }
     }
     

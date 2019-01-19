@@ -42,7 +42,7 @@ struct SUAdminController: RouteCollection {
             context = SignInContext()
         }
         
-        return try req.view().render("signIn", context)
+        return try req.view().render("Sign In/signIn", context)
     }
     
     func signInPostHandler(_ req: Request, userData: SignInData) throws -> Future<HTTPResponseStatus> {
@@ -70,7 +70,7 @@ struct SUAdminController: RouteCollection {
             let authenticatedUser = try req.requireAuthenticated(SUUser.self)
             let context = ChangePasswordContext(authenticatedUser: authenticatedUser, editingUser: user)
             
-            return try req.view().render("password", context)
+            return try req.view().render("Users/password", context)
         }
     }
     

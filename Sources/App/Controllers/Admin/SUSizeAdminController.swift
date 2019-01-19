@@ -21,7 +21,7 @@ struct SUSizeAdminController: RouteCollection {
         let user = try req.requireAuthenticated(SUUser.self)
         let context = CreateSizeContext(authenticatedUser: user)
         
-        return try req.view().render("size", context)
+        return try req.view().render("Sizes/size", context)
     }
     
     func sizesHandler(_ req: Request) throws -> Future<View> {
@@ -69,7 +69,7 @@ struct SUSizeAdminController: RouteCollection {
                 
                 let context = SizesContext(authenticatedUser: user, sizes: sizes, pages: pages, currentPage: currentPage, pageOffset: pageOffset, sizesPerPage: selectedSizesPerPage, pageIncrements: pageIncrementValues)
                 
-                return try req.view().render("sizes", context)
+                return try req.view().render("Sizes/sizes", context)
             }
         }
     }
@@ -81,7 +81,7 @@ struct SUSizeAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = EditSizeContext(authenticatedUser: user, size: size)
             
-            return try req.view().render("size", context)
+            return try req.view().render("Sizes/size", context)
         }
     }
     

@@ -21,7 +21,7 @@ struct SUCategoryAdminController: RouteCollection {
         let user = try req.requireAuthenticated(SUUser.self)
         let context = CreateCategoryContext(authenticatedUser: user)
         
-        return try req.view().render("category", context)
+        return try req.view().render("Categories/category", context)
     }
     
     func categoriesHandler(_ req: Request) throws -> Future<View> {
@@ -31,7 +31,7 @@ struct SUCategoryAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = CategoriesContext(authenticatedUser: user, categories: categories)
             
-            return try req.view().render("categories", context)
+            return try req.view().render("Categories/categories", context)
         }
     }
     
@@ -42,7 +42,7 @@ struct SUCategoryAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = EditCategoryContext(authenticatedUser: user, category: category)
             
-            return try req.view().render("category", context)
+            return try req.view().render("Categories/category", context)
         }
     }
     

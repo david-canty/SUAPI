@@ -46,7 +46,7 @@ struct SUShopItemAdminController: RouteCollection {
                     let user = try req.requireAuthenticated(SUUser.self)
                     let context = CreateItemContext(authenticatedUser: user, categories: categories, genders: genders, schoolYears: schoolYears, sizes: sizes)
                     
-                    return try req.view().render("item", context)
+                    return try req.view().render("Items/item", context)
                 }
             }
         }
@@ -66,7 +66,7 @@ struct SUShopItemAdminController: RouteCollection {
             let user = try req.requireAuthenticated(SUUser.self)
             let context = ItemsContext(authenticatedUser: user, itemsByCategory: categoriesAndItems)
             
-            return try req.view().render("items", context)
+            return try req.view().render("Items/items", context)
         }
     }
     
@@ -98,7 +98,7 @@ struct SUShopItemAdminController: RouteCollection {
                         let user = try req.requireAuthenticated(SUUser.self)
                         let context = EditItemContext(authenticatedUser: user, item: item, categories: categories, genders: genders, schoolYears: schoolYears, selectedYears: itemYears, sizes: sizes, selectedSizes: itemSizes)
                         
-                        return try req.view().render("item", context)
+                        return try req.view().render("Items/item", context)
                     }
                 }
             }
@@ -119,7 +119,7 @@ struct SUShopItemAdminController: RouteCollection {
                 let user = try req.requireAuthenticated(SUUser.self)
                 
                 let context = ItemImagesContext(authenticatedUser: user, item: item, images: images, s3ImagesPath: s3ImagesPath)
-                return try req.view().render("itemImages", context)
+                return try req.view().render("Items/itemImages", context)
             }
         }
     }
@@ -143,7 +143,7 @@ struct SUShopItemAdminController: RouteCollection {
                     
                     let user = try req.requireAuthenticated(SUUser.self)
                     let context = ItemStockContext(authenticatedUser: user, item: item, itemSizesWithSizes: itemSizesWithSizes)
-                    return try req.view().render("itemStock", context)    
+                    return try req.view().render("Items/itemStock", context)    
                 }
             }
         }
