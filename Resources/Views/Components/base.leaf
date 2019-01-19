@@ -22,6 +22,7 @@
             </div>
             
             #if(title != "Sign In") { #embed("Components/navigation") }
+            
             #get(content)
             
         </div>
