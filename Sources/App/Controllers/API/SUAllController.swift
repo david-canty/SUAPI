@@ -15,6 +15,22 @@ struct SUAllController: RouteCollection {
     
     func getAllHandler(_ req: Request) throws -> Future<SUAllData> {
         
+        let schoolData = try getSchoolData(on: req)
+        let itemData = try getItemData(on: req)
+        let categoriesQuery = SUCategory.query(on: req).all()
+        let sizesQuery = SUSize.query(on: req).all()
+        
+        return flatMap(schoolData, itemData, categoriesQuery, sizesQuery) { schools, items, categories, sizes in
+            
+            itemData.map { items in
+                    
+                return SUAllData(schools: schools, categories: categories, sizes: sizes, items: items)
+            }
+        }
+    }
+    
+    func getSchoolData(on req: Request) throws -> Future<[SUSchoolData]> {
+        
         return SUSchool.query(on: req).all().flatMap { schools in
             
             try schools.compactMap { school in
@@ -23,29 +39,24 @@ struct SUAllController: RouteCollection {
                     
                     return SUSchoolData(school: school, years: years)
                 }
-            }.flatten(on: req).flatMap { schools in
+                }.flatten(on: req)
+        }
+    }
+    
+    func getItemData(on req: Request) throws -> Future<[SUShopItemData]> {
+        
+        return SUShopItem.query(on: req).all().flatMap { items in
+            
+            return try items.compactMap { item in
                 
-                let categoriesQuery = SUCategory.query(on: req).all()
-                let sizesQuery = SUSize.query(on: req).all()
-                let itemsQuery = SUShopItem.query(on: req).all()
-                
-                return flatMap(categoriesQuery, sizesQuery, itemsQuery) { categories, sizes, items in
+                try SUItemSize.query(on: req).filter(\.itemID == item.requireID()).all().flatMap { sizes in
                     
-                    try items.compactMap { item in
+                    return try map(item.years.query(on: req).all(), item.images.query(on: req).all()) { years, images in
                         
-                        try SUItemSize.query(on: req).filter(\.itemID == item.requireID()).all().flatMap { sizes in
-                            
-                            return try map(item.years.query(on: req).all(), item.images.query(on: req).all()) { years, images in
-                                
-                                return SUShopItemData(item: item, sizes: sizes, years: years, images: images)
-                            }
-                        }
-                        }.flatten(on: req).map { items in
-                            
-                            return SUAllData(schools: schools, categories: categories, sizes: sizes, items: items)
+                        return SUShopItemData(item: item, sizes: sizes, years: years, images: images)
                     }
                 }
-            }
+                }.flatten(on: req)
         }
     }
     
