@@ -29,21 +29,20 @@ enum CancelReturnItem: String {
 
 struct SUOrderController: RouteCollection {
 
-    private let mailgun: Mailgun
     private let apiKeyStorage: APIKeyStorage
+    private let mailgun: Mailgun
     private let oneSignal: OneSignal
     private let oneSignalApp: OneSignalApp
     
     init(apiKeyStorage: APIKeyStorage, mailgun: Mailgun, oneSignal: OneSignal) {
         
         self.apiKeyStorage = apiKeyStorage
+        self.mailgun = mailgun
+        self.oneSignal = oneSignal
         
         let oneSignalAPIKey = apiKeyStorage.oneSignalAPIKey
         let oneSignalAppId = apiKeyStorage.oneSignalAppId
         self.oneSignalApp = OneSignalApp(apiKey: oneSignalAPIKey, appId: oneSignalAppId)
-        
-        self.mailgun = mailgun
-        self.oneSignal = oneSignal
     }
     
     func boot(router: Router) throws {
@@ -394,16 +393,16 @@ struct SUOrderController: RouteCollection {
         
         return order.customer.get(on: req).flatMap { customer in
             
-            if let apnsToken = customer.apnsDeviceToken {
+            if let playerId = customer.oneSignalPlayerId {
                 
                 let orderId = try order.requireID()
+                let additionalData = ["orderId": String(orderId)]
             
-                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
+                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: [playerId], additionalData: additionalData)
                 
-                notification.additionalData(key: "orderId", value: String(orderId))
                 notification.setContentAvailable(true)
                 
-                return try self.oneSignal.send(notification: notification, toApp: self.oneSignalApp).transform(to: HTTPStatus.ok)
+                return try self.oneSignal.send(notification: notification, toApp: self.oneSignalApp) .transform(to: HTTPStatus.ok)
                 
             } else {
                 
@@ -515,13 +514,13 @@ struct SUOrderController: RouteCollection {
         
         return order.customer.get(on: req).flatMap { customer in
             
-            if let apnsToken = customer.apnsDeviceToken {
+            if let playerId = customer.oneSignalPlayerId {
                 
                 let orderItemId = try orderItem.requireID()
+                let additionalData = ["orderItemId": String(orderItemId)]
                 
-                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: nil, iosDeviceTokens: [apnsToken])
+                var notification = OneSignalNotification(title: title, subtitle: nil, body: body, users: [playerId], additionalData: additionalData)
                 
-                notification.additionalData(key: "orderItemId", value: String(orderItemId))
                 notification.setContentAvailable(true)
                 
                 return try self.oneSignal.send(notification: notification, toApp: self.oneSignalApp).transform(to: HTTPStatus.ok)

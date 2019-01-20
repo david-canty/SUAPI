@@ -16,6 +16,7 @@ final class SUCustomer: Codable {
     var addressLine3: String?
     var postcode: String?
     var apnsDeviceToken: String?
+    var oneSignalPlayerId: String?
     var timestamp: Date?
     
     init(firebaseUserId: String,

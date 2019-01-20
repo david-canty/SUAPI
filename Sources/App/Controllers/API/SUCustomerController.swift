@@ -11,6 +11,7 @@ struct SUCustomerController: RouteCollection {
             // CRUD
             jwtProtectedGroup.post(use: createHandler)
             jwtProtectedGroup.patch(APNSToken.self, at: SUCustomer.parameter, "apns-token", use: apnsTokenHandler)
+            jwtProtectedGroup.patch(OneSignalPlayer.self, at: SUCustomer.parameter, "onesignal-player", use: oneSignalPlayerHandler)
             
             // Orders
             jwtProtectedGroup.get(SUCustomer.parameter, "orders", use: getOrdersHandler)
@@ -75,6 +76,16 @@ struct SUCustomerController: RouteCollection {
         }
     }
     
+    func oneSignalPlayerHandler(_ req: Request, content: OneSignalPlayer) throws -> Future<SUCustomer> {
+        
+        return try req.parameters.next(SUCustomer.self).flatMap { customer in
+            
+            customer.oneSignalPlayerId = content.id
+            customer.timestamp = Date()
+            return customer.update(on: req)
+        }
+    }
+    
     // Orders
     func getOrdersHandler(_ req: Request) throws -> Future<[OrderData]> {
         
@@ -126,5 +137,9 @@ struct SUCustomerController: RouteCollection {
     
     struct APNSToken: Content {
         let token: String
+    }
+    
+    struct OneSignalPlayer: Content {
+        let id: String
     }
 }
